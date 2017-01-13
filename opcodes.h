@@ -3,7 +3,7 @@
 
 // Max 16 opcodes so we can use 4 bits to identify each opcode
 // Max 16 registers so 4 bits to identify each register
-// Max 3 registers to one opcode so max 2 bytes per instruction (32 bits)
+// Max 3 registers to one opcode so max 2 bytes per instruction (16 bits)
 
 // Halts execution 
 // HALT
