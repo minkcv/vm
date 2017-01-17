@@ -7,7 +7,6 @@ typedef struct
     unsigned int arg0   : 4;
     unsigned int arg1   : 4;
     unsigned int arg2   : 4;
-} Instruction
-
+} Instruction;
 
 #endif

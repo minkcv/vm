@@ -55,7 +55,7 @@
 #define STR 0xA
 
 // Loads the value in the first register with the
-// constant value in the second argument
+// constant value in the second argument which takes up 8 bits (the rest of the instruction)
 // LRC r1 103
 #define LRC 0xB
 
