@@ -3,7 +3,7 @@
 #define VM_H_
 
 // Segment size in bytes
-#define MEMORY_SEGMENT_SIZE 1024
+#define MEMORY_SEGMENT_SIZE 256
 // Number of segments
 #define MEMORY_SEGMENT_COUNT 256
 

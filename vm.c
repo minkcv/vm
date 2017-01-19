@@ -45,7 +45,53 @@ void exec(VM* vm, Instruction* instr)
     else if (instr->opcode == ADD)
     {
         printf("Adding values %d and %d from registers %d and %d into %d\n", vm->regs[instr->arg0], vm->regs[instr->arg1], instr->arg0, instr->arg1, instr->arg2);
-        vm->regs[instr->arg0] = vm->regs[instr->arg1] + vm->regs[instr->arg2];
+        vm->regs[instr->arg2] = vm->regs[instr->arg0] + vm->regs[instr->arg1];
+    }
+    else if (instr->opcode == SUB)
+    {
+        printf("Subtracting values %d and %d from registers %d and %d into %d\n", vm->regs[instr->arg0], vm->regs[instr->arg1], instr->arg0, instr->arg1, instr->arg2);
+        vm->regs[instr->arg2] = vm->regs[instr->arg0] - vm->regs[instr->arg1];
+    }
+    else if (instr->opcode == CMP)
+    {
+        if (vm->regs[instr->arg0] > vm->regs[instr->arg1])
+            vm->regs[instr->arg2] = 1;
+        else if (vm->regs[instr->arg0] < vm->regs[instr->arg1])
+            vm->regs[instr->arg2] = -1;
+        else
+            vm->regs[instr->arg2] = 0;
+    }
+    else if (instr->opcode == JLT)
+    {
+        if (vm->regs[instr->arg0] < 0)
+            vm->pc = vm->code + vm->regs[instr->arg1] - 1;
+    }
+    else if (instr->opcode == JGT)
+    {
+        if (vm->regs[instr->arg0] > 0)
+            vm->pc = vm->code + vm->regs[instr->arg1] - 1;
+    }
+    else if (instr->opcode == JEQ)
+    {
+        if (vm->regs[instr->arg0] == 0)
+            vm->pc = vm->code + vm->regs[instr->arg1] - 1;
+    }
+    else if (instr->opcode == JMP)
+    {
+        printf("Jumping to address: %d\n", vm->regs[instr->arg0]);
+        vm->pc = vm->code + vm->regs[instr->arg0] - 1;
+    }
+    else if (instr->opcode == MOV)
+    {
+        vm->regs[instr->arg1] = vm->regs[instr->arg0];
+    }
+    else if (instr->opcode == LDR)
+    {
+        vm->regs[instr->arg0] = vm->memory[vm->regs[instr->arg1]][vm->regs[instr->arg2]];
+    }
+    else if (instr->opcode == STR)
+    {
+
     }
     else if (instr->opcode == LRC)
     {
