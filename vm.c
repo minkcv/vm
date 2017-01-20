@@ -91,7 +91,7 @@ void exec(VM* vm, Instruction* instr)
     }
     else if (instr->opcode == STR)
     {
-
+        vm->memory[vm->regs[instr->arg1]][vm->regs[instr->arg2]] = vm->regs[instr->arg0];
     }
     else if (instr->opcode == LRC)
     {

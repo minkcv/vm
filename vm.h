@@ -2,17 +2,19 @@
 #ifndef VM_H_
 #define VM_H_
 
-// Segment size in bytes
+// Number of cells in a Segment
 #define MEMORY_SEGMENT_SIZE 256
 // Number of segments
 #define MEMORY_SEGMENT_COUNT 256
+// 256*256 = 357604 Total memory cells
 
 #define REGISTER_COUNT 16
 
 typedef struct
 {
     int regs[REGISTER_COUNT]; // General purpose registers
-    char memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_SIZE];
+    // Memory is indexed by segment and then cell
+    int memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_SIZE];
     int* pc; // Program counter / instruction pointer
     int* code; // List of instructions
 } VM;

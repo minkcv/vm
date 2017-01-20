@@ -45,12 +45,12 @@
 #define MOV 0x8
 
 // Loads the first register with the value stored at the
-// memory address specified by the address of a segment (r2) and an offset (r3)
+// memory address specified by the address of a segment (r2) and the address of a cell (r3)
 // LDR r1 r2 r3
 #define LDR 0x9
 
 // Stores the value in the first register at the 
-// memory address specified by the address of a segment (r2) and an offset (r3)
+// memory address specified by the address of a segment (r2) and the address of a cell (r3)
 // STR r1 r2 r3
 #define STR 0xA
 
