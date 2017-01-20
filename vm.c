@@ -83,14 +83,17 @@ void exec(VM* vm, Instruction* instr)
     }
     else if (instr->opcode == MOV)
     {
+        printf("Copying the value in register %d to register %d", instr->arg0, instr->arg1);
         vm->regs[instr->arg1] = vm->regs[instr->arg0];
     }
     else if (instr->opcode == LDR)
     {
+        printf("Loading the register %d with the value at memory address: %d-%d\n", instr->arg0, vm->regs[instr->arg1], vm->regs[instr->arg2]);
         vm->regs[instr->arg0] = vm->memory[vm->regs[instr->arg1]][vm->regs[instr->arg2]];
     }
     else if (instr->opcode == STR)
     {
+        printf("Storing the value in register %d into the memory address %d-%d\n", instr->arg0, vm->regs[instr->arg1], vm->regs[instr->arg2]);
         vm->memory[vm->regs[instr->arg1]][vm->regs[instr->arg2]] = vm->regs[instr->arg0];
     }
     else if (instr->opcode == LRC)
