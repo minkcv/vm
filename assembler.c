@@ -123,6 +123,8 @@ int main (int argc, char** argv)
             printf("instr: %x\n", binary[i]);
 
         fclose(bin);
+        free(binary);
+        binary = NULL;
         if (written != numInstructions)
         {
             printf("Error writing binary file\n");
