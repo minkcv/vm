@@ -1,4 +1,5 @@
 #include "instruction.h"
+#include <stdint.h>
 #ifndef VM_H_
 #define VM_H_
 
@@ -15,15 +16,15 @@ typedef struct
     int regs[REGISTER_COUNT]; // General purpose registers
     // Memory is indexed by segment and then cell
     int memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_SIZE];
-    int* pc; // Program counter / instruction pointer
-    int* code; // List of instructions
+    uint16_t* pc; // Program counter / instruction pointer
+    uint16_t* code; // List of instructions
 } VM;
 
-VM* createVM(int* code);
+VM* createVM(uint16_t* code);
 
 void run(VM* vm);
 
-Instruction* decode(int* instr);
+Instruction* decode(uint16_t* instr);
 
 void exec(VM* vm, Instruction* instr);
 

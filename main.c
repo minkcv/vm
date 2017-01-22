@@ -1,23 +1,55 @@
 #include "instruction.h"
 #include "opcodes.h"
 #include "vm.h"
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
 
-int main (char argc, char* argv)
+uint16_t* readBinary(const char* filename);
+
+int main (char argc, char** argv)
 {
-    // 0xB011: Load the constant "3" into register 0
-    // 0x7000: Jump to the address in register 0
-    // 0x0000: Halt (except we skip over this instruction)
-    // 0xB206: Load the constant "6" into register 2
-    // 0x2101: Subtract the values in registers 1 and 0 and
-    // store the result into register 1
-    // 0x4120: Jumps to the address in register 2 if the value 
-    // in register 1 is a less than
-    // 0x9200: Stores the value in register 2 in 
-    // memory where the segment is the value at register 0, 
-    // and the cell is the value in register 0
-    // 0x0000: Halt
-    int code[8] = { 0xB003, 0x7000, 0x0000, 0xB206, 0x2101, 0x4120, 0x9200, 0x0000 };
+    char* filename = NULL;
+    int index;
+    int c;
+    opterr = 0;
+    while ((c = getopt(argc, argv, "hf:")) != -1)
+    {
+        switch(c)
+        {
+            case 'f':
+                filename = optarg;
+                break;
+            default:
+            case 'h':
+                printf("Usage: main -f program.bin\n");
+                break;
+                exit(1);
+        }
+    }
+    if (filename == NULL)
+    {
+        printf("Usage: main -f program.bin\n");
+        exit(1);
+    }
+    uint16_t* code = readBinary(filename);
+    int i;
     VM* vm = createVM(code);
     run(vm);
+    free(code);
+    code = NULL;
     return 0;
+}
+
+uint16_t* readBinary(const char* filename)
+{
+    FILE* bin = fopen(filename, "rb");
+    uint16_t numInstructions = 0;
+    // binaries are length prefixed
+    fread(&numInstructions, sizeof(uint16_t), 1, bin);
+    uint16_t* code = malloc(sizeof(uint16_t) * numInstructions);
+    fread(code, sizeof(uint16_t), numInstructions, bin);
+    fclose(bin);
+    return code;
 }

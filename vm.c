@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-VM* createVM(int* code)
+VM* createVM(uint16_t* code)
 {
     VM* vm = (VM*)malloc(sizeof(VM));
     vm->code = code;
@@ -17,17 +17,17 @@ void run(VM* vm)
     printf("Starting execution\n");
     while (1)
     {
-        int* instr = vm->pc;
+        uint16_t* instr = vm->pc;
         Instruction* decoded = decode(instr);
         exec(vm, decoded);
         vm->pc++;
     }
 }
 
-Instruction* decode(int* instr)
+Instruction* decode(uint16_t* instr)
 {
     Instruction* decoded = malloc(sizeof(Instruction));
-    int clean = 0x00FF;
+    uint16_t clean = 0x00FF;
     decoded->opcode = *instr >> 12;
     decoded->arg0 = *instr >> 8 & clean;
     decoded->arg1 = *instr >> 4 & clean;
