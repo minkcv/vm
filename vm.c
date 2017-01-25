@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+// Creates a vm with the supplied code
 VM* createVM(uint16_t* code)
 {
     VM* vm = (VM*)malloc(sizeof(VM));
@@ -12,6 +13,8 @@ VM* createVM(uint16_t* code)
     return vm;
 }
 
+// Starts the fetch, decode, execute cycle
+// of a vm from the start of its code
 void run(VM* vm)
 {
     printf("Starting execution\n");
@@ -24,6 +27,7 @@ void run(VM* vm)
     }
 }
 
+// Decodes a uint16_t instruction into a 16 bit instruction struct
 Instruction* decode(uint16_t* instr)
 {
     Instruction* decoded = malloc(sizeof(Instruction));
@@ -35,6 +39,7 @@ Instruction* decode(uint16_t* instr)
     return decoded;
 }
 
+// Executes an instruction
 void exec(VM* vm, Instruction* instr)
 {
     if (instr->opcode == HALT)

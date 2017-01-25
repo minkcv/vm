@@ -1,6 +1,7 @@
 #ifndef INSTRUCTION_H_
 #define INSTRUCTION_H_
 
+// 16 bit instruction
 typedef struct
 {
     unsigned int opcode : 4;

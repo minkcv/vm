@@ -37,20 +37,24 @@ int main (int argc, char** argv)
     FILE* src = fopen(filename, "r");
     if (src)
     {
-        uint16_t numInstructions = countLines(src);
+        uint16_t numInstructions = countLines(src); // Number of non comment lines in the file
         uint16_t* binary = malloc(sizeof(uint16_t) * numInstructions);
-        char* line = NULL; // causes getline to use malloc, we free later
+        char* line = NULL; // Causes getline to use malloc, we free this for every line
         size_t toRead = 0; // Passing 0 to getline reads until \n
         ssize_t charsRead;
         int lineIndex = 0;
+
+        // Read each line in the file
         while ((charsRead = getline(&line, &toRead, src)) != -1)
         {
+            // If line is not a command and we haven't reached the end of the non comment code.
             if (line[0] != ';' && lineIndex < numInstructions)
             {
+                // Parse tokens separated by a space
                 char* token = strtok(line, " ");
-                uint16_t instr;
-                int arg = 0;
-                while (token != NULL)
+                uint16_t instr; // Assembled instruction
+                int arg = 0; // Which arg we are currently parsing
+                while (token != NULL && arg < 4)
                 {
                     if (arg == 0)
                     {
@@ -89,12 +93,12 @@ int main (int argc, char** argv)
                     }
                     else if (arg == 2)
                     {
-                        if (token[0] == 'r')
+                        if (token[0] == 'r') // Token is a register
                             instr |= (atoi(token + 1) << 4);
-                        else 
+                        else if (token[0] == '#') // Token is a constant
                         {
                             instr |= atoi(token);
-                            arg++;
+                            arg++; // Skip the next arg, constants take up 2 args
                         }
                     }
                     else if (arg == 3)
@@ -103,9 +107,9 @@ int main (int argc, char** argv)
                             instr |= atoi(token + 1);
                     }
                     arg++;
-                    token = strtok(NULL, " ");
+                    token = strtok(NULL, " "); // Get the next token
                 }
-                binary[lineIndex] = instr;
+                binary[lineIndex] = instr; // Save the assembled instruction
                 lineIndex++;
             }
             // Free and null the line pointer. getline will reallocate for us
@@ -113,18 +117,15 @@ int main (int argc, char** argv)
             line = NULL;
         }
 
-        // Now write the binary out
+        // Now write the binary array out to a file with .bin appended to the name
         FILE* bin = fopen(strcat(filename, ".bin"), "wb");
         // Prefix binary with length
         fwrite(&numInstructions, sizeof(uint16_t), 1, bin);
         size_t written = fwrite(binary, sizeof(uint16_t), numInstructions, bin);
-        int i;
-        for (i = 0; i < numInstructions; i++)
-            printf("instr: %x\n", binary[i]);
-
         fclose(bin);
         free(binary);
         binary = NULL;
+        // Check that the instructions were written correctly
         if (written != numInstructions)
         {
             printf("Error writing binary file\n");

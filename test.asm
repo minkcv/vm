@@ -1,7 +1,7 @@
 ; This is a test program
 ; These are comments
 ; 0x907B
-LRC r0 123
+LRC r0 #123
 ; 0x1001
 ADD r0 r0 r1
 ; 0x000
