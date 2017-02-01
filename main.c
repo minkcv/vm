@@ -1,6 +1,7 @@
 #include "instruction.h"
 #include "opcodes.h"
 #include "vm.h"
+#include "display.h"
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -33,6 +34,9 @@ int main (char argc, char** argv)
         printf("Usage: main -f program.bin\n");
         exit(1);
     }
+
+    //SDL_Surface* screen = initDisplay();
+
     uint16_t* code = readBinary(filename);
     int i;
     VM* vm = createVM(code);
