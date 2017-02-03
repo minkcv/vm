@@ -117,6 +117,10 @@ int main (int argc, char** argv)
             line = NULL;
         }
 
+        char* filenameNoExtension = strsep(&filename, ".");
+        if (filenameNoExtension != NULL)
+            filename = filenameNoExtension;
+
         // Now write the binary array out to a file with .bin appended to the name
         FILE* bin = fopen(strcat(filename, ".bin"), "wb");
         // Prefix binary with length
