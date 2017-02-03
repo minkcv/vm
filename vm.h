@@ -13,9 +13,9 @@
 
 typedef struct
 {
-    int regs[REGISTER_COUNT]; // General purpose registers
+    int8_t regs[REGISTER_COUNT]; // General purpose registers
     // Memory is indexed by segment and then cell
-    int memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_SIZE];
+    int8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_SIZE];
     uint16_t* pc; // Program counter / instruction pointer
     uint16_t* code; // List of instructions
 } VM;
