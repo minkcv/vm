@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 // Creates a vm with the supplied code
+// display is an optional pointer to a display struct
 VM* createVM(uint16_t* code)
 {
     VM* vm = (VM*)malloc(sizeof(VM));

@@ -35,7 +35,14 @@ int main (char argc, char** argv)
         exit(1);
     }
 
-    //SDL_Surface* screen = initDisplay();
+    Display* display = createDisplay(640, 480, 1);
+    SDL_Event event;
+    while (event.type != SDL_QUIT)
+    {
+        SDL_PollEvent(&event);
+        updateDisplay(display);
+    }
+    quitDisplay(display);
 
     uint16_t* code = readBinary(filename);
     int i;
