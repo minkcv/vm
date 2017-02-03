@@ -95,10 +95,23 @@ int main (int argc, char** argv)
                     {
                         if (token[0] == 'r') // Token is a register
                             instr |= (atoi(token + 1) << 4);
-                        else if (token[0] == '#') // Token is a constant
+                        else if (token[0] == '#') // Token is a constant in base 10
                         {
-                            instr |= atoi(token);
+                            // Remove the # from the string
+                            char* num = token;
+                            strsep(&num, "#");
+                            // Convert to integer and append to instruction
+                            instr |= atoi(num);
                             arg++; // Skip the next arg, constants take up 2 args
+                        }
+                        else if (token[0] == '$') // Token is a constant in base 16 (hex)
+                        {
+                            // Remove the $ from the string
+                            char* num = token;
+                            strsep(&num, "$");
+                            // Convert to base 16 and append to instruction
+                            instr |= (int8_t)strtol(num, NULL, 16);
+                            arg++; // Skip the next arg
                         }
                     }
                     else if (arg == 3)
