@@ -37,6 +37,7 @@ int main (char argc, char** argv)
 
     Display* display = createDisplay(640, 480, 1);
     SDL_Event event;
+    //dumpColors(display->colors, display->ncolors);
     while (event.type != SDL_QUIT)
     {
         SDL_PollEvent(&event);
@@ -45,7 +46,6 @@ int main (char argc, char** argv)
     quitDisplay(display);
 
     uint16_t* code = readBinary(filename);
-    int i;
     VM* vm = createVM(code);
     run(vm);
     free(code);
@@ -56,6 +56,11 @@ int main (char argc, char** argv)
 uint16_t* readBinary(const char* filename)
 {
     FILE* bin = fopen(filename, "rb");
+    if (bin == NULL)
+    {
+        printf("Error reading file %s\n", filename);
+        exit(1);
+    }
     uint16_t numInstructions = 0;
     // binaries are length prefixed
     fread(&numInstructions, sizeof(uint16_t), 1, bin);
