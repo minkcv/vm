@@ -70,22 +70,22 @@ void exec(VM* vm, Instruction* instr)
     else if (instr->opcode == JLT)
     {
         if (vm->regs[instr->arg0] < 0)
-            vm->pc = vm->code + vm->regs[instr->arg1] - 1;
+            vm->pc = vm->code + ((instr->arg1 << 4) + instr->arg2) - 1;
     }
     else if (instr->opcode == JGT)
     {
         if (vm->regs[instr->arg0] > 0)
-            vm->pc = vm->code + vm->regs[instr->arg1] - 1;
+            vm->pc = vm->code + ((instr->arg1 << 4) + instr->arg2) - 1;
     }
     else if (instr->opcode == JEQ)
     {
         if (vm->regs[instr->arg0] == 0)
-            vm->pc = vm->code + vm->regs[instr->arg1] - 1;
+            vm->pc = vm->code + ((instr->arg1 << 4) + instr->arg2) - 1;
     }
     else if (instr->opcode == JMP)
     {
-        printf("Jumping to address: %d\n", vm->regs[instr->arg0]);
-        vm->pc = vm->code + vm->regs[instr->arg0] - 1;
+        printf("Jumping to address: %d\n", (instr->arg1 << 4) + instr->arg2);
+        vm->pc = vm->code + ((instr->arg1 << 4) + instr->arg2) - 1;
     }
     else if (instr->opcode == MOV)
     {

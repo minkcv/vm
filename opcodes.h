@@ -4,6 +4,7 @@
 // Max 16 opcodes so we can use 4 bits to identify each opcode
 // Max 16 registers so 4 bits to identify each register
 // Max 3 registers to one opcode so max 2 bytes per instruction (16 bits)
+// Uses of constants like #123 are interchangeable with hex constants such as $7B
 
 // Halts execution 
 // HALT
@@ -21,23 +22,23 @@
 // CMP r1 r2 r3
 #define CMP 0x3
 
-// Jumps to the address in the second register if the
+// Jumps to the label if the
 // first register is a "less than"
-// JLT r1 r2
+// JLT r1 @label
 #define JLT 0x4
 
-// Jumps to the address in the second register if the
+// Jumps to the label if the
 // first register is a "greater than"
-// JGT r1 r2
+// JGT r1 @label
 #define JGT 0x5
 
-// Jumps to the address in the second register if the
+// Jumps to the label if the
 // first register is a "equal to"
-// JEQ r1 r2
+// JEQ r1 @label
 #define JEQ 0x6
 
-// Jumps to the address in the register
-// JMP r1
+// Jumps to the label
+// JMP @label
 #define JMP 0x7
 
 // Copies the value in the first register to the second register

@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
-uint16_t* readBinary(const char* filename);
+uint16_t* readBinary(const char* filename, int print);
 
 int main (char argc, char** argv)
 {
@@ -35,7 +35,7 @@ int main (char argc, char** argv)
         exit(1);
     }
 
-    Display* display = createDisplay(640, 480, 1);
+    Display* display = createDisplay(320, 240, 1);
     SDL_Event event;
     //dumpColors(display->colors, display->ncolors);
     while (event.type != SDL_QUIT)
@@ -45,7 +45,7 @@ int main (char argc, char** argv)
     }
     quitDisplay(display);
 
-    uint16_t* code = readBinary(filename);
+    uint16_t* code = readBinary(filename, 1);
     VM* vm = createVM(code);
     run(vm);
     free(code);
@@ -53,7 +53,7 @@ int main (char argc, char** argv)
     return 0;
 }
 
-uint16_t* readBinary(const char* filename)
+uint16_t* readBinary(const char* filename, int print)
 {
     FILE* bin = fopen(filename, "rb");
     if (bin == NULL)
@@ -66,6 +66,15 @@ uint16_t* readBinary(const char* filename)
     fread(&numInstructions, sizeof(uint16_t), 1, bin);
     uint16_t* code = malloc(sizeof(uint16_t) * numInstructions);
     fread(code, sizeof(uint16_t), numInstructions, bin);
+    if (print)
+    {
+        printf("Binary Program:\n");
+        int i;
+        for (i = 0; i < numInstructions; i++)
+        {
+            printf("%x\n", code[i]);
+        }
+    }
     fclose(bin);
     return code;
 }

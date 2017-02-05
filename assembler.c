@@ -6,7 +6,18 @@
 #include <limits.h>
 #include <stdint.h>
 
+#define MAX_LABELS 256
+
+// Used to map a label to an address
+typedef struct
+{
+    uint16_t address;
+    char* label;
+} LabelAddress;
+
 int countLines(FILE* src);
+uint16_t getAddressOfLabel(char* label, LabelAddress* labelMap[MAX_LABELS]);
+void createLabelMap(FILE* src, LabelAddress*** labelMap);
 
 int main (int argc, char** argv)
 {
@@ -34,21 +45,25 @@ int main (int argc, char** argv)
         exit(1);
     }
 
+
     FILE* src = fopen(filename, "r");
     if (src)
     {
-        uint16_t numInstructions = countLines(src); // Number of non comment lines in the file
+        // Number of non comment and non label lines in the file
+        uint16_t numInstructions = countLines(src); 
         uint16_t* binary = malloc(sizeof(uint16_t) * numInstructions);
         char* line = NULL; // Causes getline to use malloc, we free this for every line
         size_t toRead = 0; // Passing 0 to getline reads until \n
         ssize_t charsRead;
         int lineIndex = 0;
+        LabelAddress** labelMap = malloc(sizeof(LabelAddress*) * MAX_LABELS);
+        createLabelMap(src, &labelMap);
 
         // Read each line in the file
         while ((charsRead = getline(&line, &toRead, src)) != -1)
         {
             // If line is not a command and we haven't reached the end of the non comment code.
-            if (line[0] != ';' && lineIndex < numInstructions)
+            if (line[0] != ';' && line[0] != '@' && lineIndex < numInstructions)
             {
                 // Parse tokens separated by a space
                 char* token = strtok(line, " ");
@@ -90,6 +105,13 @@ int main (int argc, char** argv)
                     {
                         if (token[0] == 'r')
                             instr |= (atoi(token + 1) << 8);
+                        else if (token[0] == '@')
+                        {
+                            char* label = token;
+                            strsep(&label, "@");
+                            int16_t address = getAddressOfLabel(label, labelMap);
+                            instr |= address;
+                        }
                     }
                     else if (arg == 2)
                     {
@@ -113,6 +135,13 @@ int main (int argc, char** argv)
                             instr |= (int8_t)strtol(num, NULL, 16);
                             arg++; // Skip the next arg
                         }
+                        else if (token[0] == '@')
+                        {
+                            char* label = token;
+                            strsep(&label, "@");
+                            int16_t address = getAddressOfLabel(label, labelMap);
+                            instr |= address;
+                        }
                     }
                     else if (arg == 3)
                     {
@@ -129,6 +158,21 @@ int main (int argc, char** argv)
             free(line);
             line = NULL;
         }
+
+        // Free the label map
+        int i;
+        for (i = 0; i < MAX_LABELS; i++)
+        {
+            if (labelMap[i] != NULL)
+            {
+                if (labelMap[i]->label != NULL)
+                {
+                    free(labelMap[i]->label);
+                }
+                free(labelMap[i]);
+            }
+        }
+        free(labelMap);
 
         char* filenameNoExtension = strsep(&filename, ".");
         if (filenameNoExtension != NULL)
@@ -159,32 +203,93 @@ int main (int argc, char** argv)
     return 0;
 }
 
-// Counts lines that don't start with a semicolon (comment)
+// Counts lines that don't start with a ; (comment) or @ (label)
 int countLines(FILE* src)
 {
     char c;
     int count = 0;
     int lastnew = 1;
-    int comment = 0;
+    int skip = 0;
     while (fscanf(src, "%c", &c) != EOF)
     {
-        if (lastnew && c == ';')
+        if (lastnew && (c == ';' || c == '@'))
         {
-            comment = 1;
+            skip = 1;
         }
         else if(lastnew)
         {
-            comment = 0;
+            skip = 0;
         }
 
         lastnew = 0;
         if (c == '\n')
         {
-            if (!comment)
+            if (!skip)
                 count++;
             lastnew = 1;
         }
     }
     rewind(src);
     return count;
+}
+
+void createLabelMap(FILE* src, LabelAddress*** labelMap)
+{
+    char* line = NULL;
+    size_t toRead = 0; // Read until \n
+    ssize_t charsRead;
+    int labelCount = 0;
+    uint16_t instrCount = 0;
+    while ((charsRead = getline(&line, &toRead, src)) != -1)
+    {
+        if(line[0] == '@')
+        {
+            // Create the label entry in labelMap
+            char* start = line;
+            char* beforeAt = strsep(&line, "@");
+            char* labelName = strsep(&line, " ");
+            LabelAddress* labeladdr = malloc(sizeof(LabelAddress));
+            labeladdr->label = malloc(sizeof(char) * (strlen(labelName) + 1));
+            strcpy(labeladdr->label, labelName);
+            labeladdr->address = instrCount;
+            (*labelMap)[labelCount] = labeladdr;
+            labelCount++;
+            printf("Label %s maps to address %d\n", labelName, instrCount + 1);
+            free(start);
+            start = NULL;
+            labelName = NULL;
+            beforeAt = NULL;
+            line = NULL;
+        }
+        else if (line[0] != ';')
+        {
+            instrCount++;
+            free(line);
+            line = NULL;
+        }
+        else
+        {
+            free(line);
+            line = NULL;
+        }
+    }
+    rewind(src);
+}
+
+uint16_t getAddressOfLabel(char* label, LabelAddress* labelMap[MAX_LABELS])
+{
+    int i;
+    for (i = 0; i < MAX_LABELS; i++)
+    {
+        LabelAddress* current = labelMap[i];
+        if (current != NULL && current->label != NULL)
+        {
+            if (!strcmp(current->label, label))
+            {
+                return current->address;
+            }
+        }
+    }
+    printf("Label \"%s\" not defined\n", label);
+    exit(1);
 }
