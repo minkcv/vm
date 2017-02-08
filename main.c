@@ -14,13 +14,17 @@ int main (char argc, char** argv)
     char* filename = NULL;
     int index;
     int c;
+    int scale = 1;
     opterr = 0;
-    while ((c = getopt(argc, argv, "hf:")) != -1)
+    while ((c = getopt(argc, argv, "hf:s:")) != -1)
     {
         switch(c)
         {
             case 'f':
                 filename = optarg;
+                break;
+            case 's':
+                scale = atoi(optarg);
                 break;
             default:
             case 'h':
@@ -35,7 +39,7 @@ int main (char argc, char** argv)
         exit(1);
     }
 
-    Display* display = createDisplay(320, 240, 1);
+    Display* display = createDisplay(320, 240, scale);
     SDL_Event event;
     //dumpColors(display->colors, display->ncolors);
     while (event.type != SDL_QUIT)

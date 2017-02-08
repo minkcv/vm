@@ -6,7 +6,7 @@ Display* createDisplay(int width, int height, int scale)
     SDL_WM_SetCaption("Virtual Machine", "Virtual Machine");
 
     Display* display = (Display*)malloc(sizeof(Display));
-    display->screen = SDL_SetVideoMode(width, height, COLOR_DEPTH, 0);
+    display->screen = SDL_SetVideoMode(width * scale, height * scale, COLOR_DEPTH, 0);
     display->back = SDL_CreateRGBSurface(0, width, height, COLOR_DEPTH, 0, 0, 0, 0);
     SDL_Palette* palette = display->screen->format->palette;
     display->colors = palette->colors;
