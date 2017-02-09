@@ -41,7 +41,6 @@ int main (char argc, char** argv)
 
     Display* display = createDisplay(320, 240, scale);
     SDL_Event event;
-    //dumpColors(display->colors, display->ncolors);
     while (event.type != SDL_QUIT)
     {
         SDL_PollEvent(&event);

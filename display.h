@@ -12,7 +12,6 @@ typedef struct
 {
     SDL_Surface* screen;
     SDL_Surface* back; // Double buffering
-    SDL_Palette* palette; // Color palette
     SDL_Color* colors; // Colors of the color palette
     int ncolors;
     int width;
