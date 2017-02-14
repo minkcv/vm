@@ -36,7 +36,7 @@ void run(VM* vm)
         drawSprites(vm->gpu, vm->memory);
         printf("going to update the display\n");
         updateDisplay(vm->display);
-        SDL_Delay(1000); // wait 1 sec between each instruction
+        SDL_Delay(16); // wait 16ms = 60 updates per second
         SDL_PollEvent(&event);
     }
 }

@@ -18,13 +18,9 @@ LRC r4 #7 ; Byte address of color 1 in sprite
 LRC r5 $FF ; White
 STR r5 r0 r4
 ;
-; Delay for a bit
-LRC r9 #0
-LRC r9 #0
-LRC r9 #0
-LRC r9 #0
-LRC r9 #0
-LRC r9 #0
+; Loop forever until the user clicks the x 
+@forever
+JMP @forever
 ; LRC r0 $7B ; Same as #123, but in hex
 ; ADD r0 r0 r1
 ; LRC r0 #0
