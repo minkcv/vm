@@ -11,7 +11,8 @@
 
 
 // Number of sprites able to be rendered at once
-#define NUM_SPRITES 32
+// Memory 64-0 to 80-15 is for sprite attributes
+#define NUM_SPRITES 256
 
 // Number of bytes per sprite attribute
 #define SPRITE_ATTR_LENGTH 16

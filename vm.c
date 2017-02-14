@@ -26,7 +26,6 @@ void run(VM* vm)
     SDL_Event event;
     while (event.type != SDL_QUIT)
     {
-        SDL_PollEvent(&event);
         uint16_t* instr = vm->pc;
         Instruction* decoded = decode(instr);
         exec(vm, decoded);
@@ -38,6 +37,7 @@ void run(VM* vm)
         printf("going to update the display\n");
         updateDisplay(vm->display);
         SDL_Delay(1000); // wait 1 sec between each instruction
+        SDL_PollEvent(&event);
     }
 }
 
