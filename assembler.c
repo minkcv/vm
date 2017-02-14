@@ -132,7 +132,7 @@ int main (int argc, char** argv)
                             char* num = token;
                             strsep(&num, "$");
                             // Convert to base 16 and append to instruction
-                            instr |= (int8_t)strtol(num, NULL, 16);
+                            instr |= (uint8_t)strtol(num, NULL, 16);
                             arg++; // Skip the next arg
                         }
                         else if (token[0] == '@')

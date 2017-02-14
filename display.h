@@ -1,12 +1,8 @@
-#include <SDL.h>
-
 #ifndef DISPLAY_H_
 #define DISPLAY_H_
 
-// Color depth aka bits per pixel
-#define COLOR_DEPTH 8
-// Number of colors in the color palette, directly related to the above number
-#define NUM_COLORS 256
+#include "constants.h"
+#include <SDL.h>
 
 typedef struct
 {

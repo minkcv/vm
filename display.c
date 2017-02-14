@@ -18,7 +18,7 @@ Display* createDisplay(int width, int height, int scale)
     display->back = SDL_DisplayFormat(temp);
     SDL_FreeSurface(temp);
     updateDisplay(display);
-    SDL_Delay(2000); // Show splash screen for 3 seconds
+    SDL_Delay(2000); // Show splash screen for 2 seconds
     // Clear the back buffer with the first color in the color palette (black)
     SDL_FillRect(display->back, NULL, 0x00); 
 

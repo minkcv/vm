@@ -39,18 +39,11 @@ int main (char argc, char** argv)
         exit(1);
     }
 
-    Display* display = createDisplay(320, 240, scale);
-    SDL_Event event;
-    while (event.type != SDL_QUIT)
-    {
-        SDL_PollEvent(&event);
-        updateDisplay(display);
-    }
-    quitDisplay(display);
-
-    uint16_t* code = readBinary(filename, 1);
-    VM* vm = createVM(code);
+    Display* display = createDisplay(256, 192, scale);
+    uint16_t* code = readBinary(filename, 0);
+    VM* vm = createVM(code, display);
     run(vm);
+    quitDisplay(display);
     free(code);
     code = NULL;
     return 0;

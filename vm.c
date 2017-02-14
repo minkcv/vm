@@ -1,16 +1,20 @@
 #include "vm.h"
 #include "opcodes.h"
 #include "instruction.h"
+#include <SDL.h>
 #include <stdlib.h>
 #include <stdio.h>
 
 // Creates a vm with the supplied code
 // display is an optional pointer to a display struct
-VM* createVM(uint16_t* code)
+VM* createVM(uint16_t* code, Display* display)
 {
     VM* vm = (VM*)malloc(sizeof(VM));
     vm->code = code;
     vm->pc = code;
+    vm->display = display;
+    vm->gpu = createGPU(display->back);
+    memset(vm->memory, 0, sizeof(vm->memory[0][0]) * MEMORY_SEGMENT_COUNT * MEMORY_SEGMENT_SIZE);
     return vm;
 }
 
@@ -19,12 +23,21 @@ VM* createVM(uint16_t* code)
 void run(VM* vm)
 {
     printf("Starting execution\n");
-    while (1)
+    SDL_Event event;
+    while (event.type != SDL_QUIT)
     {
+        SDL_PollEvent(&event);
         uint16_t* instr = vm->pc;
         Instruction* decoded = decode(instr);
         exec(vm, decoded);
         vm->pc++;
+        printf("going to read sprites\n");
+        readSpritesFromMem(vm->gpu, vm->memory);
+        printf("going to draw sprites\n");
+        drawSprites(vm->gpu, vm->memory);
+        printf("going to update the display\n");
+        updateDisplay(vm->display);
+        SDL_Delay(1000); // wait 1 sec between each instruction
     }
 }
 
@@ -99,7 +112,7 @@ void exec(VM* vm, Instruction* instr)
     }
     else if (instr->opcode == STR)
     {
-        printf("Storing the value in register %d into the memory address %d-%d\n", instr->arg0, vm->regs[instr->arg1], vm->regs[instr->arg2]);
+        printf("Storing the value in register %d (%d) into the memory address %d-%d\n", instr->arg0, vm->regs[instr->arg0], vm->regs[instr->arg1], vm->regs[instr->arg2]);
         vm->memory[vm->regs[instr->arg1]][vm->regs[instr->arg2]] = vm->regs[instr->arg0];
     }
     else if (instr->opcode == LRC)

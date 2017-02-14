@@ -1,26 +1,28 @@
-#include "instruction.h"
-#include <stdint.h>
 #ifndef VM_H_
 #define VM_H_
 
-// Number of cells in a Segment
-#define MEMORY_SEGMENT_SIZE 256
-// Number of segments
-#define MEMORY_SEGMENT_COUNT 256
-// 256*256 = 357604 Total memory cells
+#include "constants.h"
+#include "instruction.h"
+#include "gpu.h"
+#include "display.h"
+#include <stdint.h>
+#include <SDL.h>
 
-#define REGISTER_COUNT 16
+typedef struct VM VM;
+typedef struct GPU GPU;
 
-typedef struct
+struct VM
 {
-    int8_t regs[REGISTER_COUNT]; // General purpose registers
-    // Memory is indexed by segment and then cell
-    int8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_SIZE];
+    uint8_t regs[REGISTER_COUNT]; // General purpose registers
+    // Memory is indexed by segment and then byte
+    uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_SIZE];
     uint16_t* pc; // Program counter / instruction pointer
     uint16_t* code; // List of instructions
-} VM;
+    GPU* gpu;
+    Display* display;
+};
 
-VM* createVM(uint16_t* code);
+VM* createVM(uint16_t* code, Display* display);
 
 void run(VM* vm);
 

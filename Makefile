@@ -1,7 +1,7 @@
 all: main assembler
 
 main: clean-main
-	gcc main.c vm.c display.c `sdl-config --cflags --libs` -o main
+	gcc main.c vm.c display.c gpu.c `sdl-config --cflags --libs` -o main
 
 assembler: clean-assembler
 	gcc assembler.c -o assembler
