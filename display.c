@@ -3,7 +3,7 @@
 Display* createDisplay(int width, int height, int scale)
 {
     SDL_Init(SDL_INIT_VIDEO);
-    SDL_WM_SetCaption("Virtual Machine", "Virtual Machine");
+    SDL_WM_SetCaption("Vapor Spec", "Vapor Spec");
 
     Display* display = (Display*)malloc(sizeof(Display));
     display->width = width;
@@ -14,7 +14,7 @@ Display* createDisplay(int width, int height, int scale)
     SDL_Palette* palette = display->screen->format->palette;
     display->colors = palette->colors;
     display->ncolors = palette->ncolors;
-    SDL_Surface* temp = SDL_LoadBMP("sdl_logo.bmp");
+    SDL_Surface* temp = SDL_LoadBMP("title.bmp");
     display->back = SDL_DisplayFormat(temp);
     SDL_FreeSurface(temp);
     updateDisplay(display);
