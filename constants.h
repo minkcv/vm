@@ -11,14 +11,18 @@
 
 
 // Number of sprites able to be rendered at once
-// Memory 64-0 to 80-15 is for sprite attributes
+// Memory 64.0 to 80.15 is for sprite attributes
 #define NUM_SPRITES 256
 
 // Number of bytes per sprite attribute
 #define SPRITE_ATTR_LENGTH 16
 
 // Segment of memory where sprites attributes are found
-#define ADDR_SPRITE_ATTR 64
+#define SPRITE_ATTR_SEG 64
+
+// 80.16 is the background color (one byte)
+#define BACK_COLOR_SEG 80
+#define BACK_COLOR_BYTE 16
 
 // Color depth aka bits per pixel
 #define COLOR_DEPTH 8

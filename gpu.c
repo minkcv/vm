@@ -13,21 +13,21 @@ void readSpritesFromMem(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SE
     int i;
     for (i = 0; i < NUM_SPRITES; i++)
     {
-        uint8_t flags = memory[ADDR_SPRITE_ATTR][i * SPRITE_ATTR_LENGTH];
+        uint8_t flags = memory[SPRITE_ATTR_SEG][i * SPRITE_ATTR_LENGTH];
         gpu->sprAttrs[i].active = flags >> 7;
         gpu->sprAttrs[i].flipHor = flags >> 6 & 0x1;
         gpu->sprAttrs[i].flipVer = flags >> 5 & 0x1;
         gpu->sprAttrs[i].color4Alpha = flags >> 4 & 0x1;
-        gpu->sprAttrs[i].x = memory[ADDR_SPRITE_ATTR][i * SPRITE_ATTR_LENGTH + 1];
-        gpu->sprAttrs[i].y = memory[ADDR_SPRITE_ATTR][i * SPRITE_ATTR_LENGTH + 2];
-        gpu->sprAttrs[i].width = memory[ADDR_SPRITE_ATTR][i * SPRITE_ATTR_LENGTH + 3];
-        gpu->sprAttrs[i].height = memory[ADDR_SPRITE_ATTR][i * SPRITE_ATTR_LENGTH + 4];
-        gpu->sprAttrs[i].segmentAddr = memory[ADDR_SPRITE_ATTR][i * SPRITE_ATTR_LENGTH + 5];
-        gpu->sprAttrs[i].byteAddr = memory[ADDR_SPRITE_ATTR][i * SPRITE_ATTR_LENGTH + 6];
-        gpu->sprAttrs[i].colors[0] = memory[ADDR_SPRITE_ATTR][i * SPRITE_ATTR_LENGTH + 7];
-        gpu->sprAttrs[i].colors[1] = memory[ADDR_SPRITE_ATTR][i * SPRITE_ATTR_LENGTH + 8];
-        gpu->sprAttrs[i].colors[2] = memory[ADDR_SPRITE_ATTR][i * SPRITE_ATTR_LENGTH + 9];
-        gpu->sprAttrs[i].colors[3] = memory[ADDR_SPRITE_ATTR][i * SPRITE_ATTR_LENGTH + 10];
+        gpu->sprAttrs[i].x = memory[SPRITE_ATTR_SEG][i * SPRITE_ATTR_LENGTH + 1];
+        gpu->sprAttrs[i].y = memory[SPRITE_ATTR_SEG][i * SPRITE_ATTR_LENGTH + 2];
+        gpu->sprAttrs[i].width = memory[SPRITE_ATTR_SEG][i * SPRITE_ATTR_LENGTH + 3];
+        gpu->sprAttrs[i].height = memory[SPRITE_ATTR_SEG][i * SPRITE_ATTR_LENGTH + 4];
+        gpu->sprAttrs[i].segmentAddr = memory[SPRITE_ATTR_SEG][i * SPRITE_ATTR_LENGTH + 5];
+        gpu->sprAttrs[i].byteAddr = memory[SPRITE_ATTR_SEG][i * SPRITE_ATTR_LENGTH + 6];
+        gpu->sprAttrs[i].colors[0] = memory[SPRITE_ATTR_SEG][i * SPRITE_ATTR_LENGTH + 7];
+        gpu->sprAttrs[i].colors[1] = memory[SPRITE_ATTR_SEG][i * SPRITE_ATTR_LENGTH + 8];
+        gpu->sprAttrs[i].colors[2] = memory[SPRITE_ATTR_SEG][i * SPRITE_ATTR_LENGTH + 9];
+        gpu->sprAttrs[i].colors[3] = memory[SPRITE_ATTR_SEG][i * SPRITE_ATTR_LENGTH + 10];
     }
 }
 
@@ -73,4 +73,10 @@ void drawSprites(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_S
         }
     }
     SDL_UnlockSurface(gpu->back);
+}
+
+void drawBackground(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_SIZE])
+{
+    uint8_t color = memory[BACK_COLOR_SEG][BACK_COLOR_BYTE];
+    SDL_FillRect(gpu->back, NULL, color);
 }

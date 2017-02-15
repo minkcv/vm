@@ -30,11 +30,9 @@ void run(VM* vm)
         Instruction* decoded = decode(instr);
         exec(vm, decoded);
         vm->pc++;
-        printf("going to read sprites\n");
+        drawBackground(vm->gpu, vm->memory);
         readSpritesFromMem(vm->gpu, vm->memory);
-        printf("going to draw sprites\n");
         drawSprites(vm->gpu, vm->memory);
-        printf("going to update the display\n");
         updateDisplay(vm->display);
         SDL_Delay(16); // wait 16ms = 60 updates per second
         SDL_PollEvent(&event);
