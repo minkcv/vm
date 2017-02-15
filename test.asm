@@ -19,7 +19,7 @@ LRC r5 $FF ; Color: white
 STR r5 r0 r4
 LRC r0 #80
 LRC r1 #16
-LRC r2 #75
+LRC r2 #75 ; Color: light blue
 STR r2 r0 r1
 ;
 ; Loop forever until the user clicks the x 
