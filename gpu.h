@@ -9,6 +9,8 @@
 typedef struct VM VM;
 typedef struct GPU GPU;
 
+// Sprite Attribute
+// Describes a sprite and how it should be rendered
 typedef struct 
 {
     unsigned int active : 1;
@@ -25,6 +27,8 @@ typedef struct
     uint8_t colors[4];
 } SpriteAttr;
 
+// Graphics Processing Unit
+// Reads System memory and draws sprites / background color to the display back buffer
 struct GPU
 {
     SpriteAttr sprAttrs[NUM_SPRITES];
