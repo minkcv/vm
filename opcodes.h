@@ -22,17 +22,17 @@
 // CMP r1 r2 r3
 #define CMP 0x3
 
-// Jumps to the label if the
+// Jumps to the label if the value in the
 // first register is a "less than"
 // JLT r1 @label
 #define JLT 0x4
 
-// Jumps to the label if the
+// Jumps to the label if the value in the
 // first register is a "greater than"
 // JGT r1 @label
 #define JGT 0x5
 
-// Jumps to the label if the
+// Jumps to the label if the value in the
 // first register is a "equal to"
 // JEQ r1 @label
 #define JEQ 0x6

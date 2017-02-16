@@ -71,26 +71,26 @@ void exec(VM* vm, Instruction* instr)
     }
     else if (instr->opcode == CMP)
     {
-        if (vm->regs[instr->arg0] > vm->regs[instr->arg1])
-            vm->regs[instr->arg2] = 1;
-        else if (vm->regs[instr->arg0] < vm->regs[instr->arg1])
-            vm->regs[instr->arg2] = -1;
-        else
+        if (vm->regs[instr->arg0] < vm->regs[instr->arg1])
             vm->regs[instr->arg2] = 0;
+        else if (vm->regs[instr->arg0] > vm->regs[instr->arg1])
+            vm->regs[instr->arg2] = 2;
+        else
+            vm->regs[instr->arg2] = 1;
     }
     else if (instr->opcode == JLT)
     {
-        if (vm->regs[instr->arg0] < 0)
+        if (vm->regs[instr->arg0] == 0)
             vm->pc = vm->code + ((instr->arg1 << 4) + instr->arg2) - 1;
     }
     else if (instr->opcode == JGT)
     {
-        if (vm->regs[instr->arg0] > 0)
+        if (vm->regs[instr->arg0] == 2)
             vm->pc = vm->code + ((instr->arg1 << 4) + instr->arg2) - 1;
     }
     else if (instr->opcode == JEQ)
     {
-        if (vm->regs[instr->arg0] == 0)
+        if (vm->regs[instr->arg0] == 1)
             vm->pc = vm->code + ((instr->arg1 << 4) + instr->arg2) - 1;
     }
     else if (instr->opcode == JMP)
