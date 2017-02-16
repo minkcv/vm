@@ -22,7 +22,13 @@
 
 // 80.16 is the background color (one byte)
 #define BACK_COLOR_SEG 80
-#define BACK_COLOR_BYTE 16
+#define BACK_COLOR_OFFSET 16
+
+#define NUM_JOYSTICK_BUTTONS 8
+
+#define JOYSTICK_SEG 127
+#define JOYSTICK_1_OFFSET 0
+#define JOYSTICK_2_OFFSET 1
 
 // Color depth aka bits per pixel
 #define COLOR_DEPTH 8

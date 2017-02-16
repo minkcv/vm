@@ -4,6 +4,7 @@
 #include "constants.h"
 #include "instruction.h"
 #include "gpu.h"
+#include "ipu.h"
 #include "display.h"
 #include <stdint.h>
 #include <SDL.h>
@@ -19,6 +20,7 @@ struct VM
     uint16_t* pc; // Program counter / instruction pointer
     uint16_t* code; // List of instructions
     GPU* gpu;
+    IPU* ipu;
     Display* display;
 };
 

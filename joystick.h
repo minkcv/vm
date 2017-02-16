@@ -7,15 +7,8 @@ typedef struct JOYSTICK JOYSTICK;
 
 struct JOYSTICK
 {
-    SDLKey up;
-    SDLKey down;
-    SDLKey left;
-    SDLKey right;
-    SDLKey a;
-    SDLKey b;
-    SDLKey c;
-    SDLKey d;
-    uint8_t keysAsBits; // MSB = up LSB = d
+    SDLKey buttons[NUM_JOYSTICK_BUTTONS]; // Up, Down, Left, Right, A, B, C, D
+    uint8_t keysAsBits; // MSB = up, LSB = d. 1 = pressed, 0 = not pressed
 };
 
 #endif

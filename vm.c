@@ -14,6 +14,7 @@ VM* createVM(uint16_t* code, Display* display)
     vm->pc = code;
     vm->display = display;
     vm->gpu = createGPU(display->back);
+    vm->ipu = createIPU();
     memset(vm->memory, 0, sizeof(vm->memory[0][0]) * MEMORY_SEGMENT_COUNT * MEMORY_SEGMENT_SIZE);
     return vm;
 }
@@ -26,6 +27,10 @@ void run(VM* vm)
     SDL_Event event;
     while (event.type != SDL_QUIT)
     {
+        if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP)
+        {
+            updateIPU(vm->ipu, event.key, vm->memory);
+        }
         uint16_t* instr = vm->pc;
         Instruction* decoded = decode(instr);
         exec(vm, decoded);
@@ -93,29 +98,28 @@ void exec(VM* vm, Instruction* instr)
     }
     else if (instr->opcode == JMP)
     {
-        printf("Jumping to address: %d\n", (instr->arg1 << 4) + instr->arg2);
+        //printf("Jumping to address: %d\n", (instr->arg1 << 4) + instr->arg2);
         vm->pc = vm->code + ((instr->arg1 << 4) + instr->arg2) - 1;
     }
     else if (instr->opcode == CPY)
     {
-        printf("Copying the value in register %d to register %d", instr->arg1, instr->arg0);
         vm->regs[instr->arg0] = vm->regs[instr->arg1];
     }
     else if (instr->opcode == LDR)
     {
-        printf("Loading the register %d with the value at memory address: %d-%d\n", instr->arg0, vm->regs[instr->arg1], vm->regs[instr->arg2]);
+        //printf("Loading the register %d with the value at memory address: %d-%d\n", instr->arg0, vm->regs[instr->arg1], vm->regs[instr->arg2]);
         vm->regs[instr->arg0] = vm->memory[vm->regs[instr->arg1]][vm->regs[instr->arg2]];
     }
     else if (instr->opcode == STR)
     {
-        printf("Storing the value in register %d (%d) into the memory address %d-%d\n", instr->arg0, vm->regs[instr->arg0], vm->regs[instr->arg1], vm->regs[instr->arg2]);
+        //printf("Storing the value in register %d (%d) into the memory address %d-%d\n", instr->arg0, vm->regs[instr->arg0], vm->regs[instr->arg1], vm->regs[instr->arg2]);
         vm->memory[vm->regs[instr->arg1]][vm->regs[instr->arg2]] = vm->regs[instr->arg0];
     }
     else if (instr->opcode == LRC)
     {
         int constant = (instr->arg1 << 4) & 0x00F0;
         constant += instr->arg2;
-        printf("Loading the constant %d into reg %d\n", constant, instr->arg0);
+        //printf("Loading the constant %d into reg %d\n", constant, instr->arg0);
         vm->regs[instr->arg0] = constant;
     }
 }

@@ -45,10 +45,10 @@ void drawSprites(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_S
             int y = gpu->sprAttrs[i].y;
             // TODO: flipping
             uint8_t* sprite = &memory[gpu->sprAttrs[i].segmentAddr][gpu->sprAttrs[i].byteAddr];
-            printf("sprite segment: %d\n", gpu->sprAttrs[i].segmentAddr);
-            printf("sprite byte: %d\n\n", gpu->sprAttrs[i].byteAddr);
-            printf("width: %d\n", gpu->sprAttrs[i].width);
-            printf("height: %d\n\n", gpu->sprAttrs[i].height);
+            //printf("sprite segment: %d\n", gpu->sprAttrs[i].segmentAddr);
+            //printf("sprite byte: %d\n\n", gpu->sprAttrs[i].byteAddr);
+            //printf("width: %d\n", gpu->sprAttrs[i].width);
+            //printf("height: %d\n\n", gpu->sprAttrs[i].height);
             for (h = 0; h < gpu->sprAttrs[i].height; h++)
             {
                 for (w = 0; w < gpu->sprAttrs[i].width / 4; w++)
@@ -80,6 +80,6 @@ void drawSprites(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_S
 
 void drawBackground(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_SIZE])
 {
-    uint8_t color = memory[BACK_COLOR_SEG][BACK_COLOR_BYTE];
+    uint8_t color = memory[BACK_COLOR_SEG][BACK_COLOR_OFFSET];
     SDL_FillRect(gpu->back, NULL, color);
 }
