@@ -87,8 +87,8 @@ int main (int argc, char** argv)
                             instr = JEQ << 12;
                         else if (!strcmp(token, "JMP"))
                             instr = JMP << 12;
-                        else if (!strcmp(token, "MOV"))
-                            instr = MOV << 12;
+                        else if (!strcmp(token, "CPY"))
+                            instr = CPY << 12;
                         else if (!strcmp(token, "LDR"))
                             instr = LDR << 12;
                         else if (!strcmp(token, "STR"))
@@ -247,7 +247,7 @@ void createLabelMap(FILE* src, LabelAddress*** labelMap)
             // Create the label entry in labelMap
             char* start = line;
             char* beforeAt = strsep(&line, "@");
-            char* labelName = strsep(&line, " ");
+            char* labelName = strsep(&line, " "); // Trim any comments or other text off the end
             LabelAddress* labeladdr = malloc(sizeof(LabelAddress));
             labeladdr->label = malloc(sizeof(char) * (strlen(labelName) + 1));
             strcpy(labeladdr->label, labelName);

@@ -61,22 +61,20 @@ void exec(VM* vm, Instruction* instr)
     }
     else if (instr->opcode == ADD)
     {
-        printf("Adding values %d and %d from registers %d and %d into %d\n", vm->regs[instr->arg0], vm->regs[instr->arg1], instr->arg0, instr->arg1, instr->arg2);
-        vm->regs[instr->arg2] = vm->regs[instr->arg0] + vm->regs[instr->arg1];
+        vm->regs[instr->arg0] = vm->regs[instr->arg1] + vm->regs[instr->arg2];
     }
     else if (instr->opcode == SUB)
     {
-        printf("Subtracting values %d and %d from registers %d and %d into %d\n", vm->regs[instr->arg0], vm->regs[instr->arg1], instr->arg0, instr->arg1, instr->arg2);
-        vm->regs[instr->arg2] = vm->regs[instr->arg0] - vm->regs[instr->arg1];
+        vm->regs[instr->arg0] = vm->regs[instr->arg1] - vm->regs[instr->arg2];
     }
     else if (instr->opcode == CMP)
     {
-        if (vm->regs[instr->arg0] < vm->regs[instr->arg1])
-            vm->regs[instr->arg2] = 0;
-        else if (vm->regs[instr->arg0] > vm->regs[instr->arg1])
-            vm->regs[instr->arg2] = 2;
+        if (vm->regs[instr->arg1] < vm->regs[instr->arg2])
+            vm->regs[instr->arg0] = 0;
+        else if (vm->regs[instr->arg1] > vm->regs[instr->arg2])
+            vm->regs[instr->arg0] = 2;
         else
-            vm->regs[instr->arg2] = 1;
+            vm->regs[instr->arg0] = 1;
     }
     else if (instr->opcode == JLT)
     {
@@ -98,10 +96,10 @@ void exec(VM* vm, Instruction* instr)
         printf("Jumping to address: %d\n", (instr->arg1 << 4) + instr->arg2);
         vm->pc = vm->code + ((instr->arg1 << 4) + instr->arg2) - 1;
     }
-    else if (instr->opcode == MOV)
+    else if (instr->opcode == CPY)
     {
-        printf("Copying the value in register %d to register %d", instr->arg0, instr->arg1);
-        vm->regs[instr->arg1] = vm->regs[instr->arg0];
+        printf("Copying the value in register %d to register %d", instr->arg1, instr->arg0);
+        vm->regs[instr->arg0] = vm->regs[instr->arg1];
     }
     else if (instr->opcode == LDR)
     {

@@ -10,15 +10,15 @@
 // HALT
 #define HALT 0x0 
 
-// Adds two registers and stores the result in the third
+// Adds last two registers and stores the result in the first
 // ADD r1 r2 r3
 #define ADD 0x1 
 
-// Subtracts two registers and stores the result in the third
+// Subtracts r2 - r3 and stores the result in the first
 // SUB r1 r2 r3
 #define SUB 0x2
 
-// Compares two registers and stores the result in the third
+// Compares last two registers and stores the result in the first
 // CMP r1 r2 r3
 #define CMP 0x3
 
@@ -41,9 +41,9 @@
 // JMP @label
 #define JMP 0x7
 
-// Copies the value in the first register to the second register
-// MOV r1 r2
-#define MOV 0x8
+// Copies the value in the second register to the first register
+// CPY r1 r2
+#define CPY 0x8
 
 // Loads the first register with the value stored at the
 // memory address specified by the address of a segment (r2) and the address of a byte (r3)
