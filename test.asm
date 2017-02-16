@@ -24,6 +24,7 @@ STR r2 r0 r1
 ;
 ; Loop forever until the user clicks the x 
 @forever
+; comments after label work
 JMP @forever
 ; LRC r0 $7B ; Same as #123, but in hex
 ; ADD r0 r0 r1

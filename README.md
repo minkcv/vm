@@ -1,7 +1,7 @@
 # Vapor Spec
 A virtual machine with no physical hardware spec. **The vm behavior is not yet finalized so please do not start development on a program yet.**
 
-The vm has:
+#### The vm has:
 - A 16 bit instruction size
 - 16 (possible) different opcodes
 - 16 different general purpose registers
