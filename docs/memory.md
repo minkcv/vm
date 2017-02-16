@@ -10,7 +10,7 @@ The vm addresses memory by segment and offset. There are 256 segments each with 
 ### GPU and IPU Map
 - `64.0` through `80.15` (inclusive) are for 256 sprite attributes. Each sprite attribute is 16 bytes long.
 - `80.16` is the background color of the screen.
-- `127.0` through `127.2` are the 16 bits indicating which joystick buttons are pressed. There are 8 buttons for each of the 2 joysticks.
+- `127.0` through `127.1` (inclusive) are the 16 bits indicating which joystick buttons are pressed. There are 8 buttons for each of the 2 joysticks.
 
 #### Sprite Attribute
 A sprite attribute stores information about how a sprite should be displayed on the screen. It includes an address that points to the data of the sprite. See `sprite.md` to understand how the sprite colors are stored.
