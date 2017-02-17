@@ -55,15 +55,17 @@ int main (int argc, char** argv)
         char* line = NULL; // Causes getline to use malloc, we free this for every line
         size_t toRead = 0; // Passing 0 to getline reads until \n
         ssize_t charsRead;
-        int lineIndex = 0;
+        int instrIndex = 0;
+        int lineCount = 0;
         LabelAddress** labelMap = malloc(sizeof(LabelAddress*) * MAX_LABELS);
         createLabelMap(src, &labelMap);
 
         // Read each line in the file
         while ((charsRead = getline(&line, &toRead, src)) != -1)
         {
+            lineCount++;
             // If line is not a command and we haven't reached the end of the non comment code.
-            if (line[0] != ';' && line[0] != '@' && lineIndex < numInstructions)
+            if (line[0] != ';' && line[0] != '@' && instrIndex < numInstructions)
             {
                 // Parse tokens separated by a space
                 char* token = strtok(line, " ");
@@ -77,6 +79,8 @@ int main (int argc, char** argv)
                             instr = HALT << 12;
                         else if (!strcmp(token, "ADD"))
                             instr = ADD << 12;
+                        else if (!strcmp(token, "SUB"))
+                            instr = SUB << 12;
                         else if (!strcmp(token, "CMP"))
                             instr = CMP << 12;
                         else if (!strcmp(token, "JLT"))
@@ -97,7 +101,7 @@ int main (int argc, char** argv)
                             instr = LRC << 12;
                         else
                         {
-                            printf("Not a known instruction on line %d\n", lineIndex);
+                            printf("Not a known instruction on line %d\n", lineCount);
                             exit(1);
                         }
                     }
@@ -151,8 +155,8 @@ int main (int argc, char** argv)
                     arg++;
                     token = strtok(NULL, " "); // Get the next token
                 }
-                binary[lineIndex] = instr; // Save the assembled instruction
-                lineIndex++;
+                binary[instrIndex] = instr; // Save the assembled instruction
+                instrIndex++;
             }
             // Free and null the line pointer. getline will reallocate for us
             free(line);
