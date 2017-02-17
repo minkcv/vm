@@ -22,5 +22,5 @@ A sprite will not be rendered if any part of it exceeds the boundaries of the sc
 - Byte 4 is the height of the sprite which must be a multiple of 4
 - Byte 5 is the segment address of the sprite data in memory
 - Byte 6 is the offset address of the sprite data in memory
-- Bytes 7-11 are colors from the full 256 color palette that the sprite data maps into
+- Bytes 7-11 are 4 colors from the full 256 color palette that the sprite data maps into
 - Bytes 12-15 are currently unused
