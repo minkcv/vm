@@ -17,7 +17,7 @@ Comments are indicated with a semicolon (`;`). Comments either start after an in
 Labels are specified with an at sign (`@`). Lines that start with an at sign indicate that the instruction following them is their address. Instructions with labels can not have trailing comments. Label names must not include spaces. Example:
 
     Allowed:
-    @loopforever ; a label
+    @loopforever
     ; a comment following a label
     JMP @loopforever
 
