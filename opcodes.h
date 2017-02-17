@@ -60,4 +60,26 @@
 // LRC r1 103
 #define LRC 0xB
 
+// Binary ANDs the second and third register values
+// and stores the value in the first register
+// AND r1 r2 r3
+#define AND 0xC
+
+// Binary ORs the second and third register values
+// and stores the value in the first register
+// OR r1 r2 r3
+#define OR 0xD
+
+// Binary NOTs the second registers value
+// and stores the value in the first register
+// NOT r1 r2
+#define NOT 0xE
+
+// Logical (bitwise) shifts the value in the first register
+// by the amount indicated by the second register 
+// in the direction indicated by the third register where 0 = left and 2 = right.
+// Fills new places with zeroes.
+// SHF r1 r2 r3
+#define SHF 0xF
+
 #endif

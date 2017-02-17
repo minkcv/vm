@@ -130,4 +130,27 @@ void exec(VM* vm, Instruction* instr)
         //printf("Loading the constant %d into reg %d\n", constant, instr->arg0);
         vm->regs[instr->arg0] = constant;
     }
+    else if (instr->opcode == AND)
+    {
+        vm->regs[instr->arg0] = vm->regs[instr->arg1] & vm->regs[instr->arg2];
+    }
+    else if (instr->opcode == OR)
+    {
+        vm->regs[instr->arg0] = vm->regs[instr->arg1] | vm->regs[instr->arg2];
+    }
+    else if (instr->opcode == NOT)
+    {
+        vm->regs[instr->arg0] = ~(vm->regs[instr->arg1]);
+    }
+    else if (instr->opcode == SHF)
+    {
+        if (vm->regs[instr->arg2] == 0)
+        {
+            vm->regs[instr->arg0] = vm->regs[instr->arg0] << vm->regs[instr->arg1];
+        }
+        else if (vm->regs[instr->arg2] == 2)
+        {
+            vm->regs[instr->arg0] = vm->regs[instr->arg0] >> vm->regs[instr->arg1];
+        }
+    }
 }

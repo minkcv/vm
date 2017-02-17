@@ -3,7 +3,7 @@ A virtual machine with no physical hardware spec. **The vm behavior is not yet f
 
 #### The vm has:
 - A 16 bit instruction size
-- 16 (possible) different opcodes
+- 16 different opcodes
 - 16 different general purpose registers
 - 65535 bytes (64K) of addressable memory
 - An 8-bit color depth for a color palette of 256 colors

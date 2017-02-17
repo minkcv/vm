@@ -99,6 +99,14 @@ int main (int argc, char** argv)
                             instr = STR << 12;
                         else if (!strcmp(token, "LRC"))
                             instr = LRC << 12;
+                        else if (!strcmp(token, "AND"))
+                            instr = AND << 12;
+                        else if (!strcmp(token, "OR"))
+                            instr = OR << 12;
+                        else if (!strcmp(token, "NOT"))
+                            instr = NOT << 12;
+                        else if (!strcmp(token, "SHF"))
+                            instr = SHF << 12;
                         else
                         {
                             printf("Not a known instruction on line %d\n", lineCount);
