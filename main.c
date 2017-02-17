@@ -1,3 +1,4 @@
+#include "constants.h"
 #include "instruction.h"
 #include "opcodes.h"
 #include "vm.h"
@@ -39,7 +40,7 @@ int main (char argc, char** argv)
         exit(1);
     }
 
-    Display* display = createDisplay(256, 192, scale);
+    Display* display = createDisplay(SCREEN_WIDTH, SCREEN_HEIGHT, scale);
     uint16_t* code = readBinary(filename, 0);
     VM* vm = createVM(code, display);
     run(vm);

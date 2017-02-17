@@ -1,6 +1,9 @@
 #ifndef CONSTANTS_H_
 #define CONSTANTS_H_
 
+#define SCREEN_WIDTH 256
+#define SCREEN_HEIGHT 192
+
 // Number of cells in a Segment
 #define MEMORY_SEGMENT_SIZE 256
 // Number of segments

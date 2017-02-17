@@ -38,17 +38,15 @@ void drawSprites(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_S
     uint8_t* pixels = (uint8_t*)gpu->back->pixels;
     for (i = 0; i < NUM_SPRITES; i++)
     {
-        if (gpu->sprAttrs[i].active)
+        if (gpu->sprAttrs[i].active && 
+                gpu->sprAttrs[i].x + gpu->sprAttrs[i].width < SCREEN_WIDTH &&
+                gpu->sprAttrs[i].y + gpu->sprAttrs[i].height < SCREEN_HEIGHT)
         {
             int w, h;
             int x = gpu->sprAttrs[i].x;
             int y = gpu->sprAttrs[i].y;
             // TODO: flipping
             uint8_t* sprite = &memory[gpu->sprAttrs[i].segmentAddr][gpu->sprAttrs[i].byteAddr];
-            //printf("sprite segment: %d\n", gpu->sprAttrs[i].segmentAddr);
-            //printf("sprite byte: %d\n\n", gpu->sprAttrs[i].byteAddr);
-            //printf("width: %d\n", gpu->sprAttrs[i].width);
-            //printf("height: %d\n\n", gpu->sprAttrs[i].height);
             for (h = 0; h < gpu->sprAttrs[i].height; h++)
             {
                 for (w = 0; w < gpu->sprAttrs[i].width / 4; w++)
