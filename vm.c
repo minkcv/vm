@@ -24,6 +24,8 @@ VM* createVM(uint16_t* code, Display* display)
 void run(VM* vm)
 {
     printf("Starting execution\n");
+    uint32_t startTime = SDL_GetTicks();
+    uint32_t displayWaitTime = 16; // 16ms = about 60 refreshes per second
     SDL_Event event;
     while (event.type != SDL_QUIT)
     {
@@ -35,11 +37,16 @@ void run(VM* vm)
         Instruction* decoded = decode(instr);
         exec(vm, decoded);
         vm->pc++;
-        drawBackground(vm->gpu, vm->memory);
-        readSpritesFromMem(vm->gpu, vm->memory);
-        drawSprites(vm->gpu, vm->memory);
-        updateDisplay(vm->display);
-        SDL_Delay(16); // wait 16ms = 60 updates per second
+
+        if (startTime + displayWaitTime < SDL_GetTicks())
+        {
+            drawBackground(vm->gpu, vm->memory);
+            readSpritesFromMem(vm->gpu, vm->memory);
+            drawSprites(vm->gpu, vm->memory);
+            updateDisplay(vm->display);
+            startTime = SDL_GetTicks();
+        }
+        SDL_Delay(1);
         SDL_PollEvent(&event);
     }
 }
@@ -74,6 +81,7 @@ void exec(VM* vm, Instruction* instr)
     }
     else if (instr->opcode == CMP)
     {
+        //printf("value in second arg: %d third: %d\n", vm->regs[instr->arg1], vm->regs[instr->arg2]);
         if (vm->regs[instr->arg1] < vm->regs[instr->arg2])
             vm->regs[instr->arg0] = 0;
         else if (vm->regs[instr->arg1] > vm->regs[instr->arg2])
@@ -93,12 +101,12 @@ void exec(VM* vm, Instruction* instr)
     }
     else if (instr->opcode == JEQ)
     {
+        //printf("value in first arg: %d\n", vm->regs[instr->arg0]);
         if (vm->regs[instr->arg0] == 1)
             vm->pc = vm->code + ((instr->arg1 << 4) + instr->arg2) - 1;
     }
     else if (instr->opcode == JMP)
     {
-        //printf("Jumping to address: %d\n", (instr->arg1 << 4) + instr->arg2);
         vm->pc = vm->code + ((instr->arg1 << 4) + instr->arg2) - 1;
     }
     else if (instr->opcode == CPY)

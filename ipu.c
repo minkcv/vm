@@ -13,6 +13,7 @@ IPU* createIPU()
     js1->buttons[5] = SDLK_RALT; // Right alt
     js1->buttons[6] = SDLK_RSHIFT; // Righ shift
     js1->buttons[7] = SDLK_RETURN; // AKA Enter
+    js1->keysAsBits = 0;
     ipu->js1 = js1;
 
     JOYSTICK* js2 = (JOYSTICK*)malloc(sizeof(JOYSTICK));
@@ -24,6 +25,7 @@ IPU* createIPU()
     js2->buttons[5] = SDLK_LALT; // Left alt
     js2->buttons[6] = SDLK_LSHIFT; // Left shift
     js2->buttons[7] = SDLK_TAB;
+    js2->keysAsBits = 0;
     ipu->js2 = js2;
 
     return ipu;

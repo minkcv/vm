@@ -21,16 +21,63 @@ LRC r0 #80
 LRC r1 #16
 LRC r2 #75 ; Color: light blue
 STR r2 r0 r1
-;
+; Load the joystick 1 button address
+LRC r0 #127
+LRC r1 #0
 ; Loop forever until the user clicks the x 
 @forever
 ; comments after label work
+LRC r3 #2 ; 0000 0010
+LDR r2 r0 r1 ; r2 now holds the button states of joystick 1
+CMP r4 r2 r3 ; r4 is "equal" if only joystick 1 up button is pressed
+JEQ r4 @movedown
+@donemovedown
+LRC r3 #1 ; 0000 0001
+CMP r4 r2 r3
+JEQ r4 @moveup
+@donemoveup
+LRC r3 #4 ; 0000 0100
+CMP r4 r2 r3
+JEQ r4 @moveleft
+@donemoveleft
+LRC r3 #8 ; 0000 1000
+CMP r4 r2 r3
+JEQ r4 @moveright
+@donemoveright
 JMP @forever
-; LRC r0 $7B ; Same as #123, but in hex
-; ADD r0 r0 r1
-; LRC r0 #0
-; JMP @end ; jump to label @end
-; STR r1 r0 r0
-; @end ; a label
-HALT ; There can be comments on instruction lines
-; But there must be a space before the semicolon
+;
+@movedown
+LRC r5 #64
+LRC r6 #2
+LDR r7 r5 r6
+LRC r8 #5 ; move speed 5
+ADD r7 r7 r8
+STR r7 r5 r6
+JMP @donemovedown
+;
+@moveup
+LRC r5 #64
+LRC r6 #2
+LDR r7 r5 r6
+LRC r8 #5 ; move speed 5
+SUB r7 r7 r8
+STR r7 r5 r6
+JMP @donemoveup
+;
+@moveleft
+LRC r5 #64
+LRC r6 #1
+LDR r7 r5 r6
+LRC r8 #5 ; move speed 5
+SUB r7 r7 r8
+STR r7 r5 r6
+JMP @donemoveleft
+;
+@moveright
+LRC r5 #64
+LRC r6 #1
+LDR r7 r5 r6
+LRC r8 #5 ; move speed 5
+ADD r7 r7 r8
+STR r7 r5 r6
+JMP @donemoveright
