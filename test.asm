@@ -29,18 +29,25 @@ LRC r1 #0
 ; comments after label work
 LRC r3 #2 ; 0000 0010
 LDR r2 r0 r1 ; r2 now holds the button states of joystick 1
+AND r2 r2 r3
 CMP r4 r2 r3 ; r4 is "equal" if only joystick 1 up button is pressed
 JEQ r4 @movedown
 @donemovedown
+LDR r2 r0 r1 ; r2 now holds the button states of joystick 1
 LRC r3 #1 ; 0000 0001
+AND r2 r2 r3
 CMP r4 r2 r3
 JEQ r4 @moveup
 @donemoveup
+LDR r2 r0 r1 ; r2 now holds the button states of joystick 1
 LRC r3 #4 ; 0000 0100
+AND r2 r2 r3
 CMP r4 r2 r3
 JEQ r4 @moveleft
 @donemoveleft
+LDR r2 r0 r1 ; r2 now holds the button states of joystick 1
 LRC r3 #8 ; 0000 1000
+AND r2 r2 r3
 CMP r4 r2 r3
 JEQ r4 @moveright
 @donemoveright
