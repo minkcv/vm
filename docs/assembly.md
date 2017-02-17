@@ -26,10 +26,3 @@ Labels are specified with an at sign (`@`). Lines that start with an at sign ind
     JMP @my label
     @mylabel ; my label
     JMP @mylabel ; goto my label
-
-
-#### Constants
-The load register constant (LRC) instruction can read constants as decimal or hexadecimal with the `#` and `$` prefixes respectively
-
-    LRC r0 #10
-    LRC r0 $A
