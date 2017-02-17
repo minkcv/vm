@@ -14,7 +14,7 @@ Comments are indicated with a semicolon (`;`). Comments either start after an in
     LRC r0 #10; load r0 with decimal 10
 
 #### Jump Labels
-Labels are specified with an at sign (`@`). Lines that start with an at sign indicate that the instruction following them is their address. Label names must not include spaces. Example:
+Labels are specified with an at sign (`@`). Lines that start with an at sign indicate that the instruction following them is their address. Instructions with labels can not have trailing comments. Label names must not include spaces. Example:
 
     Allowed:
     @loopforever ; a label
@@ -24,6 +24,9 @@ Labels are specified with an at sign (`@`). Lines that start with an at sign ind
     Not allowed:
     @my label
     JMP @my label
+    @mylabel ; my label
+    JMP @mylabel ; goto my label
+
 
 #### Constants
 The load register constant (LRC) instruction can read constants as decimal or hexadecimal with the `#` and `$` prefixes respectively

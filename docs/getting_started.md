@@ -1,5 +1,5 @@
 # Getting Started
-First, make sure you have build the main program and the assembler via the build instructions in the main README.md
+First, make sure you have built the main program and the assembler via the build instructions in the main README.md
 
 #### Assembling
 Write your assembly code in a plain text file and give it the extension `.asm`. Follow the guidelines in the `assembly.md` document on the syntax. Run
@@ -20,4 +20,4 @@ Optionally add:
 - `-s #`, where # is a number, if you want to scale the display up.
 - `&> /dev/null` at the end to suppress print statements.
 
-Consider creating a shell script to do this similar to the `testvm.sh` that is included.
+Consider creating a shell script for your program that is similar to the `testvm.sh` that is included.

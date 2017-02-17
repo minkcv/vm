@@ -123,6 +123,7 @@ int main (int argc, char** argv)
                             strsep(&label, "@");
                             int16_t address = getAddressOfLabel(label, labelMap);
                             instr |= address;
+                            arg += 2; // Skip the rest of the args
                         }
                     }
                     else if (arg == 2)
@@ -153,6 +154,7 @@ int main (int argc, char** argv)
                             strsep(&label, "@");
                             int16_t address = getAddressOfLabel(label, labelMap);
                             instr |= address;
+                            arg++; // Skip the next arg
                         }
                     }
                     else if (arg == 3)

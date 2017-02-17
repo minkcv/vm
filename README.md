@@ -19,17 +19,15 @@ This project can be viewed as a challenge to people like  [demoscene](https://en
 
 ### How do I build and run it?
 #### Linux:
-Install SDL1.2 if you don't already have it:
+Install SDL1.2 if you don't already have it. Systems with apt should try:
 
     sudo apt install libsdl1.2-dev
 Then run:
 
     make
-
 To test the program:
 
     ./testvm.sh
-
 #### Other Operating Systems:
 No other operating systems are currently supported. You can wait for me to implement the vm for them or do it yourself based on the spec. The point of the vm is that all programs can be ported to other platforms simply by reimplementing the vm.
 
