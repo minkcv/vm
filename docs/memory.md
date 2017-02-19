@@ -1,6 +1,7 @@
-# Memory
-
+# Memory and Code
 The vm addresses memory by segment and offset. There are 256 segments each with 256 bytes. Addresses are denoted as `segment.offset` ex: `64.2`. The bytes in memory are unsigned.
+
+Code is stored separately, not in addressable memory. Jump instructions use a segment and an offset similar to memory addressing to have 64K of addressable instructions. You can write more instructions than this, you just can't jump to them, and the included assembler will have undefined behavior for labels after the 65535th instruction.
 
 ## Memory Map
 - Segments 0 through 63 (inclusive) are general purpose RAM for your program.

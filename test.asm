@@ -4,7 +4,9 @@
 ; Create a sprite attribute
 LRC r0 #64 ; Segment address
 LRC r1 #0 ; Byte address
-LRC r3 #128 ; flags for sprite attrs: binary: 1000-0000
+LRC r3 #128; flags for sprite attrs: binary: 1000-0000
+; a blank line
+
 STR r3 r0 r1 ; set the flags
 LRC r1 #3 ; byte address of width
 LRC r3 #16
@@ -25,33 +27,38 @@ STR r2 r0 r1
 LRC r0 #127
 LRC r1 #0
 ; Loop forever until the user clicks the x 
-@forever
-; comments after label work
+@forever; comments after label work
+; comments below label work
 LRC r3 #2 ; 0000 0010
 LDR r2 r0 r1 ; r2 now holds the button states of joystick 1
 AND r2 r2 r3
 CMP r4 r2 r3 ; r4 is "equal" if only joystick 1 up button is pressed
-JEQ r4 @movedown
+LRL r9 r10 @movedown
+JEQ r4 r9 r10
 @donemovedown
 LDR r2 r0 r1 ; r2 now holds the button states of joystick 1
 LRC r3 #1 ; 0000 0001
 AND r2 r2 r3
 CMP r4 r2 r3
-JEQ r4 @moveup
+LRL r9 r10 @moveup
+JEQ r4 r9 r10
 @donemoveup
 LDR r2 r0 r1 ; r2 now holds the button states of joystick 1
 LRC r3 #4 ; 0000 0100
 AND r2 r2 r3
 CMP r4 r2 r3
-JEQ r4 @moveleft
+LRL r9 r10 @moveleft
+JEQ r4 r9 r10
 @donemoveleft
 LDR r2 r0 r1 ; r2 now holds the button states of joystick 1
 LRC r3 #8 ; 0000 1000
 AND r2 r2 r3
 CMP r4 r2 r3
-JEQ r4 @moveright
+LRL r9 r10 @moveright
+JEQ r4 r9 r10
 @donemoveright
-JMP @forever
+LRL r9 r10 @forever; back up
+JMP r9 r10
 ;
 @movedown
 LRC r5 #64
@@ -60,7 +67,8 @@ LDR r7 r5 r6
 LRC r8 #5 ; move speed 5
 ADD r7 r7 r8
 STR r7 r5 r6
-JMP @donemovedown
+LRL r9 r10 @donemovedown
+JMP r9 r10
 ;
 @moveup
 LRC r5 #64
@@ -69,7 +77,8 @@ LDR r7 r5 r6
 LRC r8 #5 ; move speed 5
 SUB r7 r7 r8
 STR r7 r5 r6
-JMP @donemoveup
+LRL r9 r10 @donemoveup
+JMP r9 r10
 ;
 @moveleft
 LRC r5 #64
@@ -78,7 +87,8 @@ LDR r7 r5 r6
 LRC r8 #5 ; move speed 5
 SUB r7 r7 r8
 STR r7 r5 r6
-JMP @donemoveleft
+LRL r9 r10 @donemoveleft
+JMP r9 r10
 ;
 @moveright
 LRC r5 #64
@@ -87,4 +97,5 @@ LDR r7 r5 r6
 LRC r8 #5 ; move speed 5
 ADD r7 r7 r8
 STR r7 r5 r6
-JMP @donemoveright
+LRL r9 r10 @donemoveright
+JMP r9 r10

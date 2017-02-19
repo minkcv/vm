@@ -1,4 +1,5 @@
 #include "opcodes.h"
+#include "constants.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -11,12 +12,13 @@
 // Used to map a label to an address
 typedef struct
 {
-    uint16_t address;
+    uint8_t segAddr;
+    uint8_t offsetAddr;
     char* label;
 } LabelAddress;
 
-int countLines(FILE* src);
-uint16_t getAddressOfLabel(char* label, LabelAddress* labelMap[MAX_LABELS]);
+int countInstructions(FILE* src);
+void getAddressesOfLabel(char* label, LabelAddress* labelMap[MAX_LABELS], uint8_t* segAddr, uint8_t* offsetAddr);
 void createLabelMap(FILE* src, LabelAddress*** labelMap);
 
 int main (int argc, char** argv)
@@ -49,14 +51,14 @@ int main (int argc, char** argv)
     FILE* src = fopen(filename, "r");
     if (src)
     {
-        // Number of non comment and non label lines in the file
-        uint16_t numInstructions = countLines(src); 
+        uint16_t numInstructions = countInstructions(src); 
+        printf("counted %d instructions\n", numInstructions);
         uint16_t* binary = malloc(sizeof(uint16_t) * numInstructions);
         char* line = NULL; // Causes getline to use malloc, we free this for every line
         size_t toRead = 0; // Passing 0 to getline reads until \n
         ssize_t charsRead;
         int instrIndex = 0;
-        int lineCount = 0;
+        int lineCount = 0; // Used for error printing
         LabelAddress** labelMap = malloc(sizeof(LabelAddress*) * MAX_LABELS);
         createLabelMap(src, &labelMap);
 
@@ -65,22 +67,90 @@ int main (int argc, char** argv)
         {
             lineCount++;
             // If line is not a command and we haven't reached the end of the non comment code.
-            if (line[0] != ';' && line[0] != '@' && instrIndex < numInstructions)
+            if (line[0] != '\n' && line[0] != ';' && line[0] != '@' && instrIndex < numInstructions)
             {
-                // Parse tokens separated by a space
-                char* token = strtok(line, " ");
+                // Parse tokens separated by a space or comment
+                char* token = strtok(line, " ;\n");
                 uint16_t instr; // Assembled instruction
                 int arg = 0; // Which arg we are currently parsing
                 while (token != NULL && arg < 4)
                 {
                     if (arg == 0)
                     {
-                        if (!strcmp(token, "HALT"))
-                            instr = HALT << 12;
+                        if (!strcmp(token, "LRL")) // Special assembler macro "Load Registers Label"
+                        {
+                            uint8_t segAddr = 0;
+                            uint8_t offsetAddr = 0;
+                            uint8_t reg1;
+                            uint8_t reg2;
+                            token = strtok(NULL, " "); // Get the next token
+                            if (token != NULL && token[0] == 'r')
+                                reg1 = atoi(token + 1);
+                            token = strtok(NULL, " "); // Get the next token
+                            if (token != NULL && token[0] == 'r')
+                                reg2 = atoi(token + 1);
+                            token = strtok(NULL, " "); // Get the next token
+                            if (token[0] == '@')
+                            {
+                                char* label = token;
+                                strsep(&label, "@");
+                                char* labelName = strsep(&label, " ;\n"); // Trim any comments or other text off the end
+                                getAddressesOfLabel(labelName, labelMap, &segAddr, &offsetAddr);
+                                instr = LRC << 12;
+                                instr |= reg1 << 8;
+                                instr |= segAddr;
+                                binary[instrIndex] = instr; // Save the assembled instruction
+                                instrIndex++;
+                                instr = LRC << 12;
+                                instr |= reg2 << 8;
+                                instr |= offsetAddr;
+                            }
+                            arg += 3; // Parsed the entire instruction here
+                        }
+                        else if (!strcmp(token, "HALT"))
+                        {
+                            instr = EXT << 12;
+                            instr |= EXT_HALT << 8;
+                            arg++;
+                        }
+                        else if (!strcmp(token, "CPY"))
+                        {
+                            instr = EXT << 12;
+                            instr |= EXT_CPY << 8;
+                            arg++;
+                        }
+                        else if (!strcmp(token, "NOT"))
+                        {
+                            instr = EXT << 12;
+                            instr |= EXT_NOT << 8;
+                            arg++;
+                        }
+                        else if (!strcmp(token, "LSL"))
+                        {
+                            instr = EXT << 12;
+                            instr |= EXT_LSL << 8;
+                            arg++;
+                        }
+                        else if (!strcmp(token, "LSR"))
+                        {
+                            instr = EXT << 12;
+                            instr |= EXT_LSR << 8;
+                            arg++;
+                        }
+                        else if (!strcmp(token, "JMP"))
+                        {
+                            instr = EXT << 12;
+                            instr |= EXT_JMP << 8;
+                            arg++;
+                        }
                         else if (!strcmp(token, "ADD"))
                             instr = ADD << 12;
                         else if (!strcmp(token, "SUB"))
                             instr = SUB << 12;
+                        else if (!strcmp(token, "ADDC"))
+                            instr = ADDC << 12;
+                        else if (!strcmp(token, "SUBC"))
+                            instr = SUBC << 12;
                         else if (!strcmp(token, "CMP"))
                             instr = CMP << 12;
                         else if (!strcmp(token, "JLT"))
@@ -89,10 +159,6 @@ int main (int argc, char** argv)
                             instr = JGT << 12;
                         else if (!strcmp(token, "JEQ"))
                             instr = JEQ << 12;
-                        else if (!strcmp(token, "JMP"))
-                            instr = JMP << 12;
-                        else if (!strcmp(token, "CPY"))
-                            instr = CPY << 12;
                         else if (!strcmp(token, "LDR"))
                             instr = LDR << 12;
                         else if (!strcmp(token, "STR"))
@@ -103,66 +169,49 @@ int main (int argc, char** argv)
                             instr = AND << 12;
                         else if (!strcmp(token, "OR"))
                             instr = OR << 12;
-                        else if (!strcmp(token, "NOT"))
-                            instr = NOT << 12;
-                        else if (!strcmp(token, "SHF"))
-                            instr = SHF << 12;
                         else
                         {
                             printf("Not a known instruction on line %d\n", lineCount);
                             exit(1);
                         }
+                        arg++;
                     }
-                    else if (arg == 1)
+                    else if (arg < 4)
                     {
                         if (token[0] == 'r')
-                            instr |= (atoi(token + 1) << 8);
-                        else if (token[0] == '@')
                         {
-                            char* label = token;
-                            strsep(&label, "@");
-                            int16_t address = getAddressOfLabel(label, labelMap);
-                            instr |= address;
-                            arg += 2; // Skip the rest of the args
+                            int shift = 0;
+                            if (arg == 1)
+                                shift = 8;
+                            if (arg == 2)
+                                shift = 4;
+                            if (arg == 3)
+                                shift = 0;
+                            instr |= (atoi(token + 1) << shift);
                         }
-                    }
-                    else if (arg == 2)
-                    {
-                        if (token[0] == 'r') // Token is a register
-                            instr |= (atoi(token + 1) << 4);
-                        else if (token[0] == '#') // Token is a constant in base 10
+                        else if (token[0] == '#' || token[0] == '$') // Token is a constant
                         {
-                            // Remove the # from the string
                             char* num = token;
-                            strsep(&num, "#");
-                            // Convert to integer and append to instruction
-                            instr |= atoi(num);
-                            arg++; // Skip the next arg, constants take up 2 args
+                            uint8_t constant;
+                            if (token[0] == '#') // A constant in base 10
+                            {
+                                // Remove the # from the string
+                                strsep(&num, "#");
+                                // Convert to integer
+                                constant = (uint8_t)atoi(num);
+                            }
+                            else if (token[0] == '$')
+                            {
+                                // Remove the $ from the string
+                                strsep(&num, "$");
+                                // Convert to base 16
+                                constant = (uint8_t)strtol(num, NULL, 16);
+                            }
+                            instr |= constant;
+                            arg++;
                         }
-                        else if (token[0] == '$') // Token is a constant in base 16 (hex)
-                        {
-                            // Remove the $ from the string
-                            char* num = token;
-                            strsep(&num, "$");
-                            // Convert to base 16 and append to instruction
-                            instr |= (uint8_t)strtol(num, NULL, 16);
-                            arg++; // Skip the next arg
-                        }
-                        else if (token[0] == '@')
-                        {
-                            char* label = token;
-                            strsep(&label, "@");
-                            int16_t address = getAddressOfLabel(label, labelMap);
-                            instr |= address;
-                            arg++; // Skip the next arg
-                        }
+                        arg++;
                     }
-                    else if (arg == 3)
-                    {
-                        if (token[0] == 'r')
-                            instr |= atoi(token + 1);
-                    }
-                    arg++;
                     token = strtok(NULL, " "); // Get the next token
                 }
                 binary[instrIndex] = instr; // Save the assembled instruction
@@ -218,33 +267,27 @@ int main (int argc, char** argv)
 }
 
 // Counts lines that don't start with a ; (comment) or @ (label)
-int countLines(FILE* src)
+// 2 instructions for LRL macro
+int countInstructions(FILE* src)
 {
-    char c;
-    int count = 0;
-    int lastnew = 1;
-    int skip = 0;
-    while (fscanf(src, "%c", &c) != EOF)
+    char* line = NULL;
+    size_t toRead = 0; // Read until \n
+    ssize_t charsRead;
+    uint16_t instrCount = 0;
+    while ((charsRead = getline(&line, &toRead, src)) != -1)
     {
-        if (lastnew && (c == ';' || c == '@'))
+        if (line[0] != '\n' && line[0] != '@' && line[0] != ';')
         {
-            skip = 1;
+            char* token = strtok(line, " ");
+            if (!strcmp(token, "LRL"))
+                instrCount++;
+            instrCount++;
         }
-        else if(lastnew)
-        {
-            skip = 0;
-        }
-
-        lastnew = 0;
-        if (c == '\n')
-        {
-            if (!skip)
-                count++;
-            lastnew = 1;
-        }
+        free(line);
+        line = NULL; // Causes getline to keep reading
     }
     rewind(src);
-    return count;
+    return instrCount;
 }
 
 void createLabelMap(FILE* src, LabelAddress*** labelMap)
@@ -261,22 +304,25 @@ void createLabelMap(FILE* src, LabelAddress*** labelMap)
             // Create the label entry in labelMap
             char* start = line;
             char* beforeAt = strsep(&line, "@");
-            char* labelName = strsep(&line, " "); // Trim any comments or other text off the end
+            char* labelName = strsep(&line, " ;\n"); // Trim any comments or other text off the end
             LabelAddress* labeladdr = malloc(sizeof(LabelAddress));
             labeladdr->label = malloc(sizeof(char) * (strlen(labelName) + 1));
             strcpy(labeladdr->label, labelName);
-            labeladdr->address = instrCount;
+            labeladdr->segAddr = instrCount / JUMP_SEGMENT_SIZE;
+            labeladdr->offsetAddr = instrCount % JUMP_SEGMENT_SIZE;
             (*labelMap)[labelCount] = labeladdr;
             labelCount++;
-            printf("Label %s maps to address %d\n", labelName, instrCount + 1);
             free(start);
             start = NULL;
             labelName = NULL;
             beforeAt = NULL;
             line = NULL;
         }
-        else if (line[0] != ';')
+        else if (line[0] != ';' && line[0] != '\n')
         {
+            char* token = strtok(line, " ");
+            if (!strcmp(token, "LRL"))
+                instrCount++;
             instrCount++;
             free(line);
             line = NULL;
@@ -290,7 +336,7 @@ void createLabelMap(FILE* src, LabelAddress*** labelMap)
     rewind(src);
 }
 
-uint16_t getAddressOfLabel(char* label, LabelAddress* labelMap[MAX_LABELS])
+void getAddressesOfLabel(char* label, LabelAddress* labelMap[MAX_LABELS], uint8_t* segAddr, uint8_t* offsetAddr)
 {
     int i;
     for (i = 0; i < MAX_LABELS; i++)
@@ -300,10 +346,12 @@ uint16_t getAddressOfLabel(char* label, LabelAddress* labelMap[MAX_LABELS])
         {
             if (!strcmp(current->label, label))
             {
-                return current->address;
+                *segAddr = current->segAddr;
+                *offsetAddr = current->offsetAddr;
+                return;
             }
         }
     }
-    printf("Label \"%s\" not defined\n", label);
+    printf("Error: Label \"%s\" not defined\n", label);
     exit(1);
 }

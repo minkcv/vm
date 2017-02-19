@@ -61,6 +61,7 @@ uint16_t* readBinary(const char* filename, int print)
     uint16_t numInstructions = 0;
     // binaries are length prefixed
     fread(&numInstructions, sizeof(uint16_t), 1, bin);
+    printf("Binary is %d instructions\n", numInstructions);
     uint16_t* code = malloc(sizeof(uint16_t) * numInstructions);
     fread(code, sizeof(uint16_t), numInstructions, bin);
     if (print)
@@ -69,7 +70,7 @@ uint16_t* readBinary(const char* filename, int print)
         int i;
         for (i = 0; i < numInstructions; i++)
         {
-            printf("%x\n", code[i]);
+            printf("%4X\n", code[i]);
         }
     }
     fclose(bin);

@@ -23,7 +23,6 @@ VM* createVM(uint16_t* code, Display* display)
 // of a vm from the start of its code
 void run(VM* vm)
 {
-    printf("Starting execution\n");
     uint32_t startTime = SDL_GetTicks();
     uint32_t displayWaitTime = 16; // 16ms = about 60 refreshes per second
     SDL_Event event;
@@ -55,8 +54,8 @@ void run(VM* vm)
 Instruction* decode(uint16_t* instr)
 {
     Instruction* decoded = malloc(sizeof(Instruction));
-    uint16_t clean = 0x00FF;
-    decoded->opcode = *instr >> 12;
+    uint16_t clean = 0x000F;
+    decoded->opcode = *instr >> 12 & clean;
     decoded->arg0 = *instr >> 8 & clean;
     decoded->arg1 = *instr >> 4 & clean;
     decoded->arg2 = *instr & clean;
@@ -66,10 +65,33 @@ Instruction* decode(uint16_t* instr)
 // Executes an instruction
 void exec(VM* vm, Instruction* instr)
 {
-    if (instr->opcode == HALT)
+    if (instr->opcode == EXT)
     {
-        printf("Exiting\n");
-        exit(0);
+        if (instr->arg0 == EXT_HALT)
+        {
+            printf("Exiting\n");
+            exit(0);
+        }
+        else if (instr->arg0 == EXT_CPY)
+        {
+            vm->regs[instr->arg1] = vm->regs[instr->arg2];
+        }
+        else if (instr->arg0 == EXT_NOT)
+        {
+            vm->regs[instr->arg1] = ~(vm->regs[instr->arg2]);
+        }
+        else if (instr->arg0 == EXT_LSL)
+        {
+            vm->regs[instr->arg0] = vm->regs[instr->arg0] << vm->regs[instr->arg1];
+        }
+        else if (instr->arg0 == EXT_LSR)
+        {
+            vm->regs[instr->arg0] = vm->regs[instr->arg0] >> vm->regs[instr->arg1];
+        }
+        else if (instr->arg0 == EXT_JMP)
+        {
+            vm->pc = vm->code + (vm->regs[instr->arg1] * JUMP_SEGMENT_SIZE) + vm->regs[instr->arg2] - 1;
+        }
     }
     else if (instr->opcode == ADD)
     {
@@ -78,6 +100,14 @@ void exec(VM* vm, Instruction* instr)
     else if (instr->opcode == SUB)
     {
         vm->regs[instr->arg0] = vm->regs[instr->arg1] - vm->regs[instr->arg2];
+    }
+    else if (instr->opcode == ADDC)
+    {
+        vm->regs[instr->arg0] += ((instr->arg1 << 4) & 0x00F0) + instr->arg2;
+    }
+    else if (instr->opcode == SUBC)
+    {
+        vm->regs[instr->arg0] -= ((instr->arg1 << 4) & 0x00F0) + instr->arg2;
     }
     else if (instr->opcode == CMP)
     {
@@ -91,25 +121,17 @@ void exec(VM* vm, Instruction* instr)
     else if (instr->opcode == JLT)
     {
         if (vm->regs[instr->arg0] == 0)
-            vm->pc = vm->code + ((instr->arg1 << 4) + instr->arg2) - 1;
+            vm->pc = vm->code + (vm->regs[instr->arg1] * JUMP_SEGMENT_SIZE) + vm->regs[instr->arg2] - 1;
     }
     else if (instr->opcode == JGT)
     {
         if (vm->regs[instr->arg0] == 2)
-            vm->pc = vm->code + ((instr->arg1 << 4) + instr->arg2) - 1;
+            vm->pc = vm->code + (vm->regs[instr->arg1] * JUMP_SEGMENT_SIZE) + vm->regs[instr->arg2] - 1;
     }
     else if (instr->opcode == JEQ)
     {
         if (vm->regs[instr->arg0] == 1)
-            vm->pc = vm->code + ((instr->arg1 << 4) + instr->arg2) - 1;
-    }
-    else if (instr->opcode == JMP)
-    {
-        vm->pc = vm->code + ((instr->arg1 << 4) + instr->arg2) - 1;
-    }
-    else if (instr->opcode == CPY)
-    {
-        vm->regs[instr->arg0] = vm->regs[instr->arg1];
+            vm->pc = vm->code + (vm->regs[instr->arg1] * JUMP_SEGMENT_SIZE) + vm->regs[instr->arg2] - 1;
     }
     else if (instr->opcode == LDR)
     {
@@ -127,9 +149,7 @@ void exec(VM* vm, Instruction* instr)
     }
     else if (instr->opcode == LRC)
     {
-        int constant = (instr->arg1 << 4) & 0x00F0;
-        constant += instr->arg2;
-        vm->regs[instr->arg0] = constant;
+        vm->regs[instr->arg0] = ((instr->arg1 << 4) & 0x00F0) + instr->arg2;
     }
     else if (instr->opcode == AND)
     {
@@ -138,20 +158,5 @@ void exec(VM* vm, Instruction* instr)
     else if (instr->opcode == OR)
     {
         vm->regs[instr->arg0] = vm->regs[instr->arg1] | vm->regs[instr->arg2];
-    }
-    else if (instr->opcode == NOT)
-    {
-        vm->regs[instr->arg0] = ~(vm->regs[instr->arg1]);
-    }
-    else if (instr->opcode == SHF)
-    {
-        if (vm->regs[instr->arg2] == 0)
-        {
-            vm->regs[instr->arg0] = vm->regs[instr->arg0] << vm->regs[instr->arg1];
-        }
-        else if (vm->regs[instr->arg2] == 2)
-        {
-            vm->regs[instr->arg0] = vm->regs[instr->arg0] >> vm->regs[instr->arg1];
-        }
     }
 }

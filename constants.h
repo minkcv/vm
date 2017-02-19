@@ -4,6 +4,8 @@
 #define SCREEN_WIDTH 256
 #define SCREEN_HEIGHT 192
 
+// Instruction addressing also uses segments and offset
+#define JUMP_SEGMENT_SIZE 256
 // Number of cells in a Segment
 #define MEMORY_SEGMENT_SIZE 256
 // Number of segments
