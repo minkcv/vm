@@ -7,7 +7,7 @@
 
 // Creates a vm with the supplied code
 // display is an optional pointer to a display struct
-VM* createVM(uint16_t* code, Display* display)
+VM* createVM(uint16_t* code, uint8_t* rom, Display* display)
 {
     VM* vm = (VM*)malloc(sizeof(VM));
     vm->code = code;
@@ -16,6 +16,7 @@ VM* createVM(uint16_t* code, Display* display)
     vm->gpu = createGPU(display->back);
     vm->ipu = createIPU();
     memset(vm->memory, 0, sizeof(vm->memory[0][0]) * MEMORY_SEGMENT_COUNT * MEMORY_SEGMENT_SIZE);
+    memcpy(vm->memory[128], rom, 128 * MEMORY_SEGMENT_SIZE);
     return vm;
 }
 

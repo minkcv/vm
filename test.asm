@@ -16,8 +16,17 @@ STR r3 r0 r1 ; set height
 LRC r4 #5 ; Segment address of sprite segment address in sprite attribute
 LRC r5 #128 ; Segment address of sprite
 STR r5 r0 r4
-LRC r4 #7 ; Byte address of color 1 in sprite
+LRC r4 #7 ; Byte address of color 0 in sprite
 LRC r5 $FF ; Color: white
+STR r5 r0 r4
+LRC r4 #8 ; color 1
+LRC r5 $0F
+STR r5 r0 r4
+LRC r4 #9 ; color 2
+LRC r5 $F0
+STR r5 r0 r4
+LRC r4 #10 ; color 3
+LRC r5 $88
 STR r5 r0 r4
 LRC r0 #80
 LRC r1 #16

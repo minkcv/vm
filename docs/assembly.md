@@ -1,5 +1,5 @@
 # The Assembly Language
-This file describes the syntax of the assembly language for the provided assembler. See `opcodes.md` to learn how to use each instruction. See `getting_started.md` to learn how to use the assembler. Be careful when looking at the output binary file in a hex editor as it may not represent the program accurately since the binary is read in to an unsigned type.
+This file describes the syntax of the assembly language for the provided assembler. See `opcodes.md` to learn how to use each instruction. See `getting_started.md` to learn how to use the assembler. Be careful when looking at the output binary file in a hex editor as it may not represent the program accurately since the binary is read in to an unsigned type. Program binaries also use two bytes to prefix the number of instructions.
 
 #### Constants
 For instructions that take a constant, the constant can be specified with `#` for decimal or `$` for hexadecimal.

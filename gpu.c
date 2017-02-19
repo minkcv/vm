@@ -53,9 +53,9 @@ void drawSprites(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_S
                 {
                     uint8_t fourPixels = *(sprite + w + (h * gpu->sprAttrs[i].height));
                     uint8_t nibble1 = fourPixels & 0x2;
-                    uint8_t nibble2 = (fourPixels >> 2) & 0x2;
-                    uint8_t nibble3 = (fourPixels >> 4) & 0x2;
-                    uint8_t nibble4 = (fourPixels >> 6) & 0x2;
+                    uint8_t nibble2 = (fourPixels >> 2) & 0x3;
+                    uint8_t nibble3 = (fourPixels >> 4) & 0x3;
+                    uint8_t nibble4 = (fourPixels >> 6) & 0x3;
                     uint8_t pixel1 = gpu->sprAttrs[i].colors[nibble1];
                     uint8_t pixel2 = gpu->sprAttrs[i].colors[nibble2];
                     uint8_t pixel3 = gpu->sprAttrs[i].colors[nibble3];

@@ -9,23 +9,28 @@
 #include <stdint.h>
 
 uint16_t* readBinary(const char* filename, int print);
+uint8_t* readRom(const char* filename, int print);
 
 int main (char argc, char** argv)
 {
-    char* filename = NULL;
+    char* programName = NULL;
+    char* romName = NULL;
     int index;
     int c;
     int scale = 1;
     opterr = 0;
-    while ((c = getopt(argc, argv, "hf:s:")) != -1)
+    while ((c = getopt(argc, argv, "hf:r:s:")) != -1)
     {
         switch(c)
         {
             case 'f':
-                filename = optarg;
+                programName = optarg;
                 break;
             case 's':
                 scale = atoi(optarg);
+                break;
+            case 'r':
+                romName = optarg;
                 break;
             default:
             case 'h':
@@ -34,18 +39,20 @@ int main (char argc, char** argv)
                 exit(1);
         }
     }
-    if (filename == NULL)
+    if (programName == NULL)
     {
         printf("Usage: main -f program.bin\n");
         exit(1);
     }
 
     Display* display = createDisplay(SCREEN_WIDTH, SCREEN_HEIGHT, scale);
-    uint16_t* code = readBinary(filename, 0);
-    VM* vm = createVM(code, display);
+    uint16_t* code = readBinary(programName, 0);
+    uint8_t* rom = readRom(romName, 0);
+    VM* vm = createVM(code, rom, display);
     run(vm);
     quitDisplay(display);
     free(code);
+    free(rom);
     code = NULL;
     return 0;
 }
@@ -69,10 +76,30 @@ uint16_t* readBinary(const char* filename, int print)
         printf("Binary Program:\n");
         int i;
         for (i = 0; i < numInstructions; i++)
-        {
             printf("%4X\n", code[i]);
-        }
     }
     fclose(bin);
     return code;
+}
+
+uint8_t* readRom(const char* filename, int print)
+{
+    FILE* romfile = fopen(filename, "rb");
+    if (romfile == NULL)
+    {
+        printf("Error reading file %s\n", filename);
+        exit(1);
+    }
+    uint8_t* rom = malloc(sizeof(uint8_t) * 128 * MEMORY_SEGMENT_SIZE);
+    size_t bytesRead = fread(rom, sizeof(uint8_t), 128 * MEMORY_SEGMENT_SIZE, romfile);
+    printf("Read %d bytes from the rom\n", bytesRead);
+    if (print)
+    {
+        printf("Rom:\n");
+        int i;
+        for (i = 0; i < bytesRead; i++)
+            printf("%2X\n", rom[i]);
+    }
+    fclose(romfile);
+    return rom;
 }

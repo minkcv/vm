@@ -24,7 +24,7 @@ struct VM
     Display* display;
 };
 
-VM* createVM(uint16_t* code, Display* display);
+VM* createVM(uint16_t* code, uint8_t* rom, Display* display);
 
 void run(VM* vm);
 
