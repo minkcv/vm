@@ -1,7 +1,7 @@
 # Opcodes
 The vm supports 16 different opcodes specified by the 4 most significant bits of each instruction. The first opcode (0000) allows for 16 additional opcodes specified by the second 4 bits of each instruction. These additional opcodes only operate on two arguments but allow for more instructions to use 3 arguments.
 
-Instructions that take register(s) as arguments can take any register r0 - r15 and can even take the same register for different arguments.
+Instructions that take register(s) as arguments can take any register r0 - r15 and can even take the same register for different arguments. There are no implicit registers like an accumulator or comparison register.
 
 #### EXT 0x0
 Indicates an extended opcode specified by the next 4 bits of the instruction.
