@@ -7,7 +7,7 @@
 #include <limits.h>
 #include <stdint.h>
 
-#define MAX_LABELS 256
+#define MAX_LABELS 1024
 
 // Used to map a label to an address
 typedef struct

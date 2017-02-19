@@ -15,7 +15,9 @@ Comments are indicated with a semicolon (`;`). Comments either start after an in
     LRC r2 #26 ; also valid
 
 #### Jump Labels
-Labels are specified with an at sign (`@`). Lines that start with an at sign indicate that the instruction following them is their address. The jump opcodes operate on registers in order to address 65535 different instructions so the assembler macro "LRL" for "Load Registers Label" is used to make jumping easier. "LRL" inserts two LRC instructions. One for the segment of the label and one for the offset of the label. Example:
+Labels are specified with an at sign (`@`). Lines that start with an at sign indicate that the instruction following them is their address. The assembler has a maximum of 1024 labels.
+
+ The jump opcodes operate on register values in order to address 65535 different instructions so the assembler macro "LRL" for "Load Registers Label" is used to make jumping easier. "LRL" inserts two LRC instructions. One for the segment address of the label and one for the offset address of the label. Example:
 
     @mylabel
     ADDI r1 #123
