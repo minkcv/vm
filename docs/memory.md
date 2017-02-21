@@ -10,6 +10,6 @@ Code is stored separately, not in addressable memory. Jump instructions use a se
 
 ### GPU and IPU Map
 - `64.0` through `80.15` (inclusive) are for 256 sprite attributes. Each sprite attribute is 16 bytes long.
-- `80.16` is the background color of the screen.
+- `80.16` is the background color of the screen stored as an index into the 256 color map.
 - `80.17` contains flags to change the state of the GPU.
 - `127.0` through `127.1` (inclusive) are the 16 bits indicating which joystick buttons are pressed. There are 8 buttons for each of the 2 joysticks.
