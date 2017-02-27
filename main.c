@@ -47,13 +47,18 @@ int main (char argc, char** argv)
 
     Display* display = createDisplay(SCREEN_WIDTH, SCREEN_HEIGHT, scale);
     uint16_t* code = readBinary(programName, 0);
-    uint8_t* rom = readRom(romName, 0);
+    uint8_t* rom = NULL;
+    if (romName != NULL) // ROM is optional
+        rom = readRom(romName, 0);
+
     VM* vm = createVM(code, rom, display);
     run(vm);
     quitDisplay(display);
     free(code);
-    free(rom);
+    if (rom != NULL)
+        free(rom);
     code = NULL;
+    rom = NULL;
     return 0;
 }
 
