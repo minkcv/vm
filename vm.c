@@ -25,8 +25,11 @@ VM* createVM(uint16_t* code, uint8_t* rom, Display* display)
 // of a vm from the start of its code
 void run(VM* vm)
 {
-    uint32_t startTime = SDL_GetTicks();
+    uint32_t displayStartTime = SDL_GetTicks();
     uint32_t displayWaitTime = 16; // 16ms = about 60 refreshes per second
+    uint32_t cpuStartTime = SDL_GetTicks();
+    uint32_t cpuInstructionCount = 0;
+    int wait = 0;
     SDL_Event event;
     while (event.type != SDL_QUIT)
     {
@@ -34,20 +37,38 @@ void run(VM* vm)
         {
             updateIPU(vm->ipu, event.key, vm->memory);
         }
-        uint16_t* instr = vm->pc;
-        Instruction* decoded = decode(instr);
-        exec(vm, decoded);
-        vm->pc++;
 
-        if (startTime + displayWaitTime < SDL_GetTicks())
+        // Executing
+        if (!wait)
         {
-            drawBackground(vm->gpu, vm->memory);
-            readSpritesFromMem(vm->gpu, vm->memory);
-            drawSprites(vm->gpu, vm->memory);
-            updateDisplay(vm->display);
-            startTime = SDL_GetTicks();
+            uint16_t* instr = vm->pc;
+            Instruction* decoded = decode(instr);
+            exec(vm, decoded);
+            vm->pc++;
+            cpuInstructionCount++;
         }
-        SDL_Delay(1);
+        else // Waiting
+        {
+            if ((SDL_GetTicks() - cpuStartTime) > 1000 && cpuInstructionCount > 500000)
+            {
+                // Stop waiting
+                cpuInstructionCount = 0;
+                cpuStartTime = SDL_GetTicks();
+                wait = 0;
+            }
+        }
+        if (displayStartTime + displayWaitTime < SDL_GetTicks())
+        {
+            updateGPU(vm->gpu, vm->memory);
+            if (vm->gpu->active)
+            {
+                drawBackground(vm->gpu, vm->memory);
+                readSpritesFromMem(vm->gpu, vm->memory);
+                drawSprites(vm->gpu, vm->memory);
+                updateDisplay(vm->display);
+            }
+            displayStartTime = SDL_GetTicks();
+        }
         SDL_PollEvent(&event);
     }
 }
@@ -71,7 +92,7 @@ void exec(VM* vm, Instruction* instr)
     {
         if (instr->arg0 == EXT_HALT)
         {
-            printf("Exiting\n");
+            printf("Exiting at halt instruction\n");
             exit(0);
         }
         else if (instr->arg0 == EXT_CPY)
@@ -93,6 +114,10 @@ void exec(VM* vm, Instruction* instr)
         else if (instr->arg0 == EXT_JMP)
         {
             vm->pc = vm->code + (vm->regs[instr->arg1] * JUMP_SEGMENT_SIZE) + vm->regs[instr->arg2] - 1;
+        }
+        else if (instr->arg0 == EXT_NOP)
+        {
+            // No operation
         }
     }
     else if (instr->opcode == ADD)
@@ -133,7 +158,9 @@ void exec(VM* vm, Instruction* instr)
     else if (instr->opcode == JEQ)
     {
         if (vm->regs[instr->arg0] == 1)
+        {
             vm->pc = vm->code + (vm->regs[instr->arg1] * JUMP_SEGMENT_SIZE) + vm->regs[instr->arg2] - 1;
+        }
     }
     else if (instr->opcode == LDR)
     {
@@ -160,5 +187,9 @@ void exec(VM* vm, Instruction* instr)
     else if (instr->opcode == OR)
     {
         vm->regs[instr->arg0] = vm->regs[instr->arg1] | vm->regs[instr->arg2];
+    }
+    else if (instr->opcode == XOR)
+    {
+        vm->regs[instr->arg0] = vm->regs[instr->arg1] ^ vm->regs[instr->arg2];
     }
 }

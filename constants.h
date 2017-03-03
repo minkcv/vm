@@ -29,6 +29,11 @@
 #define BACK_COLOR_SEG 80
 #define BACK_COLOR_OFFSET 16
 
+#define GPU_FLAG_SEG 80
+
+// 80.17 are flags to control the GPU and view the status
+#define GPU_FLAG_OFFSET 17
+
 #define NUM_JOYSTICK_BUTTONS 8
 
 #define JOYSTICK_SEG 127

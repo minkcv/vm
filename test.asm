@@ -1,6 +1,12 @@
 ; This is a test program
 ; These are comments
 ;
+; Enable the GPU
+LRC   r0 #80 ; GPU flag seg
+LRC r1 #17 ; GPU flag offset
+LRC r3 $1
+STR r3 r0 r1
+
 ; Create a sprite attribute
 LRC r0 #64 ; Segment address
 LRC r1 #0 ; Byte address
@@ -13,7 +19,7 @@ LRC r3 #16
 STR r3 r0 r1 ; set width
 LRC r1 #4 ; byte address of height
 STR r3 r0 r1 ; set height
-LRC r4 #5 ; Segment address of sprite segment address in sprite attribute
+LRC r4 #5 ; offset address of sprite segment address in sprite attribute
 LRC r5 #128 ; Segment address of sprite
 STR r5 r0 r4
 LRC r4 #7 ; Byte address of color 0 in sprite
@@ -35,13 +41,13 @@ STR r2 r0 r1
 ; Load the joystick 1 button address
 LRC r0 #127
 LRC r1 #0
-; Loop forever until the user clicks the x 
+; Loop forever until the user clicks the x
 @forever; comments after label work
 ; comments below label work
 LRC r3 #2 ; 0000 0010
 LDR r2 r0 r1 ; r2 now holds the button states of joystick 1
 AND r2 r2 r3
-CMP r4 r2 r3 ; r4 is "equal" if only joystick 1 up button is pressed
+CMP r4 r2 r3 ; r4 is "equal" if joystick 1 up button is pressed
 LRL r9 r10 @movedown
 JEQ r4 r9 r10
 @donemovedown
@@ -66,6 +72,13 @@ CMP r4 r2 r3
 LRL r9 r10 @moveright
 JEQ r4 r9 r10
 @donemoveright
+NOP ; test nop
+LRL r9 r10 @waitscreen
+JMP r9 r10
+@donewaitscreen
+LRC r12 #80
+LRC r13 #17
+LDR r15 r12 r13 ; remember the current gpu flags
 LRL r9 r10 @forever; back up
 JMP r9 r10
 ;
@@ -107,4 +120,26 @@ LRC r8 #5 ; move speed 5
 ADD r7 r7 r8
 STR r7 r5 r6
 LRL r9 r10 @donemoveright
+JMP r9 r10
+;
+@waitscreen
+NOP ; easy to see in printouts
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+LRC r12 #80
+LRC r13 #17
+LDR r14 r12 r13
+LRC r12 $2 ; 0000 0010
+AND r14 r12 r14 ; mask r14 to 0000 0010
+AND r15 r12 r15 ; mask r15 to 0000 0010
+XOR r14 r14 r15 ; see if r14 and r15 differ
+CMP r12 r14 r12
+LRL r9 r10 @donewaitscreen
+JEQ r12 r9 r10
+LRL r9 r10 @waitscreen
 JMP r9 r10

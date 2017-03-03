@@ -143,6 +143,12 @@ int main (int argc, char** argv)
                             instr |= EXT_JMP << 8;
                             arg++;
                         }
+                        else if (!strcmp(token, "NOP"))
+                        {
+                            instr = EXT << 12;
+                            instr |= EXT_NOP << 8;
+                            arg++;
+                        }
                         else if (!strcmp(token, "ADD"))
                             instr = ADD << 12;
                         else if (!strcmp(token, "SUB"))
@@ -169,6 +175,8 @@ int main (int argc, char** argv)
                             instr = AND << 12;
                         else if (!strcmp(token, "OR"))
                             instr = OR << 12;
+                        else if (!strcmp(token, "XOR"))
+                            instr = XOR << 12;
                         else
                         {
                             printf("Not a known instruction on line %d\n", lineCount);

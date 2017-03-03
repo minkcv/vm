@@ -5,7 +5,20 @@ GPU* createGPU(SDL_Surface* back)
 {
     GPU* gpu = (GPU*)malloc(sizeof(GPU));
     gpu->back = back;
+    gpu->active = 1;
     return gpu;
+}
+
+void updateGPU(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_SIZE])
+{
+    gpu->active = memory[GPU_FLAG_SEG][GPU_FLAG_OFFSET] & 0x1;
+    if (gpu->active)
+    {
+        // Preserve other bits, only change the second bit
+        gpu->refreshed = !gpu->refreshed;
+        memory[GPU_FLAG_SEG][GPU_FLAG_OFFSET] &= 0xFD; // Clear the second bit
+        memory[GPU_FLAG_SEG][GPU_FLAG_OFFSET] |= (gpu->refreshed << 1); // Set the second bit according to gpu->refreshed
+    }
 }
 
 void readSpritesFromMem(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_SIZE])

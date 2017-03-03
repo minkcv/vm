@@ -42,6 +42,12 @@ Jumps to the address specified by the values in the registers where the first re
     ASM: JMP r3 r2
     BIN: 0000 0101 0011 0010
 
+##### EXT NOP 0x6
+No operation. used to waste time.
+
+    ASM: NOP
+    BIN: 0000 0110 0000 0000
+
 #### ADD 0x1
 Adds the values in the last 2 registers and stores the value in the first register.
 
@@ -119,3 +125,9 @@ Binary ORs the values in the second and third registers and stores the result in
 
     ASM: OR r1 r4 r3 ; r1 = r4 | r3
     BIN: 1101 0001 0100 0011
+
+#### XOR 0xE
+Binary XORs the values in the second and third registers and stores the result in the first register.
+
+    ASM: XOR r1 r9 rA ; r1 = r9 ^ rA
+    BIN: 1110 0001 1001 1010

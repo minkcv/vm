@@ -41,6 +41,10 @@
 // EXT JMP r1 r2
 #define EXT_JMP 0x5
 
+// No operation
+// Used to waste time
+#define EXT_NOP 0x6
+
 // Adds last two registers and stores the result in the first
 // ADD r1 r2 r3
 #define ADD 0x1 
@@ -100,5 +104,10 @@
 // and stores the value in the first register
 // OR r1 r2 r3
 #define OR 0xD
+
+// Binary XORs the second and third register values
+// and stores the value in the first register
+// XOR r1 r2 r3
+#define XOR 0xE
 
 #endif
