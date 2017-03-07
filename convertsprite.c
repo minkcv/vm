@@ -21,19 +21,33 @@ int getColorIndex(int rgba[4], int colors[4][3])
 
 int main (int argc, char** argv)
 {
+    /*
     fprintf(stderr, "   Compiled with libpng %s; using libpng %s.\n",
       PNG_LIBPNG_VER_STRING, png_libpng_ver);
     fprintf(stderr, "   Compiled with zlib %s; using zlib %s.\n",
       ZLIB_VERSION, zlib_version);
+    */
 
-    FILE* fp = fopen("testsprite.png", "rb");
-    if (fp == NULL)
+    if (argc < 2 || !strlen(argv[1]))
     {
-        printf("Couldn't open file\n");
+        printf("Usage: convertsprite sprite.png\n");
         return 1;
     }
-    char* sprName = "testsprite.spr";
-    FILE* spriteFile = fopen(sprName, "wb");
+    char* filename = argv[1];
+    FILE* fp = fopen(filename, "rb");
+    if (fp == NULL)
+    {
+        printf("Couldn't open file with name %s\n", filename);
+        return 1;
+    }
+    char* filenameNoExtension = strsep(&filename, ".");
+    if (filenameNoExtension == NULL)
+    {
+        printf("Filename should have \".png\" as an extension\n");
+        return 1;
+    }
+
+    FILE* spriteFile = fopen(strcat(filenameNoExtension, ".spr"), "wb");
     int x, y;
     int width, height;
     png_byte colorType;
@@ -106,7 +120,7 @@ int main (int argc, char** argv)
     }
 
     size_t written = fwrite(sprite, sizeof(uint8_t), (width  / 4) * height, spriteFile);
-    printf("Wrote %d bytes to %s\n", written, sprName);
+    printf("Wrote %d bytes to %s\n", written, strcat(filenameNoExtension, ".spr"));
     fclose(spriteFile);
     free(sprite);
     for (y = 0; y < height; y++)
