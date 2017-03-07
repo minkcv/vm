@@ -1,5 +1,5 @@
 # Joysticks and Input
-The vm supports 2 joysticks, each with 8 buttons. The buttons can either be pressed (1) or not pressed (0). The button states are located in a byte at memory address `127.0` for the first joystick and `127.1` for the second joystick.
+The vm supports 2 joysticks, each with 8 buttons. The buttons can either be pressed (1) or not pressed (0). The button states are located in a byte at memory address `127.0` for the first joystick and `127.1` for the second joystick. See `sample.md` for example code to read a button.
 
 ### Button Mapping
 #### Joystick 1
@@ -21,14 +21,3 @@ The vm supports 2 joysticks, each with 8 buttons. The buttons can either be pres
 - Bit 2: A
 - Bit 1: S
 - Bit 0 (LSB): W
-
-### Example Assembly
-
-    LRC r0 #127 ; segment of joysticks
-    LRC r1 #0 ; offset of first joystick
-    LDR r2 r0 r1 ; load r2 with the button states of joystick 1
-    LRC r3 #2 ; 0000 0010 down arrow
-    AND r2 r2 r3 ; binary and the button states with the down arrow
-    CMP r4 r2 r3 ; compare r2 with 0000 0010. will put 1 in r4 if they are equal
-    ; jump to downpressed label if down arrow was pressed
-    JEQ r4 @downpressed

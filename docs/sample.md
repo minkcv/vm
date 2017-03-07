@@ -50,7 +50,7 @@ STR r3 r1 r2 ; Write the flags to memory
 ## Reading Joystick 1 Input and Jumping on Button Press
 (Not jumping as in making a character jump, but as in jumping to a section of code)
 ```
-LRC r1 #127 ; Joystick 1 segment address
+LRC r1 #127 ; Joysticks segment address
 LRC r2 #0 ; Joystick 1 offset address
 LRC r3 #2 ; Joystick 1 down button pressed state 0000 0010
 LDR r4 r1 r2 ; Read Joystick 1 buttons states from memory
@@ -62,7 +62,7 @@ JEQ r5 r9 r10 ; Jump to the @movedown label if the comparison returned true
 ```
 
 ## Waiting Until the Screen Refreshes
-Without any sort of waiting, the program will run at 500,000 instructions per second and a human player won't be able to keep up. We can execute our desired update code and then wait until the GPU toggles the "refreshed" flag.
+Without any sort of waiting, a program will run at 500,000 instructions per second and a human player won't be able to keep up. We can execute our desired update code and then wait until the GPU toggles the "refreshed" flag.
 ```
 @gameloop
 ; Your game code here

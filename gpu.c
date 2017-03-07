@@ -64,15 +64,15 @@ void drawSprites(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_S
             {
                 for (w = 0; w < gpu->sprAttrs[i].width / 4; w++)
                 {
-                    uint8_t fourPixels = *(sprite + w + (h * gpu->sprAttrs[i].height));
-                    uint8_t nibble1 = fourPixels & 0x2;
-                    uint8_t nibble2 = (fourPixels >> 2) & 0x3;
-                    uint8_t nibble3 = (fourPixels >> 4) & 0x3;
-                    uint8_t nibble4 = (fourPixels >> 6) & 0x3;
-                    uint8_t pixel1 = gpu->sprAttrs[i].colors[nibble1];
-                    uint8_t pixel2 = gpu->sprAttrs[i].colors[nibble2];
-                    uint8_t pixel3 = gpu->sprAttrs[i].colors[nibble3];
-                    uint8_t pixel4 = gpu->sprAttrs[i].colors[nibble4];
+                    uint8_t fourPixels = *(sprite + w + (h * gpu->sprAttrs[i].width / 4));
+                    uint8_t bits1 = (fourPixels >> 6) & 0x3; // MSB
+                    uint8_t bits2 = (fourPixels >> 4) & 0x3;
+                    uint8_t bits3 = (fourPixels >> 2) & 0x3;
+                    uint8_t bits4 = fourPixels & 0x3;
+                    uint8_t pixel1 = gpu->sprAttrs[i].colors[bits1];
+                    uint8_t pixel2 = gpu->sprAttrs[i].colors[bits2];
+                    uint8_t pixel3 = gpu->sprAttrs[i].colors[bits3];
+                    uint8_t pixel4 = gpu->sprAttrs[i].colors[bits4];
                     uint8_t* curPixel = (uint8_t*)(pixels + x + (y * gpu->back->pitch) + (w * 4) + (h * gpu->back->pitch));
                     if (!(gpu->sprAttrs[i].color4Alpha && pixel1 == gpu->sprAttrs[i].colors[3]))
                         *curPixel = pixel1;

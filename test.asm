@@ -10,9 +10,7 @@ STR r3 r0 r1
 ; Create a sprite attribute
 LRC r0 #64 ; Segment address
 LRC r1 #0 ; Byte address
-LRC r3 #128; flags for sprite attrs: binary: 1000-0000
-; a blank line
-
+LRC r3 #144; flags for sprite attrs: binary: 1001-0000
 STR r3 r0 r1 ; set the flags
 LRC r1 #3 ; byte address of width
 LRC r3 #16
@@ -23,16 +21,16 @@ LRC r4 #5 ; offset address of sprite segment address in sprite attribute
 LRC r5 #128 ; Segment address of sprite
 STR r5 r0 r4
 LRC r4 #7 ; Byte address of color 0 in sprite
-LRC r5 $FF ; Color: white
+LRC r5 #224 ; Color: red
 STR r5 r0 r4
-LRC r4 #8 ; color 1
-LRC r5 $0F
+LRC r4 #8 ; color 1 offset
+LRC r5 #250 ; Color: beige
 STR r5 r0 r4
-LRC r4 #9 ; color 2
-LRC r5 $F0
+LRC r4 #9 ; color 2 offset
+LRC r5 #3 ; Color: blue
 STR r5 r0 r4
-LRC r4 #10 ; color 3
-LRC r5 $88
+LRC r4 #10 ; color 3 offset
+LRC r5 $88 ; Color: doesn't matter, we're using transparency
 STR r5 r0 r4
 LRC r0 #80
 LRC r1 #16
