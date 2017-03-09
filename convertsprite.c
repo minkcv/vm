@@ -75,7 +75,8 @@ int main (int argc, char** argv)
     png_read_image(pngPtr, rowPointers);
 
     int usedColors = 0;
-    int colors[4][3] = {{}, {}, {}}; // Careful, don't hurt yourself on these thorns.
+    int colors[4][3];
+    memset(colors, -1, sizeof(int) * 4 * 3);
     int rgba[4] = {};
     uint8_t* sprite = (uint8_t*)malloc((width / 4) * height);
     size_t spriteOffset = 0;

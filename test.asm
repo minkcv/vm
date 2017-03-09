@@ -21,13 +21,13 @@ LRC r4 #5 ; offset address of sprite segment address in sprite attribute
 LRC r5 #128 ; Segment address of sprite
 STR r5 r0 r4
 LRC r4 #7 ; Byte address of color 0 in sprite
-LRC r5 #224 ; Color: red
+LRC r5 #0 ; Color
 STR r5 r0 r4
 LRC r4 #8 ; color 1 offset
-LRC r5 #250 ; Color: beige
+LRC r5 #224 ; Color
 STR r5 r0 r4
 LRC r4 #9 ; color 2 offset
-LRC r5 #3 ; Color: blue
+LRC r5 #255 ; Color
 STR r5 r0 r4
 LRC r4 #10 ; color 3 offset
 LRC r5 $88 ; Color: doesn't matter, we're using transparency
