@@ -2,7 +2,7 @@
 ; These are comments
 ;
 ; Enable the GPU
-LRC   r0 #80 ; GPU flag seg
+LRC   r0 #127 ; GPU flag seg
 LRC r1 #17 ; GPU flag offset
 LRC r3 $1
 STR r3 r0 r1
@@ -32,7 +32,8 @@ STR r5 r0 r4
 LRC r4 #10 ; color 3 offset
 LRC r5 $88 ; Color: doesn't matter, we're using transparency
 STR r5 r0 r4
-LRC r0 #80
+; background color
+LRC r0 #127
 LRC r1 #16
 LRC r2 #75 ; Color: light blue
 STR r2 r0 r1
@@ -74,7 +75,7 @@ NOP ; test nop
 LRL r9 r10 @waitscreen
 JMP r9 r10
 @donewaitscreen
-LRC r12 #80
+LRC r12 #127
 LRC r13 #17
 LDR r15 r12 r13 ; remember the current gpu flags
 LRL r9 r10 @forever; back up
@@ -84,7 +85,7 @@ JMP r9 r10
 LRC r5 #64
 LRC r6 #2
 LDR r7 r5 r6
-LRC r8 #5 ; move speed 5
+LRC r8 #2 ; move speed 2
 ADD r7 r7 r8
 STR r7 r5 r6
 LRL r9 r10 @donemovedown
@@ -94,7 +95,7 @@ JMP r9 r10
 LRC r5 #64
 LRC r6 #2
 LDR r7 r5 r6
-LRC r8 #5 ; move speed 5
+LRC r8 #2 ; move speed 2
 SUB r7 r7 r8
 STR r7 r5 r6
 LRL r9 r10 @donemoveup
@@ -104,7 +105,7 @@ JMP r9 r10
 LRC r5 #64
 LRC r6 #1
 LDR r7 r5 r6
-LRC r8 #5 ; move speed 5
+LRC r8 #2 ; move speed 2
 SUB r7 r7 r8
 STR r7 r5 r6
 LRL r9 r10 @donemoveleft
@@ -114,7 +115,7 @@ JMP r9 r10
 LRC r5 #64
 LRC r6 #1
 LDR r7 r5 r6
-LRC r8 #5 ; move speed 5
+LRC r8 #2 ; move speed 2
 ADD r7 r7 r8
 STR r7 r5 r6
 LRL r9 r10 @donemoveright
@@ -129,7 +130,7 @@ NOP
 NOP
 NOP
 NOP
-LRC r12 #80
+LRC r12 #127 ; gpu flags
 LRC r13 #17
 LDR r14 r12 r13
 LRC r12 $2 ; 0000 0010

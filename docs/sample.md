@@ -2,7 +2,7 @@
 
 ## Enabling the GPU (rendering)
 ```
-LRC r1 #80 ; Segment address of the GPU flags
+LRC r1 #127 ; Segment address of the GPU flags
 LRC r2 #17 ; Offset of the GPU flags
 LDR r3 r1 r2 ; Read the current flags
 LRC r4 #1 ; Set the enabled flag: 0000 0001
@@ -12,7 +12,7 @@ STR r3 r1 r2 ; Write the flags to memory
 
 ## Changing the Background color
 ```
-LRC r1 #80 ; Segment address of background color
+LRC r1 #127 ; Segment address of background color
 LRC r2 #16 ; Offset address of background color
 LRC r3 #75 ; Light blue (An index into the 256 screen color palette)
 STR r3 r1 r2 ; Write the byte to memory
@@ -21,9 +21,9 @@ STR r3 r1 r2 ; Write the byte to memory
 ## Creating a Sprite Attribute
 ```
 ; Set the width and height
-LRC r1 #64 ; Segment addresses
+LRC r1 #64 ; Segment addresses of sprite attribute
 LRC r2 #3 ; Offset address of sprite width
-LRC r3 #16 ; Width and height of sprite
+LRC r3 #16 ; Width and height of 16x16 sprite
 STR r3 r1 r2 ; Write the width to memory
 LRC r2 #4 ; Offset address of sprite height
 STR r3 r1 r2 ; Write the height to memory
@@ -69,7 +69,7 @@ Without any sort of waiting, a program will run at 500,000 instructions per seco
 LRL r1 r2 @waitscreen
 JMP r1 r2
 @donewaitscreen
-LRC r1 #80 ; Segment address of GPU flags
+LRC r1 #127 ; Segment address of GPU flags
 LRC r2 #17 ; Offset address of GPU flags
 LDR r15 r1 r2 ; Read the flags from memory
 LRL r1 r2 @gameloop
@@ -80,7 +80,7 @@ NOP ; Waste some time
 NOP
 NOP
 NOP
-LRC r1 #80 ; Segment address of GPU flags
+LRC r1 #127 ; Segment address of GPU flags
 LRC r2 #17 ; Offset address of GPU flags
 LDR r3 r1 r2 ; Read the flags from memory
 LRC r4 $2 ; 0000 0010

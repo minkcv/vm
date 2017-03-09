@@ -54,11 +54,11 @@
 #define SUB 0x2
 
 // Adds the value to the register
-// ADDI r1 #103
+// ADDC r1 #103
 #define ADDC 0x3
 
 // Subtracts the value from the register
-// SUBI r1 #103
+// SUBC r1 #103
 #define SUBC 0x4
 
 // Compares last two registers and stores the result in the first

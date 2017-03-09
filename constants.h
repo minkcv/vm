@@ -22,23 +22,23 @@
 // Number of bytes per sprite attribute
 #define SPRITE_ATTR_LENGTH 16
 
-// Segment of memory where sprites attributes are found
+// Segment of memory where sprites attributes start
 #define SPRITE_ATTR_SEG 64
-
-// 80.16 is the background color (one byte)
-#define BACK_COLOR_SEG 80
-#define BACK_COLOR_OFFSET 16
-
-#define GPU_FLAG_SEG 80
-
-// 80.17 are flags to control the GPU and view the status
-#define GPU_FLAG_OFFSET 17
 
 #define NUM_JOYSTICK_BUTTONS 8
 
+// 127.0 and 127.1 are joystick 1 and 2 button states
 #define JOYSTICK_SEG 127
 #define JOYSTICK_1_OFFSET 0
 #define JOYSTICK_2_OFFSET 1
+
+// 127.16 is the background color (one byte)
+#define BACK_COLOR_SEG 127
+#define BACK_COLOR_OFFSET 16
+
+// 127.17 are flags to control the GPU and view the status
+#define GPU_FLAG_SEG 127
+#define GPU_FLAG_OFFSET 17
 
 // Color depth aka bits per pixel
 #define COLOR_DEPTH 8
