@@ -12,6 +12,12 @@ LRC r0 #64 ; Segment address
 LRC r1 #0 ; Byte address
 LRC r3 #144; flags for sprite attrs: binary: 1001-0000
 STR r3 r0 r1 ; set the flags
+LRC r1 #1
+LRC r3 #120 ; start x
+STR r3 r0 r1
+LRC r1 #2
+LRC r3 #88 ; start y
+STR r3 r0 r1
 LRC r1 #3 ; byte address of width
 LRC r3 #16
 STR r3 r0 r1 ; set width
@@ -30,6 +36,7 @@ LRC r4 #9 ; color 2 offset
 LRC r5 #11 ; Color
 STR r5 r0 r4
 ; stars sprite attribute
+; multiple times
 LRC r0 #64
 LRC r1 #16
 LRC r3 #144
