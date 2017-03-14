@@ -21,21 +21,44 @@ LRC r4 #5 ; offset address of sprite segment address in sprite attribute
 LRC r5 #128 ; Segment address of sprite
 STR r5 r0 r4
 LRC r4 #7 ; Byte address of color 0 in sprite
-LRC r5 #0 ; Color
-STR r5 r0 r4
-LRC r4 #8 ; color 1 offset
-LRC r5 #224 ; Color
-STR r5 r0 r4
-LRC r4 #9 ; color 2 offset
 LRC r5 #255 ; Color
 STR r5 r0 r4
-LRC r4 #10 ; color 3 offset
-LRC r5 $88 ; Color: doesn't matter, we're using transparency
+LRC r4 #8 ; color 1 offset
+LRC r5 #54 ; Color
 STR r5 r0 r4
+LRC r4 #9 ; color 2 offset
+LRC r5 #11 ; Color
+STR r5 r0 r4
+; stars sprite attribute
+LRC r0 #64
+LRC r1 #16
+LRC r3 #144
+STR r3 r0 r1 ; flags
+LRC r1 #19
+LRC r3 #32
+STR r3 r0 r1 ; width
+LRC r1 #20
+LRC r3 #64
+STR r3 r0 r1 ; height
+LRC r4 #21
+LRC r5 #128
+STR r5 r0 r4 ; segment
+LRC r4 #22
+LRC r5 #64
+STR r5 r0 r4 ; offset
+LRC r4 #23
+LRC r5 #0
+STR r5 r0 r4 ; color 0
+LRC r4 #24
+LRC r5 #255
+STR r5 r0 r4 ; color 1
+LRC r4 #25
+LRC r5 #254
+STR r5 r0 r4 ; color 2
 ; background color
 LRC r0 #127
 LRC r1 #16
-LRC r2 #75 ; Color: light blue
+LRC r2 #128 ; Color: dark red
 STR r2 r0 r1
 ; Load the joystick 1 button address
 LRC r0 #127

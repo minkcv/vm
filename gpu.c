@@ -74,13 +74,13 @@ void drawSprites(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_S
                     uint8_t pixel3 = gpu->sprAttrs[i].colors[bits3];
                     uint8_t pixel4 = gpu->sprAttrs[i].colors[bits4];
                     uint8_t* curPixel = (uint8_t*)(pixels + x + (y * gpu->back->pitch) + (w * 4) + (h * gpu->back->pitch));
-                    if (!(gpu->sprAttrs[i].color4Alpha && pixel1 == gpu->sprAttrs[i].colors[3]))
+                    if (!(gpu->sprAttrs[i].color4Alpha && bits1 == 0x3))
                         *curPixel = pixel1;
-                    if (!(gpu->sprAttrs[i].color4Alpha && pixel2 == gpu->sprAttrs[i].colors[3]))
+                    if (!(gpu->sprAttrs[i].color4Alpha && bits2 == 0x3))
                         *(curPixel + 1) = pixel2;
-                    if (!(gpu->sprAttrs[i].color4Alpha && pixel3 == gpu->sprAttrs[i].colors[3]))
+                    if (!(gpu->sprAttrs[i].color4Alpha && bits3 == 0x3))
                         *(curPixel + 2) = pixel3;
-                    if (!(gpu->sprAttrs[i].color4Alpha && pixel4 == gpu->sprAttrs[i].colors[3]))
+                    if (!(gpu->sprAttrs[i].color4Alpha && bits4 == 0x3))
                         *(curPixel + 3) = pixel4;
                 }
             }

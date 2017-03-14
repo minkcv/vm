@@ -103,6 +103,7 @@ int main (int argc, char** argv)
                 index = getColorIndex(rgba, colors); // 2 bit index into colors[4]
                 if (index == -1)
                 {
+                    printf("%3d %3d %3d (%3d) at %2d %2d is a new color\n", rgba[0], rgba[1], rgba[2], rgba[3], x, y);
                     colors[usedColors][0] = rgba[0];
                     colors[usedColors][1] = rgba[1];
                     colors[usedColors][2] = rgba[2];
@@ -121,7 +122,7 @@ int main (int argc, char** argv)
     }
 
     size_t written = fwrite(sprite, sizeof(uint8_t), (width  / 4) * height, spriteFile);
-    printf("Wrote %d bytes to %s\n", written, strcat(filenameNoExtension, ".spr"));
+    printf("Wrote %d bytes to %s\n", written, filenameNoExtension);
     fclose(spriteFile);
     free(sprite);
     for (y = 0; y < height; y++)

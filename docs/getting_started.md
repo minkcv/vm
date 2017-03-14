@@ -31,4 +31,4 @@ Optionally add:
 - `-r myrom.rom` to load up to 32768 bytes into the ROM section of memory.
 - `&> /dev/null` at the end to suppress print statements.
 
-Consider creating a shell script for your program that is similar to the `testvm.sh` that is included.
+Consider creating a shell script for your program that is similar to the included `testvm.sh` script.
