@@ -52,8 +52,8 @@ void drawSprites(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_S
     for (i = 0; i < NUM_SPRITES; i++)
     {
         if (gpu->sprAttrs[i].active && 
-                gpu->sprAttrs[i].x + gpu->sprAttrs[i].width < SCREEN_WIDTH &&
-                gpu->sprAttrs[i].y + gpu->sprAttrs[i].height < SCREEN_HEIGHT)
+                gpu->sprAttrs[i].x + gpu->sprAttrs[i].width <= SCREEN_WIDTH &&
+                gpu->sprAttrs[i].y + gpu->sprAttrs[i].height <= SCREEN_HEIGHT)
         {
             int w, h;
             int x = gpu->sprAttrs[i].x;
