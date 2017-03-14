@@ -37,31 +37,57 @@ LRC r5 #11 ; Color
 STR r5 r0 r4
 ; stars sprite attribute
 ; multiple times
+; r6 is our looping index
+; r2 is 16 * r6
+; r7 is our max loops
+LRC r2 #0
+LRC r6 #0
+LRC r7 #9
+@stars
 LRC r0 #64
 LRC r1 #16
+ADD r1 r1 r2
 LRC r3 #144
 STR r3 r0 r1 ; flags
+LRC r1 #17
+ADD r1 r1 r2
+LRC r3 #0
+ADD r3 r3 r2
+ADD r3 r3 r2
+STR r3 r0 r1 ; x
 LRC r1 #19
+ADD r1 r1 r2
 LRC r3 #32
 STR r3 r0 r1 ; width
 LRC r1 #20
+ADD r1 r1 r2
 LRC r3 #64
 STR r3 r0 r1 ; height
 LRC r4 #21
+ADD r4 r4 r2
 LRC r5 #128
 STR r5 r0 r4 ; segment
 LRC r4 #22
+ADD r4 r4 r2
 LRC r5 #64
 STR r5 r0 r4 ; offset
 LRC r4 #23
+ADD r4 r4 r2
 LRC r5 #0
 STR r5 r0 r4 ; color 0
 LRC r4 #24
+ADD r4 r4 r2
 LRC r5 #255
 STR r5 r0 r4 ; color 1
 LRC r4 #25
+ADD r4 r4 r2
 LRC r5 #254
 STR r5 r0 r4 ; color 2
+ADDC r2 #16
+ADDC r6 #1
+CMP r8 r6 r7
+LRL r14 r15 @stars
+JLT r8 r14 r15
 ; background color
 LRC r0 #127
 LRC r1 #16
