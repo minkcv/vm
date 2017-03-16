@@ -103,7 +103,7 @@ int main (int argc, char** argv)
                 index = getColorIndex(rgba, colors); // 2 bit index into colors[4]
                 if (index == -1)
                 {
-                    printf("%3d %3d %3d (%3d) at %2d %2d is a new color\n", rgba[0], rgba[1], rgba[2], rgba[3], x, y);
+                    //printf("%3d %3d %3d (%3d) at %2d %2d is a new color\n", rgba[0], rgba[1], rgba[2], rgba[3], x, y);
                     colors[usedColors][0] = rgba[0];
                     colors[usedColors][1] = rgba[1];
                     colors[usedColors][2] = rgba[2];
@@ -131,11 +131,13 @@ int main (int argc, char** argv)
 
     fclose(fp);
 
-    printf("This sprite's color palette is:\n");
+    printf("This sprite's color palette:\n");
+    printf("Index is -1 if a color is not used\n");
     int i;
     for (i = 0; i < 4 - useAlpha; i++)
     {
         // Look in the gimp palette to gain insight into this.
+        // TODO: there is an off by one in here
         int fullPaletteIndex = ((colors[i][0] / 36.4285) * 32) + ((colors[i][1] / 36.4285) * 4) + (colors[i][2] / 85.0);
         printf("Color %d has palette index %d\n", i, fullPaletteIndex);
     }

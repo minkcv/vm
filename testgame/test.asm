@@ -8,7 +8,7 @@ LRC r3 $1
 STR r3 r0 r1
 
 ; Create a sprite attribute
-LRC r0 #64 ; Segment address
+LRC r0 #65 ; Segment address (draw the player on top of sprites in the 64 segment
 LRC r1 #0 ; Byte address
 LRC r3 #144; flags for sprite attrs: binary: 1001-0000
 STR r3 r0 r1 ; set the flags
@@ -42,7 +42,8 @@ STR r5 r0 r4
 ; r7 is our max loops
 LRC r2 #0
 LRC r6 #0
-LRC r7 #9
+LRC r7 #8
+LRC r0 #64 ; below the player
 @stars
 LRC r0 #64
 LRC r1 #16
@@ -52,6 +53,7 @@ STR r3 r0 r1 ; flags
 LRC r1 #17
 ADD r1 r1 r2
 LRC r3 #0
+; move 32 * r6 right
 ADD r3 r3 r2
 ADD r3 r3 r2
 STR r3 r0 r1 ; x
@@ -88,6 +90,33 @@ ADDC r6 #1
 CMP r8 r6 r7
 LRL r14 r15 @stars
 JLT r8 r14 r15
+; rock sprite
+LRC r1 #144 ; sprite attr offset, still segment 64
+LRC r3 #144 ; 1001-0000
+STR r3 r0 r1 ; flags
+LRC r1 #145
+LRC r3 #32
+STR r3 r0 r1 ; x
+LRC r1 #146
+LRC r3 #96
+STR r3 r0 r1 ; y
+LRC r1 #147
+LRC r3 #16
+STR r3 r0 r1 ; width
+LRC r1 #148
+STR r3 r0 r1 ; height
+LRC r1 #149
+LRC r3 #130
+STR r3 r0 r1 ; segment
+LRC r1 #150
+LRC r3 #64
+STR r3 r0 r1 ; offset
+LRC r1 #151
+LRC r3 #96
+STR r3 r0 r1 ; color 0
+LRC r1 #152
+LRC r3 #164
+STR r3 r0 r1 ; color 1
 ; background color
 LRC r0 #127
 LRC r1 #16
@@ -138,43 +167,55 @@ LRL r9 r10 @forever; back up
 JMP r9 r10
 ;
 @movedown
-LRC r5 #64
+LRL r9 r10 @donemovedown
+LRC r5 #65
 LRC r6 #2
 LDR r7 r5 r6
+LRC r4 #174 ; 192 - 16 - 2
+CMP r4 r7 r4
+JGT r4 r9 r10
 LRC r8 #2 ; move speed 2
 ADD r7 r7 r8
 STR r7 r5 r6
-LRL r9 r10 @donemovedown
 JMP r9 r10
 ;
 @moveup
-LRC r5 #64
+LRL r9 r10 @donemoveup
+LRC r5 #65
 LRC r6 #2
 LDR r7 r5 r6
+LRC r4 #64 ; sky tile height
+CMP r4 r7 r4
+JLT r4 r9 r10
 LRC r8 #2 ; move speed 2
 SUB r7 r7 r8
 STR r7 r5 r6
-LRL r9 r10 @donemoveup
 JMP r9 r10
 ;
 @moveleft
-LRC r5 #64
+LRL r9 r10 @donemoveleft
+LRC r5 #65
 LRC r6 #1
 LDR r7 r5 r6
+LRC r4 #0
+CMP r4 r7 r4
+JEQ r4 r9 r10
 LRC r8 #2 ; move speed 2
 SUB r7 r7 r8
 STR r7 r5 r6
-LRL r9 r10 @donemoveleft
 JMP r9 r10
 ;
 @moveright
-LRC r5 #64
+LRL r9 r10 @donemoveright
+LRC r5 #65
 LRC r6 #1
 LDR r7 r5 r6
+LRC r4 #240 ; 256 - 16
+CMP r4 r7 r4
+JEQ r4 r9 r10
 LRC r8 #2 ; move speed 2
 ADD r7 r7 r8
 STR r7 r5 r6
-LRL r9 r10 @donemoveright
 JMP r9 r10
 ;
 @waitscreen
