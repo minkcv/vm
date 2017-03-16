@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <math.h>
 
 int getColorIndex(int rgba[4], int colors[4][3])
 {
@@ -137,8 +138,7 @@ int main (int argc, char** argv)
     for (i = 0; i < 4 - useAlpha; i++)
     {
         // Look in the gimp palette to gain insight into this.
-        // TODO: there is an off by one in here
-        int fullPaletteIndex = ((colors[i][0] / 36.4285) * 32) + ((colors[i][1] / 36.4285) * 4) + (colors[i][2] / 85.0);
+        int fullPaletteIndex = ceil((colors[i][0] / 36) * 32) + ((colors[i][1] / 36) * 4) + (colors[i][2] / 85.0);
         printf("Color %d has palette index %d\n", i, fullPaletteIndex);
     }
     if (useAlpha)

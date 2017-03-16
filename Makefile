@@ -7,7 +7,7 @@ assembler: clean-assembler
 	gcc assembler.c -o assembler
 
 convertsprite: clean-convertsprite
-	gcc convertsprite.c -o convertsprite -lpng -lz
+	gcc convertsprite.c -o convertsprite -lpng -lz -lm
 
 clean-main:
 	rm -f main
