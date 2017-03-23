@@ -16,7 +16,7 @@ A virtual machine with no physical hardware spec.
 - A speed of 500,000 instructions per second (0.5 MIPS)
 
 ### An Included Demo:
-You can move the astronaut around with the arrow keys.
+The demo supports moving the astronaut with the arrows. 
 
 ![demo](https://github.com/minkcv/vm/blob/master/mars.png)
 
