@@ -15,6 +15,11 @@ A virtual machine with no physical hardware spec.
 - A maximum of 65536 instructions per program
 - A speed of 500,000 instructions per second (0.5 MIPS)
 
+### An Included Demo:
+You can move the astronaut around with the arrow keys.
+
+![demo](https://github.com/minkcv/vm/blob/master/mars.png)
+
 ### Why did you make this? Who is it for?
 This is a hobby project to allow myself and others to write games in assembly without some of the annoyances that physical architectures impose.
 
