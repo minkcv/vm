@@ -1,8 +1,8 @@
-#include "constants.h"
-#include "instruction.h"
-#include "opcodes.h"
-#include "vm.h"
-#include "display.h"
+#include "machine/constants.h"
+#include "machine/instruction.h"
+#include "machine/opcodes.h"
+#include "machine/vm.h"
+#include "machine/display.h"
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>

@@ -1,5 +1,5 @@
-#include "opcodes.h"
-#include "constants.h"
+#include "machine/opcodes.h"
+#include "machine/constants.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

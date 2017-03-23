@@ -1,4 +1,4 @@
-#include "constants.h"
+#include "machine/constants.h"
 #include "png.h"
 #include <stdio.h>
 #include <stdlib.h>
