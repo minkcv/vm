@@ -15,10 +15,11 @@ A virtual machine with no physical hardware spec.
 - A maximum of 65536 instructions per program
 - A speed of 500,000 instructions per second (0.5 MIPS)
 
-### An Included Demo:
-The demo supports moving the astronaut with the arrows. 
+### Included Programs:
+Two programs are included to demonstrate the capabilities of the vm. "Mars" is a simple scene showing colored sprites that the player can move around in. "Pong" is a clone of the classic Atari game for 2 players.
 
 ![demo](https://github.com/minkcv/vm/blob/master/mars.png)
+![pong](https://github.com/minkcv/vm/blob/master/pong.png)
 
 ### Why did you make this? Who is it for?
 This is a hobby project to allow myself and others to write games in assembly without some of the annoyances that physical architectures impose.
@@ -31,9 +32,10 @@ Install SDL1.2 if you don't already have it. Systems with apt should try:
 
     sudo apt install libsdl1.2-dev
 
-To build and run all the components, do:
+To build and test the vm, run one of the included programs:
 
-    ./testvm.sh
+    ./mars.sh
+    ./pong.sh
 
 #### Other Operating Systems:
 No other operating systems are currently supported. You can wait for me to implement the vm for them or do it yourself. The point of the vm is that all programs can be ported to other platforms simply by reimplementing the vm.
