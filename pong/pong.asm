@@ -157,7 +157,7 @@ LRL r14 r15 @moveballleft
 JLT r2 r14 r15 ; Ball is moving left
 @returnmoveballleft
 LRC r1 #5
-LDR r2 r0 r1 ; Load again since @moveballleft changes registers
+LDR r2 r0 r1 ; Load ball x direction from RAM
 LRL r14 r15 @moveballright
 JGT r2 r14 r15
 @returnmoveballright
@@ -251,7 +251,7 @@ JMP r14 r15
 @moveballleft
 LRC r1 #3
 LDR r2 r0 r1 ; Load ball x position into r2
-LRC r3 #8
+LRC r3 #4
 CMP r3 r2 r3
 LRL r14 r15 @reset
 JLT r3 r14 r15 ; Ball is past left paddle, reset
@@ -263,13 +263,15 @@ LRC r1 #1
 LDR r3 r0 r1 ; Load left paddle y into r3
 LRC r1 #4
 LDR r4 r0 r1 ; Load ball y into r4
-CMP r5 r4 r3 ; Compare ball y with left paddle top y
+ADDC r4 #8 ; r4 is now bottom y of ball
+CMP r5 r4 r3 ; Compare ball bottom y with left paddle top y
 LRC r1 #64 ; Paddle height
 ADD r1 r1 r3 ; r1 is now the bottom y of the left paddle
+SUBC r4 #8 ; r4 is now top y of ball
 CMP r6 r4 r1 ; Compare ball y with left paddle bottom y
 LRL r14 r15 @nocollisionleft
 JLT r5 r14 r15 ; Above the left paddle
-JGT r5 r14 r15 ; Below the left paddle
+JGT r6 r14 r15 ; Below the left paddle
 ; Collision with left paddle, reverse x direction
 LRC r1 #5
 LRC r2 #2
@@ -279,21 +281,89 @@ JMP r14 r15 ; Return
 @nocollisionleft
 ; Move the ball left
 LRC r1 #3
-LDR r2 r0 r1 ; Load ball x position into 42
+LDR r2 r0 r1 ; Load ball x position into r2
 SUBC r2 #4 ; Move 4 pixels left
 STR r2 r0 r1
 LRL r14 r15 @returnmoveballleft
 JMP r14 r15
 
 @moveballright
+LRC r1 #3
+LDR r2 r0 r1 ; Load ball x position into r2
+LRC r3 #244
+CMP r3 r2 r3
+LRL r14 r15 @reset
+JGT r3 r14 r15 ; Ball is past right paddle, reset
+LRC r3 #232
+CMP r3 r2 r3
+LRL r14 r15 @nocollisionright
+JLT r3 r14 r15 ; Ball x is not right of the left side of the right paddle
+LRC r1 #2
+LDR r3 r0 r1 ; Load right paddle y into r3
+LRC r1 #4
+LDR r4 r0 r1 ; Load ball y into r4
+ADDC r4 #8 ; r4 is now bottom y of ball
+CMP r5 r4 r3 ; Compare ball bottom y with right paddle top y
+LRC r1 #64 ; Paddle height
+ADD r1 r1 r3 ; r1 is now the bottom y of the right paddle
+SUBC r4 #8 ; r4 is now top y of ball
+CMP r6 r4 r1 ; Compare ball y with right paddle bottom y
+LRL r14 r15 @nocollisionright
+JLT r5 r14 r15 ; Above the right paddle
+JGT r6 r14 r15 ; Below the right paddle
+; Collision with right paddle, reverse x direction
+LRC r1 #5
+STR r0 r0 r1 ; Set ball x direction to 0 (left)
+LRL r14 r15 @returnmoveballright
+JMP r14 r15 ; Return
+@nocollisionright
+; Move the ball right
+LRC r1 #3
+LDR r2 r0 r1 ; Load ball x position into r2
+ADDC r2 #4 ; Move 4 pixels right
+STR r2 r0 r1
 LRL r14 r15 @returnmoveballright
 JMP r14 r15
 
 @moveballup
+LRC r1 #4
+LDR r2 r0 r1 ; Load ball y position into r2
+CMP r1 r0 r2
+LRL r14 r15 @nocollisiontop
+JLT r1 r14 r15 ; Ball is below the top of the screen
+; Collision with top of screen, reverse y direction
+LRC r1 #6
+LRC r2 #2
+STR r2 r0 r1 ; Set y direction to 2 (down)
+LRL r14 r15 @returnmoveballup
+JMP r14 r15
+@nocollisiontop
+; Move the ball up
+LRC r1 #4
+LDR r2 r0 r1 ; Load ball y position into r2
+SUBC r2 #4 ; Move 4 pixels up
+STR r2 r0 r1
 LRL r14 r15 @returnmoveballup
 JMP r14 r15
 
 @moveballdown
+LRC r1 #4
+LDR r2 r0 r1 ; Load ball y position into r2
+LRC r3 #184 ; 192 - 8 (screen height - ball height)
+CMP r1 r2 r3
+LRL r14 r15 @nocollisionbottom
+JLT r1 r14 r15 ; Ball is above the bottom of the screen
+; Collision with top of screen, reverse y direction
+LRC r1 #6
+STR r0 r0 r1 ; Set y direction to 0 (up)
+LRL r14 r15 @returnmoveballup
+JMP r14 r15
+@nocollisionbottom
+; Move the ball down
+LRC r1 #4
+LDR r2 r0 r1 ; Load ball y position into r2
+ADDC r2 #4 ; Move 4 pixels down
+STR r2 r0 r1
 LRL r14 r15 @returnmoveballdown
 JMP r14 r15
 
