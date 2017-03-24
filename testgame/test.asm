@@ -2,7 +2,7 @@
 ; These are comments
 ;
 ; Enable the GPU
-LRC   r0 #127 ; GPU flag seg
+LRC r0 #127 ; GPU flag seg
 LRC r1 #17 ; GPU flag offset
 LRC r3 $1
 STR r3 r0 r1
