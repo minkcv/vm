@@ -1,8 +1,6 @@
 # Vapor Spec
 A virtual machine with no physical hardware spec.
 
-**The vm behavior is not yet finalized so please do not start development on a program yet.**
-
 #### The vm has:
 - A 16 bit instruction size
 - 16 different general purpose registers
@@ -41,6 +39,5 @@ To build and test the vm, run one of the included programs:
 No other operating systems are currently supported. You can wait for me to implement the vm for them or do it yourself. The point of the vm is that all programs can be ported to other platforms simply by reimplementing the vm.
 
 ### How do I make a program/game?
-1. Wait until the vm is fully implemented and the behavior finalized.
-2. Have some assembly programming knowledge (and some patience).
-3. Check out the `/docs` folder.
+1. Have some assembly programming knowledge (and some patience).
+2. Check out the `/docs` folder.
