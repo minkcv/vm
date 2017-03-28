@@ -10,7 +10,7 @@ STR r3 r0 r1
 ; Create a sprite attribute
 LRC r0 #65 ; Segment address (draw the player on top of sprites in the 64 segment
 LRC r1 #0 ; Byte address
-LRC r3 #208; flags for sprite attrs: binary: 1101-0000
+LRC r3 #176; flags for sprite attrs: binary: 1011-0000
 STR r3 r0 r1 ; set the flags
 LRC r1 #1
 LRC r3 #120 ; start x
