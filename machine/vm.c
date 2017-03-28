@@ -33,6 +33,10 @@ void run(VM* vm)
     SDL_Event event;
     while (event.type != SDL_QUIT)
     {
+        if (event.key.keysym.sym == SDLK_ESCAPE)
+        {
+            exit(0);
+        }
         if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP)
         {
             updateIPU(vm->ipu, event.key, vm->memory);

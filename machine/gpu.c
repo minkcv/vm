@@ -58,13 +58,28 @@ void drawSprites(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_S
             int w, h;
             int x = gpu->sprAttrs[i].x;
             int y = gpu->sprAttrs[i].y;
-            // TODO: flipping
+            int flipHor = gpu->sprAttrs[i].flipHor;
+            int flipVer = gpu->sprAttrs[i].flipVer;
+            int width = gpu->sprAttrs[i].width;
+            int height = gpu->sprAttrs[i].height;
             uint8_t* sprite = &memory[gpu->sprAttrs[i].segmentAddr][gpu->sprAttrs[i].byteAddr];
             for (h = 0; h < gpu->sprAttrs[i].height; h++)
             {
                 for (w = 0; w < gpu->sprAttrs[i].width / 4; w++)
                 {
-                    uint8_t fourPixels = *(sprite + w + (h * gpu->sprAttrs[i].width / 4));
+                    uint8_t fourPixels = 0;
+                    if (flipHor == 0 && flipVer == 0)
+                        fourPixels = *(sprite + w + (h * width / 4));
+                    else if (flipHor == 1 && flipVer == 0)
+                    {
+                        uint8_t fourReversedPixels = *(sprite + (width / 4) - w - 1 + (h * width / 4));
+                        printf("pixels: %d\n", fourReversedPixels);
+                        fourPixels |= (fourReversedPixels & 0xC0) >> 6;
+                        fourPixels |= (fourReversedPixels & 0x30) >> 2;
+                        fourPixels |= (fourReversedPixels & 0x0C) << 2;
+                        fourPixels |= (fourReversedPixels & 0x3) << 6;
+                        printf("reversed pixels: %d\n", fourPixels);
+                    }
                     uint8_t bits1 = (fourPixels >> 6) & 0x3; // MSB
                     uint8_t bits2 = (fourPixels >> 4) & 0x3;
                     uint8_t bits3 = (fourPixels >> 2) & 0x3;

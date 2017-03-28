@@ -1,6 +1,6 @@
 *.swp
 main
-test.bin
+**/mars.bin
 assembler
 convertsprite
-pong.bin
+**/pong.bin
