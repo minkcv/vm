@@ -8,7 +8,7 @@ A virtual machine with no physical hardware spec.
 - An 8-bit color depth screen for a palette of 256 colors
 - Support for 256 concurrent sprites
 - Support for sprites with 4 colors or 3 colors + alpha
-- A screen resolution of 256 x 192
+- A screen resolution of 256 x 192 and a refresh rate of 60 Hz (16 ms)
 - An assembler to accompany it
 - A maximum of 65536 instructions per program
 - A speed of 500,000 instructions per second (0.5 MIPS)
