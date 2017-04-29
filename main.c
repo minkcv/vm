@@ -10,7 +10,7 @@
 uint16_t* readBinary(const char* filename, int print);
 uint8_t* readRom(const char* filename, int print);
 
-int main (char argc, char** argv)
+int main (int argc, char** argv)
 {
     char* programName = NULL;
     char* romName = NULL;
