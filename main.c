@@ -3,7 +3,6 @@
 #include "machine/opcodes.h"
 #include "machine/vm.h"
 #include "machine/display.h"
-#include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -18,25 +17,23 @@ int main (char argc, char** argv)
     int index;
     int c;
     int scale = 1;
-    opterr = 0;
-    while ((c = getopt(argc, argv, "hf:r:s:")) != -1)
+    int i;
+    for (i = 1; i < argc; i++)
     {
-        switch(c)
+        if (!strcmp(argv[i], "-f"))
         {
-            case 'f':
-                programName = optarg;
-                break;
-            case 's':
-                scale = atoi(optarg);
-                break;
-            case 'r':
-                romName = optarg;
-                break;
-            default:
-            case 'h':
-                printf("Usage: main -f program.bin\n");
-                break;
-                exit(1);
+            if (i + 1 < argc)
+                programName = argv[i + 1];
+        }
+        else if (!strcmp(argv[i], "-r"))
+        {
+            if (i + 1 < argc)
+                romName = argv[i + 1];
+        }
+        else if (!strcmp(argv[i], "-s"))
+        {
+            if (i + 1 < argc)
+                scale = atoi(argv[i + 1]);
         }
     }
     if (programName == NULL)
