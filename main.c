@@ -14,8 +14,6 @@ int main (int argc, char** argv)
 {
     char* programName = NULL;
     char* romName = NULL;
-    int index;
-    int c;
     int scale = 1;
     int i;
     for (i = 1; i < argc; i++)

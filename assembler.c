@@ -2,7 +2,6 @@
 #include "machine/constants.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
 #include <limits.h>
 #include <stdint.h>
@@ -24,21 +23,13 @@ void createLabelMap(FILE* src, LabelAddress*** labelMap);
 int main (int argc, char** argv)
 {
     char* filename = NULL;
-    int index;
-    int c;
-    opterr = 0;
-    while ((c = getopt(argc, argv, "hf:")) != -1)
+    int i;
+    for (i = 1; i < argc; i++)
     {
-        switch(c)
+        if (!strcmp(argv[i], "-f"))
         {
-            case 'f':
-                filename = optarg;
-                break;
-            case 'h':
-            default:
-                printf("Usage: assember -f sourcefile.asm\n");
-                exit(1);
-                break;
+            if (i + 1 < argc)
+                filename = argv[i + 1];
         }
     }
     if (filename == NULL)
