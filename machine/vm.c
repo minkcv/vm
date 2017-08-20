@@ -92,108 +92,89 @@ Instruction* decode(uint16_t* instr)
 // Executes an instruction
 void exec(VM* vm, Instruction* instr)
 {
-    if (instr->opcode == EXT)
+    switch(instr->opcode)
     {
-        if (instr->arg0 == EXT_HALT)
-        {
-            printf("Exiting at halt instruction\n");
-            exit(0);
-        }
-        else if (instr->arg0 == EXT_CPY)
-        {
-            vm->regs[instr->arg1] = vm->regs[instr->arg2];
-        }
-        else if (instr->arg0 == EXT_NOT)
-        {
-            vm->regs[instr->arg1] = ~(vm->regs[instr->arg2]);
-        }
-        else if (instr->arg0 == EXT_LSL)
-        {
-            vm->regs[instr->arg0] = vm->regs[instr->arg0] << vm->regs[instr->arg1];
-        }
-        else if (instr->arg0 == EXT_LSR)
-        {
-            vm->regs[instr->arg0] = vm->regs[instr->arg0] >> vm->regs[instr->arg1];
-        }
-        else if (instr->arg0 == EXT_JMP)
-        {
-            vm->pc = vm->code + (vm->regs[instr->arg1] * JUMP_SEGMENT_SIZE) + vm->regs[instr->arg2] - 1;
-        }
-        else if (instr->arg0 == EXT_NOP)
-        {
-            // No operation
-        }
-    }
-    else if (instr->opcode == ADD)
-    {
-        vm->regs[instr->arg0] = vm->regs[instr->arg1] + vm->regs[instr->arg2];
-    }
-    else if (instr->opcode == SUB)
-    {
-        vm->regs[instr->arg0] = vm->regs[instr->arg1] - vm->regs[instr->arg2];
-    }
-    else if (instr->opcode == ADDC)
-    {
-        vm->regs[instr->arg0] += ((instr->arg1 << 4) & 0x00F0) + instr->arg2;
-    }
-    else if (instr->opcode == SUBC)
-    {
-        vm->regs[instr->arg0] -= ((instr->arg1 << 4) & 0x00F0) + instr->arg2;
-    }
-    else if (instr->opcode == CMP)
-    {
-        if (vm->regs[instr->arg1] < vm->regs[instr->arg2])
-            vm->regs[instr->arg0] = 0;
-        else if (vm->regs[instr->arg1] > vm->regs[instr->arg2])
-            vm->regs[instr->arg0] = 2;
-        else
-            vm->regs[instr->arg0] = 1;
-    }
-    else if (instr->opcode == JLT)
-    {
-        if (vm->regs[instr->arg0] == 0)
-            vm->pc = vm->code + (vm->regs[instr->arg1] * JUMP_SEGMENT_SIZE) + vm->regs[instr->arg2] - 1;
-    }
-    else if (instr->opcode == JGT)
-    {
-        if (vm->regs[instr->arg0] == 2)
-            vm->pc = vm->code + (vm->regs[instr->arg1] * JUMP_SEGMENT_SIZE) + vm->regs[instr->arg2] - 1;
-    }
-    else if (instr->opcode == JEQ)
-    {
-        if (vm->regs[instr->arg0] == 1)
-        {
-            vm->pc = vm->code + (vm->regs[instr->arg1] * JUMP_SEGMENT_SIZE) + vm->regs[instr->arg2] - 1;
-        }
-    }
-    else if (instr->opcode == LDR)
-    {
-        vm->regs[instr->arg0] = vm->memory[vm->regs[instr->arg1]][vm->regs[instr->arg2]];
-    }
-    else if (instr->opcode == STR)
-    {
-        if (vm->regs[instr->arg1] < 128) // Segment is not part of ROM
-            vm->memory[vm->regs[instr->arg1]][vm->regs[instr->arg2]] = vm->regs[instr->arg0];
-        else
-        {
-            printf("Attempted illegal write to ROM\n");
-            exit(1);
-        }
-    }
-    else if (instr->opcode == LRC)
-    {
-        vm->regs[instr->arg0] = ((instr->arg1 << 4) & 0x00F0) + instr->arg2;
-    }
-    else if (instr->opcode == AND)
-    {
-        vm->regs[instr->arg0] = vm->regs[instr->arg1] & vm->regs[instr->arg2];
-    }
-    else if (instr->opcode == OR)
-    {
-        vm->regs[instr->arg0] = vm->regs[instr->arg1] | vm->regs[instr->arg2];
-    }
-    else if (instr->opcode == XOR)
-    {
-        vm->regs[instr->arg0] = vm->regs[instr->arg1] ^ vm->regs[instr->arg2];
+        case EXT:
+            switch(instr->arg0)
+            {
+                case EXT_HALT:
+                    printf("Exiting at halt instruction\n");
+                    exit(0);
+                    break;
+                case EXT_CPY:
+                    vm->regs[instr->arg1] = vm->regs[instr->arg2];
+                    break;
+                case EXT_NOT:
+                    vm->regs[instr->arg1] = ~(vm->regs[instr->arg2]);
+                    break;
+                case EXT_LSL:
+                    vm->regs[instr->arg0] = vm->regs[instr->arg0] << vm->regs[instr->arg1];
+                    break;
+                case EXT_LSR:
+                    vm->regs[instr->arg0] = vm->regs[instr->arg0] >> vm->regs[instr->arg1];
+                    break;
+                case EXT_JMP:
+                    vm->pc = vm->code + (vm->regs[instr->arg1] * JUMP_SEGMENT_SIZE) + vm->regs[instr->arg2] - 1;
+                    break;
+                case EXT_NOP:
+                    break;
+            }
+            break;
+        case ADD:
+            vm->regs[instr->arg0] = vm->regs[instr->arg1] + vm->regs[instr->arg2];
+            break;
+        case SUB:
+            vm->regs[instr->arg0] = vm->regs[instr->arg1] - vm->regs[instr->arg2];
+            break;
+        case ADDC:
+            vm->regs[instr->arg0] += ((instr->arg1 << 4) & 0x00F0) + instr->arg2;
+            break;
+        case SUBC:
+            vm->regs[instr->arg0] -= ((instr->arg1 << 4) & 0x00F0) + instr->arg2;
+            break;
+        case CMP:
+            if (vm->regs[instr->arg1] < vm->regs[instr->arg2])
+                vm->regs[instr->arg0] = 0;
+            else if (vm->regs[instr->arg1] > vm->regs[instr->arg2])
+                vm->regs[instr->arg0] = 2;
+            else
+                vm->regs[instr->arg0] = 1;
+            break;
+        case JLT:
+            if (vm->regs[instr->arg0] == 0)
+                vm->pc = vm->code + (vm->regs[instr->arg1] * JUMP_SEGMENT_SIZE) + vm->regs[instr->arg2] - 1;
+            break;
+        case JGT:
+            if (vm->regs[instr->arg0] == 2)
+                vm->pc = vm->code + (vm->regs[instr->arg1] * JUMP_SEGMENT_SIZE) + vm->regs[instr->arg2] - 1;
+            break;
+        case JEQ:
+            if (vm->regs[instr->arg0] == 1)
+                vm->pc = vm->code + (vm->regs[instr->arg1] * JUMP_SEGMENT_SIZE) + vm->regs[instr->arg2] - 1;
+            break;
+        case LDR:
+            vm->regs[instr->arg0] = vm->memory[vm->regs[instr->arg1]][vm->regs[instr->arg2]];
+            break;
+        case STR:
+            if (vm->regs[instr->arg1] < 128) // Segment is not part of ROM
+                vm->memory[vm->regs[instr->arg1]][vm->regs[instr->arg2]] = vm->regs[instr->arg0];
+            else
+            {
+                printf("Attempted illegal write to ROM\n");
+                exit(1);
+            }
+            break;
+        case LRC:
+            vm->regs[instr->arg0] = ((instr->arg1 << 4) & 0x00F0) + instr->arg2;
+            break;
+        case AND:
+            vm->regs[instr->arg0] = vm->regs[instr->arg1] & vm->regs[instr->arg2];
+            break;
+        case OR:
+            vm->regs[instr->arg0] = vm->regs[instr->arg1] | vm->regs[instr->arg2];
+            break;
+        case XOR:
+            vm->regs[instr->arg0] = vm->regs[instr->arg1] ^ vm->regs[instr->arg2];
+            break;
     }
 }
