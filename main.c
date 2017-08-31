@@ -65,7 +65,7 @@ uint16_t* readBinary(const char* filename, int print)
         printf("Error reading file %s\n", filename);
         exit(1);
     }
-    uint16_t numInstructions = 0;
+    size_t numInstructions = 0;
     // binaries are length prefixed
     fread(&numInstructions, sizeof(uint16_t), 1, bin);
     printf("Binary is %d instructions\n", numInstructions);
