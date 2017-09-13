@@ -32,6 +32,7 @@ void run(VM* vm)
     uint32_t cpuInstructionCount = 0;
     int wait = 0;
     SDL_Event event;
+    SDL_PollEvent(&event);
     while (event.type != SDL_QUIT)
     {
         if (event.key.keysym.sym == SDLK_ESCAPE)
@@ -51,6 +52,7 @@ void run(VM* vm)
             exec(vm, decoded);
             vm->pc++;
             cpuInstructionCount++;
+            free(decoded);
         }
         else // Waiting
         {
@@ -109,10 +111,10 @@ void exec(VM* vm, Instruction* instr)
                     vm->regs[instr->arg1] = ~(vm->regs[instr->arg2]);
                     break;
                 case EXT_LSL:
-                    vm->regs[instr->arg0] = vm->regs[instr->arg0] << vm->regs[instr->arg1];
+                    vm->regs[instr->arg1] = vm->regs[instr->arg1] << vm->regs[instr->arg2];
                     break;
                 case EXT_LSR:
-                    vm->regs[instr->arg0] = vm->regs[instr->arg0] >> vm->regs[instr->arg1];
+                    vm->regs[instr->arg1] = vm->regs[instr->arg1] >> vm->regs[instr->arg2];
                     break;
                 case EXT_JMP:
                     vm->pc = vm->code + (vm->regs[instr->arg1] * JUMP_SEGMENT_SIZE) + vm->regs[instr->arg2] - 1;
