@@ -68,7 +68,7 @@ uint16_t* readBinary(const char* filename, int print)
     size_t numInstructions = 0;
     // binaries are length prefixed
     fread(&numInstructions, sizeof(uint16_t), 1, bin);
-    printf("Binary is %d instructions\n", numInstructions);
+    printf("Binary is %zd instructions\n", numInstructions);
     uint16_t* code = malloc(sizeof(uint16_t) * numInstructions);
     fread(code, sizeof(uint16_t), numInstructions, bin);
     if (print)
@@ -92,7 +92,7 @@ uint8_t* readRom(const char* filename, int print)
     }
     uint8_t* rom = malloc(sizeof(uint8_t) * 128 * MEMORY_SEGMENT_SIZE);
     size_t bytesRead = fread(rom, sizeof(uint8_t), 128 * MEMORY_SEGMENT_SIZE, romfile);
-    printf("Read %d bytes from the rom\n", bytesRead);
+    printf("Read %zd bytes from the rom\n", bytesRead);
     if (print)
     {
         printf("Rom:\n");

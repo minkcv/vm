@@ -53,10 +53,12 @@ void run(VM* vm)
             vm->pc++;
             cpuInstructionCount++;
             free(decoded);
+            if (cpuInstructionCount > 500000)
+                wait = 1;
         }
         else // Waiting
         {
-            if ((SDL_GetTicks() - cpuStartTime) > 1000 && cpuInstructionCount > 500000)
+            if ((SDL_GetTicks() - cpuStartTime) > 1000)
             {
                 // Stop waiting
                 cpuInstructionCount = 0;

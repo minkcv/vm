@@ -255,7 +255,7 @@ int main (int argc, char** argv)
         }
         else
         {
-            printf("%d instructions written to %s\n", written, filename);
+            printf("%zd instructions written to %s\n", written, filename);
         }
     }
     else

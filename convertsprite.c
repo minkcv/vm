@@ -123,7 +123,7 @@ int main (int argc, char** argv)
     }
 
     size_t written = fwrite(sprite, sizeof(uint8_t), (width  / 4) * height, spriteFile);
-    printf("Wrote %d bytes to %s\n", written, filenameNoExtension);
+    printf("Wrote %zd bytes to %s\n", written, filenameNoExtension);
     fclose(spriteFile);
     free(sprite);
     for (y = 0; y < height; y++)
