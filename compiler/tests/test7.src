@@ -1,0 +1,5 @@
+var name;
+name = 5;
+var coco;
+coco = name;
+
