@@ -182,8 +182,8 @@ int main (int argc, char** argv)
                 else if (!strcmp(token, "return"))
                 {
                     // Load current callstack depth
-                    sprintf(assembly[currentAssemblyLine], "LRC r0 %d\n", CALLSTACK_SEGMENT);
-                    sprintf(assembly[currentAssemblyLine + 1], "LRC r1 %d\n", CALLSTACK_DEPTH_OFFSET);
+                    sprintf(assembly[currentAssemblyLine], "LRC r0 #%d\n", CALLSTACK_SEGMENT);
+                    sprintf(assembly[currentAssemblyLine + 1], "LRC r1 #%d\n", CALLSTACK_DEPTH_OFFSET);
                     sprintf(assembly[currentAssemblyLine + 2], "LDR r2 r0 r1\n");
                     // Load the return offset
                     sprintf(assembly[currentAssemblyLine + 3], "LDR r3 r0 r2\n");
@@ -205,8 +205,8 @@ int main (int argc, char** argv)
                     {
                         uint32_t returnAssemblyLine = currentAssemblyLine + 12;
                         // Load current callstack depth
-                        sprintf(assembly[currentAssemblyLine], "LRC r0 %d\n", CALLSTACK_SEGMENT);
-                        sprintf(assembly[currentAssemblyLine + 1], "LRC r1 %d\n", CALLSTACK_DEPTH_OFFSET);
+                        sprintf(assembly[currentAssemblyLine], "LRC r0 #%d\n", CALLSTACK_SEGMENT);
+                        sprintf(assembly[currentAssemblyLine + 1], "LRC r1 #%d\n", CALLSTACK_DEPTH_OFFSET);
                         sprintf(assembly[currentAssemblyLine + 2], "LDR r2 r0 r1\n");
                         // Increment the callstack depth by 1 for the return segment
                         sprintf(assembly[currentAssemblyLine + 3], "ADDC r2 #1\n");

@@ -6,4 +6,5 @@ convertsprite
 **/pong.bin
 compiler/tests/*.asm
 compiler/compiler
+compiler/tests/*.bin
 
