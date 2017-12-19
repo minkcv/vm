@@ -136,7 +136,13 @@ int main (int argc, char** argv)
             char* token = strtok(lineIn, " ;\n");
             while (token != NULL)
             {
-                if (!strcmp(token, "var"))
+                if (strlen(token) > 1 && !strncmp(token, "//", 2))
+                {
+                    // First 2 chars of the token are '//'
+                    // The rest of the line is a comment
+                    break;
+                }
+                else if (!strcmp(token, "var"))
                 {
                     token = strtok(NULL, " ;");
                     if (token == NULL)
@@ -237,6 +243,7 @@ int main (int argc, char** argv)
                     }
                 }
 
+                // Consume any trailing spaces
                 token = strtok(NULL, " ");
             }
 
