@@ -22,8 +22,18 @@ Variables can have values stored in them using the assignment operator `=`. The 
     xposition = 5;
     xposition = xposition + 1;
 
+#### Comparison
+Variables can be compared for equality `==`, less than `<`, and greater than `>`. 0 indicates false and 1 indicates true.
+
+    atZero = xposition == 0;
+    aboveOne = xposition > 1;
+
 #### Other Operators
-TODO
+Other operators include addition `+`, subtraction `-`, bitwise and `&`, bitwise or `|`, bitwise xor `^`, and bitwise not `~`.
+
+    xposition = xposition - 1;
+    xposition = xposition & yposition;
+    xposition = ~ xposition;
 
 #### Example
 
