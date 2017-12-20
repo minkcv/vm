@@ -9,6 +9,8 @@
 #define SEGMENT_SIZE 256
 #define CALLSTACK_SEGMENT 63
 #define CALLSTACK_DEPTH_OFFSET 0
+#define MAX_CODE_BLOCKS 1024
+#define MAX_BLOCK_LABEL_LENGTH 256
 
 typedef struct
 {
@@ -254,6 +256,14 @@ int main (int argc, char** argv)
     uint32_t numInstructions = 0;
     Symbol** symbolMap = malloc(sizeof(Symbol*) * MAX_SYMBOLS);
     uint32_t currentAssemblyLine = 0;
+    uint32_t endBlockLabelId = 0;
+    int blockDepth = 0;
+    char** blockEndLabels = malloc(sizeof(char*) * MAX_CODE_BLOCKS);
+    for (i = 0; i < MAX_CODE_BLOCKS; i++)
+    {
+        blockEndLabels[i] = malloc(sizeof(char) * MAX_BLOCK_LABEL_LENGTH);
+        memset(blockEndLabels[i], 0, MAX_BLOCK_LABEL_LENGTH);
+    }
 
     while ((charsRead = getline(&lineIn, &toRead, src)) != -1)
     {
@@ -268,6 +278,38 @@ int main (int argc, char** argv)
                     // First 2 chars of the token are '//'
                     // The rest of the line is a comment
                     break;
+                }
+                else if (!strcmp(token, "}"))
+                {
+                    blockDepth--;
+                    if (blockDepth < 0)
+                    {
+                        printf("Missing open curly brace for close curly brace on line %d\n", lineCount);
+                        exit(1);
+                    }
+                    if (strlen(blockEndLabels[blockDepth]))
+                    {
+                        sprintf(assembly[currentAssemblyLine], "@%s\n", blockEndLabels[blockDepth]);
+                        currentAssemblyLine++;
+                    }
+                    memset(blockEndLabels[blockDepth], 0, MAX_BLOCK_LABEL_LENGTH);
+                }
+                else if (!strcmp(token, "if"))
+                {
+                    token = strtok_r(NULL, " {", &savePtr);
+                    sprintf(blockEndLabels[blockDepth], "_end_if_%d", endBlockLabelId);
+                    endBlockLabelId++;
+                    
+                    // Load the result of the conditional expression into register 0
+                    decomposeExpression(&token, &assembly, &currentAssemblyLine, symbolMap);
+                    // Compare the conditional expression with false (0)
+                    sprintf(assembly[currentAssemblyLine], "LRC r1 #0\n");
+                    sprintf(assembly[currentAssemblyLine + 1], "CMP r0 r0 r1\n");
+                    sprintf(assembly[currentAssemblyLine + 2], "LRL r1 r2 @%s\n", blockEndLabels[blockDepth]);
+                    // Jump past the if block if the conditional expression was false (0)
+                    sprintf(assembly[currentAssemblyLine + 3], "JEQ r0 r1 r2\n");
+                    currentAssemblyLine += 4;
+                    blockDepth++;
                 }
                 else if (!strcmp(token, "var"))
                 {
@@ -298,9 +340,15 @@ int main (int argc, char** argv)
                         printf("Redefinition of %s on line %d\n", token, lineCount);
                         exit(1);
                     }
+                    if (!strncmp(token, "_", 1))
+                    {
+                        printf("Function %s is not allowed to start with underbar on line %d\n", token, lineCount);
+                        exit(1);
+                    }
                     addSymbolToMap(token, symbolMap);
                     sprintf(assembly[currentAssemblyLine], "@%s\n", token);
                     currentAssemblyLine++;
+                    blockDepth++;
                 }
                 else if (!strcmp(token, "return"))
                 {

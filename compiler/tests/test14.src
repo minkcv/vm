@@ -1,0 +1,15 @@
+var name;
+var condition;
+var condition2;
+name = 4;
+condition = name == 4;
+
+if condition {
+    condition2 = name == 7;
+    if condition2 {
+        name = 7;
+    }
+}
+
+name = 5;
+

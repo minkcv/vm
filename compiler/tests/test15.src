@@ -1,0 +1,13 @@
+var name;
+var condition;
+
+name = 4;
+condition = name == 4;
+
+func setName {
+    if condition {
+        name = 5;
+    }
+    return;
+}
+

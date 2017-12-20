@@ -1,0 +1,10 @@
+var name;
+var condition;
+name = 5;
+condition = name == 5;
+if condition {
+    name = 4;
+}
+
+name = 6;
+
