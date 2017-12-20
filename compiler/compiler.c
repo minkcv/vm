@@ -184,16 +184,33 @@ void decomposeExpression(char** expression, char*** assembly, uint32_t* currentA
         }
         else if (!strcmp(token2, "=="))
         {
-            sprintf((*assembly)[*currentAssemblyLine], "CMP r0 r0 r15\n");
-            sprintf((*assembly)[*currentAssemblyLine + 1], "LRC r1 #1\n");
-            sprintf((*assembly)[*currentAssemblyLine + 2], "CMP r0 r0 r1\n");
-            (*currentAssemblyLine) += 3;
+            sprintf((*assembly)[*currentAssemblyLine], "CMP r1 r0 r15\n");
+            sprintf((*assembly)[*currentAssemblyLine + 1], "LRC r0 #1\n"); // Start true (1)
+            sprintf((*assembly)[*currentAssemblyLine + 2], "LRC r14 #%d\n", (*currentAssemblyLine + 6) / SEGMENT_SIZE);
+            sprintf((*assembly)[*currentAssemblyLine + 3], "LRC r15 #%d\n", (*currentAssemblyLine + 6) % SEGMENT_SIZE);
+            sprintf((*assembly)[*currentAssemblyLine + 4], "JEQ r1 r14 r15\n"); // Jump over setting to false if equal
+            sprintf((*assembly)[*currentAssemblyLine + 5], "LRC r0 #0\n"); // Set false (0)
+            (*currentAssemblyLine) += 6;
         }
         else if (!strcmp(token2, "<"))
         {
+            sprintf((*assembly)[*currentAssemblyLine], "CMP r1 r0 r15\n");
+            sprintf((*assembly)[*currentAssemblyLine + 1], "LRC r0 #1\n"); // Start true (1)
+            sprintf((*assembly)[*currentAssemblyLine + 2], "LRC r14 #%d\n", (*currentAssemblyLine + 6) / SEGMENT_SIZE);
+            sprintf((*assembly)[*currentAssemblyLine + 3], "LRC r15 #%d\n", (*currentAssemblyLine + 6) % SEGMENT_SIZE);
+            sprintf((*assembly)[*currentAssemblyLine + 4], "JLT r1 r14 r15\n"); // Jump over setting to false if less than
+            sprintf((*assembly)[*currentAssemblyLine + 5], "LRC r0 #0\n"); // Set false (0)
+            (*currentAssemblyLine) += 6;
         }
         else if (!strcmp(token2, ">"))
         {
+            sprintf((*assembly)[*currentAssemblyLine], "CMP r1 r0 r15\n");
+            sprintf((*assembly)[*currentAssemblyLine + 1], "LRC r0 #1\n"); // Start true (1)
+            sprintf((*assembly)[*currentAssemblyLine + 2], "LRC r14 #%d\n", (*currentAssemblyLine + 6) / SEGMENT_SIZE);
+            sprintf((*assembly)[*currentAssemblyLine + 3], "LRC r15 #%d\n", (*currentAssemblyLine + 6) % SEGMENT_SIZE);
+            sprintf((*assembly)[*currentAssemblyLine + 4], "JGT r1 r14 r15\n"); // Jump over setting to false if greater than
+            sprintf((*assembly)[*currentAssemblyLine + 5], "LRC r0 #0\n"); // Set false (0)
+            (*currentAssemblyLine) += 6;
         }
     }
 }

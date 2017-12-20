@@ -1,0 +1,9 @@
+var a;
+var b;
+a = 5;
+b = 4;
+var c;
+c = a == b;
+c = a < b;
+c = a > b;
+
