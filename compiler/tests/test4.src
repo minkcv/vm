@@ -1,4 +1,5 @@
 // test 4
 //test4
 var name; // test 4
+name = 1;     //test4
 
