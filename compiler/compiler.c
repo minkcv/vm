@@ -91,9 +91,8 @@ void dumpSymbolMap(Symbol** map)
 
 // Returns the number of instructions added to the assembly.
 // Returns the result of the expression in register r0
-uint32_t decomposeExpression(char** expression, char*** assembly, uint32_t currentAssemblyLine, Symbol** map)
+void decomposeExpression(char** expression, char*** assembly, uint32_t* currentAssemblyLine, Symbol** map)
 {
-    uint32_t additionalInstructions = 0;
     char* savePtr;
     char* token1 = strtok_r(*expression, " ", &savePtr);
     char* token2 = strtok_r(NULL, " ", &savePtr);
@@ -106,11 +105,10 @@ uint32_t decomposeExpression(char** expression, char*** assembly, uint32_t curre
         if (sym != NULL)
         {
             // Identifier
-            sprintf((*assembly)[currentAssemblyLine], "LRC r1 #%d\n", sym->segment);
-            sprintf((*assembly)[currentAssemblyLine + 1], "LRC r2 #%d\n", sym->offset);
-            sprintf((*assembly)[currentAssemblyLine + 2], "LDR r0 r1 r2\n");
-            additionalInstructions = 3;
-            currentAssemblyLine += additionalInstructions;
+            sprintf((*assembly)[*currentAssemblyLine], "LRC r1 #%d\n", sym->segment);
+            sprintf((*assembly)[*currentAssemblyLine + 1], "LRC r2 #%d\n", sym->offset);
+            sprintf((*assembly)[*currentAssemblyLine + 2], "LDR r0 r1 r2\n");
+            (*currentAssemblyLine) += 3;
         }
         else
         {
@@ -124,9 +122,8 @@ uint32_t decomposeExpression(char** expression, char*** assembly, uint32_t curre
             }
             else
             {
-                sprintf((*assembly)[currentAssemblyLine], "LRC r0 #%d\n", literal);
-                additionalInstructions = 1;
-                currentAssemblyLine += additionalInstructions;
+                sprintf((*assembly)[*currentAssemblyLine], "LRC r0 #%d\n", literal);
+                (*currentAssemblyLine)++;
             }
         }
     }
@@ -138,35 +135,54 @@ uint32_t decomposeExpression(char** expression, char*** assembly, uint32_t curre
             Symbol* sym = lookupSymbol(token2, map);
             if (sym != NULL)
             {
-                additionalInstructions += decomposeExpression(&token2, assembly, currentAssemblyLine, map);
-                sprintf((*assembly)[currentAssemblyLine + additionalInstructions], "NOT r0 r0\n");
-                additionalInstructions += 1;
-                currentAssemblyLine += additionalInstructions;
+                decomposeExpression(&token2, assembly, currentAssemblyLine, map);
+                sprintf((*assembly)[*currentAssemblyLine], "NOT r0 r0\n");
             }
         }
     }
     else
     {
+        decomposeExpression(&token1, assembly, currentAssemblyLine, map);
+        sprintf((*assembly)[*currentAssemblyLine], "CPY r15 r0\n");
+        (*currentAssemblyLine)++;
+        decomposeExpression(&token3, assembly, currentAssemblyLine, map);
         if (!strcmp(token2, "+"))
         {
+            sprintf((*assembly)[*currentAssemblyLine], "ADD r0 r0 r15\n");
         }
         else if (!strcmp(token2, "-"))
         {
+            sprintf((*assembly)[*currentAssemblyLine], "SUB r0 r0 r15\n");
         }
         else if (!strcmp(token2, "&"))
         {
+            sprintf((*assembly)[*currentAssemblyLine], "AND r0 r0 r15\n");
         }
         else if (!strcmp(token2, "|"))
         {
+            sprintf((*assembly)[*currentAssemblyLine], "OR r0 r0 r15\n");
         }
         else if (!strcmp(token2, "^"))
+        {
+            sprintf((*assembly)[*currentAssemblyLine], "XOR r0 r0 r15\n");
+        }
+        else if (!strcmp(token2, ">>"))
+        {
+        }
+        else if (!strcmp(token2, "<<"))
         {
         }
         else if (!strcmp(token2, "=="))
         {
         }
+        else if (!strcmp(token2, "<"))
+        {
+        }
+        else if (!strcmp(token2, ">"))
+        {
+        }
+        (*currentAssemblyLine)++;
     }
-    return additionalInstructions;
 }
 
 int main (int argc, char** argv)
@@ -252,11 +268,8 @@ int main (int argc, char** argv)
                         printf("Redefinition of %s on line %d\n", token, lineCount);
                         exit(1);
                     }
-                    printf("going to add %s to symbol map\n", token);
                     addSymbolToMap(token, &symbolMap);
-                    printf("going to add label %s to line %d of the assembly\n", token, currentAssemblyLine);
                     sprintf(assembly[currentAssemblyLine], "@%s\n", token);
-                    printf("added a label to the assembly\n");
                     currentAssemblyLine++;
                 }
                 else if (!strcmp(token, "return"))
@@ -320,8 +333,7 @@ int main (int argc, char** argv)
                         if (!strcmp(token, "="))
                         {
                             token = strtok_r(NULL, ";", &savePtr);
-                            uint32_t addedLines = decomposeExpression(&token, &assembly, currentAssemblyLine, symbolMap);
-                            currentAssemblyLine += addedLines;
+                            decomposeExpression(&token, &assembly, &currentAssemblyLine, symbolMap);
 
                             // Store the result (r0) into the right hand side identifier
                             sprintf(assembly[currentAssemblyLine], "LRC r1 #%d\n", sym->segment);
