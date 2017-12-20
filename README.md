@@ -16,8 +16,8 @@ A virtual machine with no physical hardware spec.
 ### Included Programs:
 Two programs are included to demonstrate the capabilities of the vm. "Mars" is a simple scene showing colored sprites that the player can move around in. "Pong" is a clone of the classic Atari game for 2 players.
 
-![demo](https://github.com/minkcv/vm/blob/master/mars.png)
-![pong](https://github.com/minkcv/vm/blob/master/pong.png)
+![demo](https://github.com/minkcv/vm/blob/master/etc/mars.png)
+![pong](https://github.com/minkcv/vm/blob/master/etc/pong.png)
 
 ### Why did you make this? Who is it for?
 This is a hobby project to allow myself and others to write games in assembly without some of the annoyances that physical architectures impose.
