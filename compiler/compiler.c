@@ -115,17 +115,36 @@ uint32_t decomposeExpression(char** expression, char*** assembly, uint32_t curre
         else
         {
             // Literal integer
-            uint8_t literal = (uint8_t)atoi(token1);
-            sprintf(*assembly[currentAssemblyLine], "LRC r0 #%d\n", literal);
-            additionalInstructions = 1;
-            currentAssemblyLine += 2;
+            char* end;
+            uint8_t literal = (uint8_t)strtol(token1, &end, 10);
+            if (!strcmp(token1, end))
+            {
+                printf("Failed to parse %s as identifier or literal int\n", token1);
+                exit(1);
+            }
+            else
+            {
+                sprintf((*assembly)[currentAssemblyLine], "LRC r0 #%d\n", literal);
+                additionalInstructions = 1;
+                currentAssemblyLine += 2;
+            }
         }
     }
     else if (token3 == NULL)
     {
         // If there are only 2 tokens in the expression, the first must be the operator
-        if (!strcmp(token1, "!"))
+        if (!strcmp(token1, "~"))
         {
+            Symbol* sym = lookupSymbol(token2, map);
+            if (sym != NULL)
+            {
+                sprintf((*assembly)[currentAssemblyLine], "LRC r1 #%d\n", sym->segment);
+                sprintf((*assembly)[currentAssemblyLine + 1], "LRC r2 #%d\n", sym->offset);
+                sprintf((*assembly)[currentAssemblyLine + 2], "LDR r0 r1 r2\n");
+                sprintf((*assembly)[currentAssemblyLine + 3], "NOT r0 r0\n");
+                additionalInstructions = 4;
+                currentAssemblyLine += 5;
+            }
         }
     }
     else
@@ -304,13 +323,13 @@ int main (int argc, char** argv)
                         {
                             token = strtok_r(NULL, ";", &savePtr);
                             uint32_t addedLines = decomposeExpression(&token, &assembly, currentAssemblyLine, symbolMap);
-                            currentAssemblyLine += addedLines + 1;
+                            currentAssemblyLine += addedLines;
 
                             // Store the result (r0) into the right hand side identifier
                             sprintf(assembly[currentAssemblyLine], "LRC r1 #%d\n", sym->segment);
                             sprintf(assembly[currentAssemblyLine + 1], "LRC r2 #%d\n", sym->offset);
                             sprintf(assembly[currentAssemblyLine + 2], "STR r0 r1 r2\n");
-                            currentAssemblyLine += 4;
+                            currentAssemblyLine += 3;
                         }
                     }
                 }
