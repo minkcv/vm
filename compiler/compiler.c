@@ -89,6 +89,69 @@ void dumpSymbolMap(Symbol** map)
     }
 }
 
+// Returns the number of instructions added to the assembly.
+// Returns the result of the expression in register r0
+uint32_t decomposeExpression(char** expression, char*** assembly, uint32_t currentAssemblyLine, Symbol** map)
+{
+    uint32_t additionalInstructions = 0;
+    char* savePtr;
+    char* token1 = strtok_r(*expression, " ", &savePtr);
+    char* token2 = strtok_r(NULL, " ", &savePtr);
+    char* token3 = strtok_r(NULL, " ", &savePtr);
+
+    if (token2 == NULL)
+    {
+        // The expression is just an identifier or literal integer
+        Symbol* sym = lookupSymbol(token1, map);
+        if (sym != NULL)
+        {
+            // Identifier
+            sprintf((*assembly)[currentAssemblyLine], "LRC r1 #%d\n", sym->segment);
+            sprintf((*assembly)[currentAssemblyLine + 1], "LRC r2 #%d\n", sym->offset);
+            sprintf((*assembly)[currentAssemblyLine + 2], "LDR r0 r1 r2\n");
+            additionalInstructions = 3;
+            currentAssemblyLine += 4;
+        }
+        else
+        {
+            // Literal integer
+            uint8_t literal = (uint8_t)atoi(token1);
+            sprintf(*assembly[currentAssemblyLine], "LRC r0 #%d\n", literal);
+            additionalInstructions = 1;
+            currentAssemblyLine += 2;
+        }
+    }
+    else if (token3 == NULL)
+    {
+        // If there are only 2 tokens in the expression, the first must be the operator
+        if (!strcmp(token1, "!"))
+        {
+        }
+    }
+    else
+    {
+        if (!strcmp(token2, "+"))
+        {
+        }
+        else if (!strcmp(token2, "-"))
+        {
+        }
+        else if (!strcmp(token2, "&"))
+        {
+        }
+        else if (!strcmp(token2, "|"))
+        {
+        }
+        else if (!strcmp(token2, "^"))
+        {
+        }
+        else if (!strcmp(token2, "=="))
+        {
+        }
+    }
+    return additionalInstructions;
+}
+
 int main (int argc, char** argv)
 {
     char* filename = NULL;
@@ -121,6 +184,7 @@ int main (int argc, char** argv)
         memset(assembly[i], 0, MAX_ASSEMBLY_LINE_LENGTH);
     }
     char* lineIn = NULL;
+    char* savePtr;
     size_t toRead = 0;
     ssize_t charsRead;
     int lineCount = 0;
@@ -133,7 +197,7 @@ int main (int argc, char** argv)
         lineCount++;
         if (lineIn[0] != '\n' )
         {
-            char* token = strtok(lineIn, " ;\n");
+            char* token = strtok_r(lineIn, " ;\n", &savePtr);
             while (token != NULL)
             {
                 if (strlen(token) > 1 && !strncmp(token, "//", 2))
@@ -144,7 +208,7 @@ int main (int argc, char** argv)
                 }
                 else if (!strcmp(token, "var"))
                 {
-                    token = strtok(NULL, " ;");
+                    token = strtok_r(NULL, " ;", &savePtr);
                     if (token == NULL)
                     {
                         printf("Expected identifier after '%s' on line %d\n", token, lineCount);
@@ -160,14 +224,13 @@ int main (int argc, char** argv)
                 }
                 else if (!strcmp(token, "func"))
                 {
-                    token = strtok(NULL, " {");
+                    token = strtok_r(NULL, " {", &savePtr);
                     if (token == NULL)
                     {
                         printf("Expected identifier after '%s' on line %d\n", token, lineCount);
                         exit(1);
                     }
-                    Symbol* sym = lookupSymbol(token, symbolMap);
-                    if (sym != NULL)
+                    if (lookupSymbol(token, symbolMap) != NULL)
                     {
                         printf("Redefinition of %s on line %d\n", token, lineCount);
                         exit(1);
@@ -199,7 +262,7 @@ int main (int argc, char** argv)
                 }
                 else if (!strcmp(token, "call"))
                 {
-                    token = strtok(NULL, " ;");
+                    token = strtok_r(NULL, " ;", &savePtr);
                     Symbol* sym = lookupSymbol(token, symbolMap);
                     if (sym != NULL)
                     {
@@ -211,12 +274,12 @@ int main (int argc, char** argv)
                         // Increment the callstack depth by 1 for the return segment
                         sprintf(assembly[currentAssemblyLine + 3], "ADDC r2 #1\n");
                         // Store the return segment in the callstack
-                        sprintf(assembly[currentAssemblyLine + 4], "LRC r3 %d\n", returnAssemblyLine / SEGMENT_SIZE);
+                        sprintf(assembly[currentAssemblyLine + 4], "LRC r3 #%d\n", returnAssemblyLine / SEGMENT_SIZE);
                         sprintf(assembly[currentAssemblyLine + 5], "LDR r3 r0 r2\n");
                         // Increment the callstack depth by 1 for the return offset
                         sprintf(assembly[currentAssemblyLine + 6], "ADDC r2 #1\n");
                         // Store the return offset in the callstack
-                        sprintf(assembly[currentAssemblyLine + 7], "LRC r3 %d\n", returnAssemblyLine % SEGMENT_SIZE);
+                        sprintf(assembly[currentAssemblyLine + 7], "LRC r3 #%d\n", returnAssemblyLine % SEGMENT_SIZE);
                         sprintf(assembly[currentAssemblyLine + 8], "LDR r3 r0 r2\n");
                         // Store the callstack depth at 63.0
                         sprintf(assembly[currentAssemblyLine + 9], "STR r2 r0 r1\n");
@@ -236,15 +299,24 @@ int main (int argc, char** argv)
                     Symbol* sym = lookupSymbol(token, symbolMap);
                     if (sym != NULL)
                     {
-                        token = strtok(NULL, " ;");
+                        token = strtok_r(NULL, " ", &savePtr);
                         if (!strcmp(token, "="))
                         {
+                            token = strtok_r(NULL, ";", &savePtr);
+                            uint32_t addedLines = decomposeExpression(&token, &assembly, currentAssemblyLine, symbolMap);
+                            currentAssemblyLine += addedLines + 1;
+
+                            // Store the result (r0) into the right hand side identifier
+                            sprintf(assembly[currentAssemblyLine], "LRC r1 #%d\n", sym->segment);
+                            sprintf(assembly[currentAssemblyLine + 1], "LRC r2 #%d\n", sym->offset);
+                            sprintf(assembly[currentAssemblyLine + 2], "STR r0 r1 r2\n");
+                            currentAssemblyLine += 4;
                         }
                     }
                 }
 
-                // Consume any trailing spaces
-                token = strtok(NULL, " ");
+                // Move to the next non space token
+                token = strtok_r(NULL, " ", &savePtr);
             }
 
             free(lineIn);
