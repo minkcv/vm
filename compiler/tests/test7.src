@@ -2,4 +2,6 @@ var name;
 name = 5;
 var coco;
 coco = name;
+var foo;
+foo = coco + name;
 
