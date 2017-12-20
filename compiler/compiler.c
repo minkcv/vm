@@ -110,7 +110,7 @@ uint32_t decomposeExpression(char** expression, char*** assembly, uint32_t curre
             sprintf((*assembly)[currentAssemblyLine + 1], "LRC r2 #%d\n", sym->offset);
             sprintf((*assembly)[currentAssemblyLine + 2], "LDR r0 r1 r2\n");
             additionalInstructions = 3;
-            currentAssemblyLine += 4;
+            currentAssemblyLine += additionalInstructions;
         }
         else
         {
@@ -126,7 +126,7 @@ uint32_t decomposeExpression(char** expression, char*** assembly, uint32_t curre
             {
                 sprintf((*assembly)[currentAssemblyLine], "LRC r0 #%d\n", literal);
                 additionalInstructions = 1;
-                currentAssemblyLine += 2;
+                currentAssemblyLine += additionalInstructions;
             }
         }
     }
@@ -138,12 +138,10 @@ uint32_t decomposeExpression(char** expression, char*** assembly, uint32_t curre
             Symbol* sym = lookupSymbol(token2, map);
             if (sym != NULL)
             {
-                sprintf((*assembly)[currentAssemblyLine], "LRC r1 #%d\n", sym->segment);
-                sprintf((*assembly)[currentAssemblyLine + 1], "LRC r2 #%d\n", sym->offset);
-                sprintf((*assembly)[currentAssemblyLine + 2], "LDR r0 r1 r2\n");
-                sprintf((*assembly)[currentAssemblyLine + 3], "NOT r0 r0\n");
-                additionalInstructions = 4;
-                currentAssemblyLine += 5;
+                additionalInstructions += decomposeExpression(&token2, assembly, currentAssemblyLine, map);
+                sprintf((*assembly)[currentAssemblyLine + additionalInstructions], "NOT r0 r0\n");
+                additionalInstructions += 1;
+                currentAssemblyLine += additionalInstructions;
             }
         }
     }
