@@ -92,7 +92,7 @@ void dumpSymbolMap(Symbol** map)
 }
 
 // Returns the result of the expression in register r0
-void decomposeExpression(char** expression, char*** assembly, uint32_t* currentAssemblyLine, Symbol** map)
+void decomposeExpression(char** expression, char** assembly, uint32_t* currentAssemblyLine, Symbol** map)
 {
     char* savePtr;
     char* token1 = strtok_r(*expression, " ", &savePtr);
@@ -106,9 +106,9 @@ void decomposeExpression(char** expression, char*** assembly, uint32_t* currentA
         if (sym != NULL)
         {
             // Identifier
-            sprintf((*assembly)[*currentAssemblyLine], "LRC r1 #%d\n", sym->segment);
-            sprintf((*assembly)[*currentAssemblyLine + 1], "LRC r2 #%d\n", sym->offset);
-            sprintf((*assembly)[*currentAssemblyLine + 2], "LDR r0 r1 r2\n");
+            sprintf(assembly[*currentAssemblyLine], "LRC r1 #%d\n", sym->segment);
+            sprintf(assembly[*currentAssemblyLine + 1], "LRC r2 #%d\n", sym->offset);
+            sprintf(assembly[*currentAssemblyLine + 2], "LDR r0 r1 r2\n");
             (*currentAssemblyLine) += 3;
         }
         else
@@ -123,7 +123,7 @@ void decomposeExpression(char** expression, char*** assembly, uint32_t* currentA
             }
             else
             {
-                sprintf((*assembly)[*currentAssemblyLine], "LRC r0 #%d\n", literal);
+                sprintf(assembly[*currentAssemblyLine], "LRC r0 #%d\n", literal);
                 (*currentAssemblyLine)++;
             }
         }
@@ -137,81 +137,81 @@ void decomposeExpression(char** expression, char*** assembly, uint32_t* currentA
             if (sym != NULL)
             {
                 decomposeExpression(&token2, assembly, currentAssemblyLine, map);
-                sprintf((*assembly)[*currentAssemblyLine], "NOT r0 r0\n");
+                sprintf(assembly[*currentAssemblyLine], "NOT r0 r0\n");
             }
         }
     }
     else
     {
         decomposeExpression(&token1, assembly, currentAssemblyLine, map);
-        sprintf((*assembly)[*currentAssemblyLine], "CPY r15 r0\n");
+        sprintf(assembly[*currentAssemblyLine], "CPY r15 r0\n");
         (*currentAssemblyLine)++;
         decomposeExpression(&token3, assembly, currentAssemblyLine, map);
         if (!strcmp(token2, "+"))
         {
-            sprintf((*assembly)[*currentAssemblyLine], "ADD r0 r0 r15\n");
+            sprintf(assembly[*currentAssemblyLine], "ADD r0 r0 r15\n");
             (*currentAssemblyLine)++;
         }
         else if (!strcmp(token2, "-"))
         {
-            sprintf((*assembly)[*currentAssemblyLine], "SUB r0 r0 r15\n");
+            sprintf(assembly[*currentAssemblyLine], "SUB r0 r0 r15\n");
             (*currentAssemblyLine)++;
         }
         else if (!strcmp(token2, "&"))
         {
-            sprintf((*assembly)[*currentAssemblyLine], "AND r0 r0 r15\n");
+            sprintf(assembly[*currentAssemblyLine], "AND r0 r0 r15\n");
             (*currentAssemblyLine)++;
         }
         else if (!strcmp(token2, "|"))
         {
-            sprintf((*assembly)[*currentAssemblyLine], "OR r0 r0 r15\n");
+            sprintf(assembly[*currentAssemblyLine], "OR r0 r0 r15\n");
             (*currentAssemblyLine)++;
         }
         else if (!strcmp(token2, "^"))
         {
-            sprintf((*assembly)[*currentAssemblyLine], "XOR r0 r0 r15\n");
+            sprintf(assembly[*currentAssemblyLine], "XOR r0 r0 r15\n");
             (*currentAssemblyLine)++;
         }
         else if (!strcmp(token2, ">>"))
         {
-            sprintf((*assembly)[*currentAssemblyLine], "LSR r15 r0\n");
-            sprintf((*assembly)[*currentAssemblyLine + 1], "CPY r0 r15\n");
+            sprintf(assembly[*currentAssemblyLine], "LSR r15 r0\n");
+            sprintf(assembly[*currentAssemblyLine + 1], "CPY r0 r15\n");
             (*currentAssemblyLine) += 2;
         }
         else if (!strcmp(token2, "<<"))
         {
-            sprintf((*assembly)[*currentAssemblyLine], "LSL r15 r0\n");
-            sprintf((*assembly)[*currentAssemblyLine + 1], "CPY r0 r15\n");
+            sprintf(assembly[*currentAssemblyLine], "LSL r15 r0\n");
+            sprintf(assembly[*currentAssemblyLine + 1], "CPY r0 r15\n");
             (*currentAssemblyLine) += 2;
         }
         else if (!strcmp(token2, "=="))
         {
-            sprintf((*assembly)[*currentAssemblyLine], "CMP r1 r0 r15\n");
-            sprintf((*assembly)[*currentAssemblyLine + 1], "LRC r0 #1\n"); // Start true (1)
-            sprintf((*assembly)[*currentAssemblyLine + 2], "LRC r14 #%d\n", (*currentAssemblyLine + 6) / SEGMENT_SIZE);
-            sprintf((*assembly)[*currentAssemblyLine + 3], "LRC r15 #%d\n", (*currentAssemblyLine + 6) % SEGMENT_SIZE);
-            sprintf((*assembly)[*currentAssemblyLine + 4], "JEQ r1 r14 r15\n"); // Jump over setting to false if equal
-            sprintf((*assembly)[*currentAssemblyLine + 5], "LRC r0 #0\n"); // Set false (0)
+            sprintf(assembly[*currentAssemblyLine], "CMP r1 r0 r15\n");
+            sprintf(assembly[*currentAssemblyLine + 1], "LRC r0 #1\n"); // Start true (1)
+            sprintf(assembly[*currentAssemblyLine + 2], "LRC r14 #%d\n", (*currentAssemblyLine + 6) / SEGMENT_SIZE);
+            sprintf(assembly[*currentAssemblyLine + 3], "LRC r15 #%d\n", (*currentAssemblyLine + 6) % SEGMENT_SIZE);
+            sprintf(assembly[*currentAssemblyLine + 4], "JEQ r1 r14 r15\n"); // Jump over setting to false if equal
+            sprintf(assembly[*currentAssemblyLine + 5], "LRC r0 #0\n"); // Set false (0)
             (*currentAssemblyLine) += 6;
         }
         else if (!strcmp(token2, "<"))
         {
-            sprintf((*assembly)[*currentAssemblyLine], "CMP r1 r0 r15\n");
-            sprintf((*assembly)[*currentAssemblyLine + 1], "LRC r0 #1\n"); // Start true (1)
-            sprintf((*assembly)[*currentAssemblyLine + 2], "LRC r14 #%d\n", (*currentAssemblyLine + 6) / SEGMENT_SIZE);
-            sprintf((*assembly)[*currentAssemblyLine + 3], "LRC r15 #%d\n", (*currentAssemblyLine + 6) % SEGMENT_SIZE);
-            sprintf((*assembly)[*currentAssemblyLine + 4], "JLT r1 r14 r15\n"); // Jump over setting to false if less than
-            sprintf((*assembly)[*currentAssemblyLine + 5], "LRC r0 #0\n"); // Set false (0)
+            sprintf(assembly[*currentAssemblyLine], "CMP r1 r0 r15\n");
+            sprintf(assembly[*currentAssemblyLine + 1], "LRC r0 #1\n"); // Start true (1)
+            sprintf(assembly[*currentAssemblyLine + 2], "LRC r14 #%d\n", (*currentAssemblyLine + 6) / SEGMENT_SIZE);
+            sprintf(assembly[*currentAssemblyLine + 3], "LRC r15 #%d\n", (*currentAssemblyLine + 6) % SEGMENT_SIZE);
+            sprintf(assembly[*currentAssemblyLine + 4], "JLT r1 r14 r15\n"); // Jump over setting to false if less than
+            sprintf(assembly[*currentAssemblyLine + 5], "LRC r0 #0\n"); // Set false (0)
             (*currentAssemblyLine) += 6;
         }
         else if (!strcmp(token2, ">"))
         {
-            sprintf((*assembly)[*currentAssemblyLine], "CMP r1 r0 r15\n");
-            sprintf((*assembly)[*currentAssemblyLine + 1], "LRC r0 #1\n"); // Start true (1)
-            sprintf((*assembly)[*currentAssemblyLine + 2], "LRC r14 #%d\n", (*currentAssemblyLine + 6) / SEGMENT_SIZE);
-            sprintf((*assembly)[*currentAssemblyLine + 3], "LRC r15 #%d\n", (*currentAssemblyLine + 6) % SEGMENT_SIZE);
-            sprintf((*assembly)[*currentAssemblyLine + 4], "JGT r1 r14 r15\n"); // Jump over setting to false if greater than
-            sprintf((*assembly)[*currentAssemblyLine + 5], "LRC r0 #0\n"); // Set false (0)
+            sprintf(assembly[*currentAssemblyLine], "CMP r1 r0 r15\n");
+            sprintf(assembly[*currentAssemblyLine + 1], "LRC r0 #1\n"); // Start true (1)
+            sprintf(assembly[*currentAssemblyLine + 2], "LRC r14 #%d\n", (*currentAssemblyLine + 6) / SEGMENT_SIZE);
+            sprintf(assembly[*currentAssemblyLine + 3], "LRC r15 #%d\n", (*currentAssemblyLine + 6) % SEGMENT_SIZE);
+            sprintf(assembly[*currentAssemblyLine + 4], "JGT r1 r14 r15\n"); // Jump over setting to false if greater than
+            sprintf(assembly[*currentAssemblyLine + 5], "LRC r0 #0\n"); // Set false (0)
             (*currentAssemblyLine) += 6;
         }
     }
@@ -301,7 +301,7 @@ int main (int argc, char** argv)
                     endBlockLabelId++;
                     
                     // Load the result of the conditional expression into register 0
-                    decomposeExpression(&token, &assembly, &currentAssemblyLine, symbolMap);
+                    decomposeExpression(&token, assembly, &currentAssemblyLine, symbolMap);
                     // Compare the conditional expression with false (0)
                     sprintf(assembly[currentAssemblyLine], "LRC r1 #0\n");
                     sprintf(assembly[currentAssemblyLine + 1], "CMP r0 r0 r1\n");
@@ -411,7 +411,7 @@ int main (int argc, char** argv)
                         if (!strcmp(token, "="))
                         {
                             token = strtok_r(NULL, ";", &savePtr);
-                            decomposeExpression(&token, &assembly, &currentAssemblyLine, symbolMap);
+                            decomposeExpression(&token, assembly, &currentAssemblyLine, symbolMap);
 
                             // Store the result (r0) into the right hand side identifier
                             sprintf(assembly[currentAssemblyLine], "LRC r1 #%d\n", sym->segment);
