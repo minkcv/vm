@@ -9,3 +9,4 @@ while [ -f "./tests/test$i.src" ]; do
     cat ./tests/test$i.asm
     i=$((i+1))
 done
+

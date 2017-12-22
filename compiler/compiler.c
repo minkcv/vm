@@ -12,12 +12,25 @@
 #define MAX_CODE_BLOCKS 1024
 #define MAX_BLOCK_LABEL_LENGTH 256
 
+enum BlockType
+{
+    Block_If = 0,
+    Block_While = 1,
+};
+
 typedef struct
 {
     uint8_t segment;
     uint8_t offset;
     char* identifier;
 } Symbol;
+
+typedef struct
+{
+    uint32_t labelId;
+    enum BlockType blockType;
+
+} BlockEnd;
 
 Symbol* lookupSymbol(char* identifier, Symbol** map)
 {
@@ -256,13 +269,14 @@ int main (int argc, char** argv)
     uint32_t numInstructions = 0;
     Symbol** symbolMap = malloc(sizeof(Symbol*) * MAX_SYMBOLS);
     uint32_t currentAssemblyLine = 0;
-    uint32_t endBlockLabelId = 0;
+    uint32_t endBlockLabelId = 1;
     int blockDepth = 0;
-    char** blockEndLabels = malloc(sizeof(char*) * MAX_CODE_BLOCKS);
+    BlockEnd** blockEnds = malloc(sizeof(BlockEnd*) * MAX_CODE_BLOCKS);
     for (i = 0; i < MAX_CODE_BLOCKS; i++)
     {
-        blockEndLabels[i] = malloc(sizeof(char) * MAX_BLOCK_LABEL_LENGTH);
-        memset(blockEndLabels[i], 0, MAX_BLOCK_LABEL_LENGTH);
+        blockEnds[i] = malloc(sizeof(BlockEnd));
+        blockEnds[i]->blockType = 0;
+        blockEnds[i]->labelId = 0;
     }
 
     while ((charsRead = getline(&lineIn, &toRead, src)) != -1)
@@ -287,17 +301,46 @@ int main (int argc, char** argv)
                         printf("Missing open curly brace for close curly brace on line %d\n", lineCount);
                         exit(1);
                     }
-                    if (strlen(blockEndLabels[blockDepth]))
+                    if (blockEnds[blockDepth]->labelId > 0)
                     {
-                        sprintf(assembly[currentAssemblyLine], "@%s\n", blockEndLabels[blockDepth]);
+                        if (blockEnds[blockDepth]->blockType == Block_While)
+                        {
+                            // Ending a while block, jump to before the loop condition check
+                            sprintf(assembly[currentAssemblyLine], "LRL r0 r1 @_while_%d_%d\n", blockEnds[blockDepth]->blockType, blockEnds[blockDepth]->labelId);
+                            sprintf(assembly[currentAssemblyLine + 1], "JMP r0 r1\n");
+                            currentAssemblyLine += 2;
+                        }
+                        sprintf(assembly[currentAssemblyLine], "@_end_%d_%d\n", blockEnds[blockDepth]->blockType, blockEnds[blockDepth]->labelId);
                         currentAssemblyLine++;
                     }
-                    memset(blockEndLabels[blockDepth], 0, MAX_BLOCK_LABEL_LENGTH);
+                    blockEnds[blockDepth]->blockType = 0;
+                    blockEnds[blockDepth]->labelId = 0;
+                }
+                else if (!strcmp(token, "while"))
+                {
+                    token = strtok_r(NULL, " {", &savePtr);
+                    blockEnds[blockDepth]->labelId = endBlockLabelId;
+                    blockEnds[blockDepth]->blockType = Block_While;
+
+                    sprintf(assembly[currentAssemblyLine], "@_while_%d_%d\n", Block_While, endBlockLabelId);
+                    currentAssemblyLine++;
+                    // Load the result of the conditional expression into register 0
+                    decomposeExpression(&token, assembly, &currentAssemblyLine, symbolMap);
+                    // Compare the conditional expression with false (0)
+                    sprintf(assembly[currentAssemblyLine], "LRC r1 #0\n");
+                    sprintf(assembly[currentAssemblyLine + 1], "CMP r0 r0 r1\n");
+                    sprintf(assembly[currentAssemblyLine + 2], "LRL r1 r2 @_end_%d_%d\n", blockEnds[blockDepth]->blockType, blockEnds[blockDepth]->labelId);
+                    // Jump past the if block if the conditional expression was false (0)
+                    sprintf(assembly[currentAssemblyLine + 3], "JEQ r0 r1 r2\n");
+                    currentAssemblyLine += 4;
+                    endBlockLabelId++;
+                    blockDepth++;
                 }
                 else if (!strcmp(token, "if"))
                 {
                     token = strtok_r(NULL, " {", &savePtr);
-                    sprintf(blockEndLabels[blockDepth], "_end_if_%d", endBlockLabelId);
+                    blockEnds[blockDepth]->blockType = Block_If;
+                    blockEnds[blockDepth]->labelId = endBlockLabelId;
                     endBlockLabelId++;
                     
                     // Load the result of the conditional expression into register 0
@@ -305,7 +348,7 @@ int main (int argc, char** argv)
                     // Compare the conditional expression with false (0)
                     sprintf(assembly[currentAssemblyLine], "LRC r1 #0\n");
                     sprintf(assembly[currentAssemblyLine + 1], "CMP r0 r0 r1\n");
-                    sprintf(assembly[currentAssemblyLine + 2], "LRL r1 r2 @%s\n", blockEndLabels[blockDepth]);
+                    sprintf(assembly[currentAssemblyLine + 2], "LRL r1 r2 @_end_%d_%d\n", blockEnds[blockDepth]->blockType, blockEnds[blockDepth]->labelId);
                     // Jump past the if block if the conditional expression was false (0)
                     sprintf(assembly[currentAssemblyLine + 3], "JEQ r0 r1 r2\n");
                     currentAssemblyLine += 4;

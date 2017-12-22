@@ -1,0 +1,13 @@
+var counter;
+var condition;
+counter = 0;
+
+condition = counter < 10;
+
+while condition {
+    counter = counter + 1;
+    condition = counter < 10;
+}
+    
+counter = 0;
+
