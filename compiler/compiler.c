@@ -106,12 +106,17 @@ void dumpSymbolMap(Symbol** map)
 
 // Returns the result of the expression in the register specified by "returnRegister"
 // registers below "returnRegister" are considered to be in use by higher decompose calls
-void decomposeExpression(char** expression, char** assembly, uint32_t* currentAssemblyLine, Symbol** map, uint8_t returnRegister)
+void decomposeExpression(char** expression, char** assembly, uint32_t* currentAssemblyLine, Symbol** map, uint8_t returnRegister, uint32_t sourceLine)
 {
+    if (returnRegister > 12)
+    {
+        printf("Expression on line %d is too complex and must be broken up\n", sourceLine);
+        exit(1);
+    }
     char* savePtr;
     char* token1 = strtok_r(*expression, " ", &savePtr);
     char* token2 = strtok_r(NULL, " ", &savePtr);
-    char* token3 = strtok_r(NULL, " ", &savePtr);
+    char* token3 = strtok_r(NULL, "", &savePtr);
 
     if (token2 == NULL)
     {
@@ -150,15 +155,15 @@ void decomposeExpression(char** expression, char** assembly, uint32_t* currentAs
             Symbol* sym = lookupSymbol(token2, map);
             if (sym != NULL)
             {
-                decomposeExpression(&token2, assembly, currentAssemblyLine, map, returnRegister + 1);
+                decomposeExpression(&token2, assembly, currentAssemblyLine, map, returnRegister + 1, sourceLine);
                 sprintf(assembly[*currentAssemblyLine], "NOT r%d r%d\n", returnRegister, returnRegister + 1);
             }
         }
     }
     else
     {
-        decomposeExpression(&token1, assembly, currentAssemblyLine, map, returnRegister + 1);
-        decomposeExpression(&token3, assembly, currentAssemblyLine, map, returnRegister + 2);
+        decomposeExpression(&token1, assembly, currentAssemblyLine, map, returnRegister + 1, sourceLine);
+        decomposeExpression(&token3, assembly, currentAssemblyLine, map, returnRegister + 2, sourceLine);
         if (!strcmp(token2, "+"))
         {
             sprintf(assembly[*currentAssemblyLine], "ADD r%d r%d r%d\n", returnRegister, returnRegister + 1, returnRegister + 2);
@@ -324,7 +329,7 @@ int main (int argc, char** argv)
                     sprintf(assembly[currentAssemblyLine], "@_while_%d_%d\n", Block_While, endBlockLabelId);
                     currentAssemblyLine++;
                     // Load the result of the conditional expression into register 0
-                    decomposeExpression(&token, assembly, &currentAssemblyLine, symbolMap, 0);
+                    decomposeExpression(&token, assembly, &currentAssemblyLine, symbolMap, 0, lineCount);
                     // Compare the conditional expression with false (0)
                     sprintf(assembly[currentAssemblyLine], "LRC r1 #0\n");
                     sprintf(assembly[currentAssemblyLine + 1], "CMP r0 r0 r1\n");
@@ -343,7 +348,7 @@ int main (int argc, char** argv)
                     endBlockLabelId++;
                     
                     // Load the result of the conditional expression into register 0
-                    decomposeExpression(&token, assembly, &currentAssemblyLine, symbolMap, 0);
+                    decomposeExpression(&token, assembly, &currentAssemblyLine, symbolMap, 0, lineCount);
                     // Compare the conditional expression with false (0)
                     sprintf(assembly[currentAssemblyLine], "LRC r1 #0\n");
                     sprintf(assembly[currentAssemblyLine + 1], "CMP r0 r0 r1\n");
@@ -453,7 +458,7 @@ int main (int argc, char** argv)
                         if (!strcmp(token, "="))
                         {
                             token = strtok_r(NULL, ";", &savePtr);
-                            decomposeExpression(&token, assembly, &currentAssemblyLine, symbolMap, 0);
+                            decomposeExpression(&token, assembly, &currentAssemblyLine, symbolMap, 0, lineCount);
 
                             // Store the result (r0) into the right hand side identifier
                             sprintf(assembly[currentAssemblyLine], "LRC r1 #%d\n", sym->segment);
