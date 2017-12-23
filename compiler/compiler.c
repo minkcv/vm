@@ -11,6 +11,7 @@
 #define CALLSTACK_DEPTH_OFFSET 0
 #define MAX_CODE_BLOCKS 1024
 #define MAX_BLOCK_LABEL_LENGTH 256
+#define SYMBOL_START_SEGMENT 59
 
 enum BlockType
 {
@@ -52,7 +53,7 @@ Symbol* lookupSymbol(char* identifier, Symbol** map)
 Symbol* addSymbolToMap(char* identifier, Symbol** map)
 {
     int i = 0; // Where the new symbol will go in the map
-    int segment = 0;
+    int segment = SYMBOL_START_SEGMENT;
     int offset = 0;
     Symbol* existing = NULL;
     while (i < MAX_SYMBOLS)
@@ -65,7 +66,7 @@ Symbol* addSymbolToMap(char* identifier, Symbol** map)
             // Use the next available segment/offset pair.
             segment = existing->segment;
             offset = existing->offset;
-            if (offset == 255)
+            if (offset == SEGMENT_SIZE - 1)
             {
                 segment++;
                 offset = 0;
@@ -140,7 +141,7 @@ void decomposeExpression(char** expression, char** assembly, uint32_t* currentAs
 
     if (token2 == NULL)
     {
-        // The expression is just an identifier or literal integer
+        // The expression is an identifier, literal integer, or memory access
         Symbol* sym = lookupSymbol(token1, map);
         if (sym != NULL)
         {
@@ -149,6 +150,17 @@ void decomposeExpression(char** expression, char** assembly, uint32_t* currentAs
             sprintf(assembly[*currentAssemblyLine + 1], "LRC r%d #%d\n", returnRegister + 2, sym->offset);
             sprintf(assembly[*currentAssemblyLine + 2], "LDR r%d r%d r%d\n", returnRegister, returnRegister + 1, returnRegister + 2);
             (*currentAssemblyLine) += 3;
+        }
+        else if (strstr(token1, "["))
+        {
+            // Parse the opening bracket off.
+            strtok_r(token1, "[", &savePtr);
+            char* segmentExpression = strtok_r(token1, ",", &savePtr);
+            char* offsetExpression = strtok_r(token1, "]", &savePtr);
+            decomposeExpression(&segmentExpression, assembly, currentAssemblyLine, map, returnRegister + 1, sourceLine);
+            decomposeExpression(&offsetExpression, assembly, currentAssemblyLine, map, returnRegister + 2, sourceLine);
+            sprintf(assembly[*currentAssemblyLine], "LDR r%d r%d r%d\n", returnRegister, returnRegister + 1, returnRegister + 2);
+            (*currentAssemblyLine)++;
         }
         else
         {
@@ -177,6 +189,7 @@ void decomposeExpression(char** expression, char** assembly, uint32_t* currentAs
             {
                 decomposeExpression(&token2, assembly, currentAssemblyLine, map, returnRegister + 1, sourceLine);
                 sprintf(assembly[*currentAssemblyLine], "NOT r%d r%d\n", returnRegister, returnRegister + 1);
+                (*currentAssemblyLine)++;
             }
         }
     }
@@ -406,17 +419,11 @@ int main (int argc, char** argv)
                         printf("Expected identifier after '%s' on line %d\n", token, lineCount);
                         exit(1);
                     }
-                    if (lookupSymbol(token, symbolMap) != NULL)
-                    {
-                        printf("Redefinition of %s on line %d\n", token, lineCount);
-                        exit(1);
-                    }
                     if (!strncmp(token, "_", 1))
                     {
                         printf("Function %s is not allowed to start with underbar on line %d\n", token, lineCount);
                         exit(1);
                     }
-                    addSymbolToMap(token, symbolMap);
                     sprintf(assembly[currentAssemblyLine], "@%s\n", token);
                     currentAssemblyLine++;
                     blockEnds[blockDepth]->blockType = Block_Function;
