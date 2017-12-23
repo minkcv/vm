@@ -3,3 +3,4 @@ var name2;
 name = 1;
 name2 = 1;
 name = name + name2 + 1;
+

@@ -8,6 +8,5 @@ func setName {
     if condition {
         name = 5;
     }
-    return;
 }
 
