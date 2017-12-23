@@ -429,36 +429,27 @@ int main (int argc, char** argv)
                 else if (!strcmp(token, "call"))
                 {
                     token = strtok_r(NULL, " ;", &savePtr);
-                    Symbol* sym = lookupSymbol(token, symbolMap);
-                    if (sym != NULL)
-                    {
-                        uint32_t returnAssemblyLine = currentAssemblyLine + 12;
-                        // Load current callstack depth
-                        sprintf(assembly[currentAssemblyLine], "LRC r0 #%d\n", CALLSTACK_SEGMENT);
-                        sprintf(assembly[currentAssemblyLine + 1], "LRC r1 #%d\n", CALLSTACK_DEPTH_OFFSET);
-                        sprintf(assembly[currentAssemblyLine + 2], "LDR r2 r0 r1\n");
-                        // Increment the callstack depth by 1 for the return segment
-                        sprintf(assembly[currentAssemblyLine + 3], "ADDC r2 #1\n");
-                        // Store the return segment in the callstack
-                        sprintf(assembly[currentAssemblyLine + 4], "LRC r3 #%d\n", returnAssemblyLine / SEGMENT_SIZE);
-                        sprintf(assembly[currentAssemblyLine + 5], "LDR r3 r0 r2\n");
-                        // Increment the callstack depth by 1 for the return offset
-                        sprintf(assembly[currentAssemblyLine + 6], "ADDC r2 #1\n");
-                        // Store the return offset in the callstack
-                        sprintf(assembly[currentAssemblyLine + 7], "LRC r3 #%d\n", returnAssemblyLine % SEGMENT_SIZE);
-                        sprintf(assembly[currentAssemblyLine + 8], "LDR r3 r0 r2\n");
-                        // Store the callstack depth at 63.0
-                        sprintf(assembly[currentAssemblyLine + 9], "STR r2 r0 r1\n");
-                        // Load the function address and jump
-                        sprintf(assembly[currentAssemblyLine + 10], "LRL r0 r1 @%s\n", sym->identifier);
-                        sprintf(assembly[currentAssemblyLine + 11], "JMP r0 r1\n");
-                        currentAssemblyLine += 12;
-                    }
-                    else
-                    {
-                        printf("Undeclared function %s on line %d\n", token, lineCount);
-                        exit(1);
-                    }
+                    uint32_t returnAssemblyLine = currentAssemblyLine + 12;
+                    // Load current callstack depth
+                    sprintf(assembly[currentAssemblyLine], "LRC r0 #%d\n", CALLSTACK_SEGMENT);
+                    sprintf(assembly[currentAssemblyLine + 1], "LRC r1 #%d\n", CALLSTACK_DEPTH_OFFSET);
+                    sprintf(assembly[currentAssemblyLine + 2], "LDR r2 r0 r1\n");
+                    // Increment the callstack depth by 1 for the return segment
+                    sprintf(assembly[currentAssemblyLine + 3], "ADDC r2 #1\n");
+                    // Store the return segment in the callstack
+                    sprintf(assembly[currentAssemblyLine + 4], "LRC r3 #%d\n", returnAssemblyLine / SEGMENT_SIZE);
+                    sprintf(assembly[currentAssemblyLine + 5], "STR r3 r0 r2\n");
+                    // Increment the callstack depth by 1 for the return offset
+                    sprintf(assembly[currentAssemblyLine + 6], "ADDC r2 #1\n");
+                    // Store the return offset in the callstack
+                    sprintf(assembly[currentAssemblyLine + 7], "LRC r3 #%d\n", returnAssemblyLine % SEGMENT_SIZE);
+                    sprintf(assembly[currentAssemblyLine + 8], "STR r3 r0 r2\n");
+                    // Store the callstack depth at 63.0
+                    sprintf(assembly[currentAssemblyLine + 9], "STR r2 r0 r1\n");
+                    // Load the function address and jump
+                    sprintf(assembly[currentAssemblyLine + 10], "LRL r0 r1 @%s\n", token);
+                    sprintf(assembly[currentAssemblyLine + 11], "JMP r0 r1\n");
+                    currentAssemblyLine += 12;
                 }
                 else
                 {

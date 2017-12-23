@@ -39,7 +39,9 @@ Other operators include addition `+`, subtraction `-`, bitwise and `&`, bitwise 
     xposition = xposition - 1 + 1 - 3;
 
 #### Functions
-Functions are declared with `func <name> {` and must have a closing `}`. Functions implicitly return at `}` and can explicitly return at `return`.
+Functions are declared with `func <name> {` and must have a closing `}`. Functions implicitly return at `}` and can explicitly return at `return`. Functions can be called before declared. 
+
+    call move;
 
     func move {
         if xposition > 125 {
@@ -49,4 +51,3 @@ Functions are declared with `func <name> {` and must have a closing `}`. Functio
         return;
     }
 
-    call move;

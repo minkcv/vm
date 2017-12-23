@@ -1,7 +1,9 @@
 var name;
+
+call setName;
+name = 4;
+
 func setName {
     name = 5;
-    return;
 }
-call setName;
 
