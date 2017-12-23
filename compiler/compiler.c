@@ -16,6 +16,7 @@ enum BlockType
 {
     Block_If = 0,
     Block_While = 1,
+    Block_Function = 2,
 };
 
 typedef struct
@@ -102,6 +103,25 @@ void dumpSymbolMap(Symbol** map)
         }
         i++;
     }
+}
+
+void functionReturn(char** assembly, uint32_t* currentAssemblyLine)
+{
+    // Load current callstack depth
+    sprintf(assembly[*currentAssemblyLine], "LRC r0 #%d\n", CALLSTACK_SEGMENT);
+    sprintf(assembly[*currentAssemblyLine + 1], "LRC r1 #%d\n", CALLSTACK_DEPTH_OFFSET);
+    sprintf(assembly[*currentAssemblyLine + 2], "LDR r2 r0 r1\n");
+    // Load the return offset
+    sprintf(assembly[*currentAssemblyLine + 3], "LDR r3 r0 r2\n");
+    // Load the return segment
+    sprintf(assembly[*currentAssemblyLine + 4], "SUBC r2 #1\n");
+    sprintf(assembly[*currentAssemblyLine + 5], "LDR r4 r0 r2\n");
+    // Update the callstack depth (like pop)
+    sprintf(assembly[*currentAssemblyLine + 6], "SUBC r2 #1\n");
+    sprintf(assembly[*currentAssemblyLine + 7], "STR r2 r0 r1\n");
+    // Jump to the return address
+    sprintf(assembly[*currentAssemblyLine + 8], "JMP r3 r4\n");
+    (*currentAssemblyLine) += 9;
 }
 
 // Returns the result of the expression in the register specified by "returnRegister"
@@ -317,6 +337,10 @@ int main (int argc, char** argv)
                         sprintf(assembly[currentAssemblyLine], "@_end_%d_%d\n", blockEnds[blockDepth]->blockType, blockEnds[blockDepth]->labelId);
                         currentAssemblyLine++;
                     }
+                    if (blockEnds[blockDepth]->blockType == Block_Function)
+                    {
+                        functionReturn(assembly, &currentAssemblyLine);
+                    }
                     blockEnds[blockDepth]->blockType = 0;
                     blockEnds[blockDepth]->labelId = 0;
                 }
@@ -395,25 +419,12 @@ int main (int argc, char** argv)
                     addSymbolToMap(token, symbolMap);
                     sprintf(assembly[currentAssemblyLine], "@%s\n", token);
                     currentAssemblyLine++;
+                    blockEnds[blockDepth]->blockType = Block_Function;
                     blockDepth++;
                 }
                 else if (!strcmp(token, "return"))
                 {
-                    // Load current callstack depth
-                    sprintf(assembly[currentAssemblyLine], "LRC r0 #%d\n", CALLSTACK_SEGMENT);
-                    sprintf(assembly[currentAssemblyLine + 1], "LRC r1 #%d\n", CALLSTACK_DEPTH_OFFSET);
-                    sprintf(assembly[currentAssemblyLine + 2], "LDR r2 r0 r1\n");
-                    // Load the return offset
-                    sprintf(assembly[currentAssemblyLine + 3], "LDR r3 r0 r2\n");
-                    // Load the return segment
-                    sprintf(assembly[currentAssemblyLine + 4], "SUBC r2 #1\n");
-                    sprintf(assembly[currentAssemblyLine + 5], "LDR r4 r0 r2\n");
-                    // Update the callstack depth (like pop)
-                    sprintf(assembly[currentAssemblyLine + 6], "SUBC r2 #1\n");
-                    sprintf(assembly[currentAssemblyLine + 7], "STR r2 r0 r1\n");
-                    // Jump to the return address
-                    sprintf(assembly[currentAssemblyLine + 8], "JMP r3 r4\n");
-                    currentAssemblyLine += 9;
+                    functionReturn(assembly, &currentAssemblyLine);
                 }
                 else if (!strcmp(token, "call"))
                 {

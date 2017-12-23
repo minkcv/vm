@@ -29,22 +29,24 @@ Variables can be compared for equality `==`, less than `<`, and greater than `>`
     aboveOne = xposition > 1;
 
 #### Other Operators
-Other operators include addition `+`, subtraction `-`, bitwise and `&`, bitwise or `|`, bitwise xor `^`, and bitwise not `~`.
+Other operators include addition `+`, subtraction `-`, bitwise and `&`, bitwise or `|`, bitwise xor `^`, and bitwise not `~`. Compound use of operators is supported except for not `~` and the order of operations is right to left.
 
     xposition = xposition - 1;
     xposition = xposition & yposition;
     xposition = ~ xposition;
 
-#### Example
+    // xposition = (xposition - (1 + (1 -3)));
+    xposition = xposition - 1 + 1 - 3;
 
-    // Player sprite position
-    var xposition; // x
-    var yposition; // y
+#### Functions
+Functions are declared with `func <name> {` and must have a closing `}`. Functions implicitly return at `}` and can explicitly return at `return`.
 
     func move {
-        xposition = 5;
-        yposition = xposition + 2;
-        return
+        if xposition > 125 {
+            return;
+        }
+        xposition = xposition + 2;
+        return;
     }
 
     call move;

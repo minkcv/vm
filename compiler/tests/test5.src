@@ -1,6 +1,5 @@
 var name;
 func setName {
     name = 5;
-    return;
 }
 
