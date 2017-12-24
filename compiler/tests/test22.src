@@ -1,0 +1,21 @@
+var previousGPUState;
+var GPUState;
+
+
+// set background to light blue
+[ 127 , 16 ] = 75;
+
+call enableGPU;
+
+func waitScreen {
+    while  GPUState == previousGPUState {
+        GPUState = [ 127 , 17 ];
+        GPUState = GPUState & 2;
+    }
+    previousGPUState = GPUState;
+}
+
+func enableGPU {
+    [ 127 , 17 ] = 1;
+}
+

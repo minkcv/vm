@@ -21,6 +21,7 @@ Put `.spr` files together like as follows to have them all in one ROM file:
     cat enemy.spr >> myrom.rom
 
 Any other data that you want to put in the ROM will have to be done yourself.
+
 #### Running
 Run the binary with
 
@@ -32,3 +33,4 @@ Optionally add:
 - `&> /dev/null` at the end to suppress print statements.
 
 Consider creating a shell script for your program that is similar to the included `mars.sh` script.
+

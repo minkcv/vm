@@ -103,7 +103,7 @@ void exec(VM* vm, Instruction* instr)
             switch(instr->arg0)
             {
                 case EXT_HALT:
-                    printf("Exiting at halt instruction\n");
+                    printf("Exiting at halt instruction (instruction %ld)\n", (vm->pc - vm->code));
                     exit(0);
                     break;
                 case EXT_CPY:
