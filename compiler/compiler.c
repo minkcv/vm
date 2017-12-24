@@ -267,6 +267,19 @@ void decomposeExpression(char** expression, char** assembly, uint32_t* currentAs
     }
 }
 
+uint32_t indexOfLastDot(char* string)
+{
+    uint32_t index = strlen(string);
+    while (index > 0)
+    {
+        if (string[index] == '.')
+            return index;
+
+        index--;
+    }
+    return 0;
+}
+
 int main (int argc, char** argv)
 {
     char* filename = NULL;
@@ -513,7 +526,15 @@ int main (int argc, char** argv)
     fclose(src);
     printf("Read %d lines\n", lineCount);
     dumpSymbolMap(symbolMap);
-    char* noExtension = strsep(&filename, ".");
+    uint32_t index = indexOfLastDot(filename);
+    if (index == 0)
+    {
+        printf("Filename must have extension\n");
+        exit(1);
+    }
+    char* noExtension = malloc(sizeof(char) * index);
+    strncpy(noExtension, filename, index);
+    noExtension[index] = '\0';
     FILE* asmfile = fopen(strcat(noExtension, ".asm"), "wb");
     for (i = 0; i < currentAssemblyLine; i++)
     {
