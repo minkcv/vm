@@ -136,6 +136,17 @@ void decomposeExpression(char** expression, char** assembly, uint32_t* currentAs
     }
     char* savePtr;
     char* token1 = strtok_r(*expression, " ", &savePtr);
+    if (!strcmp(token1, "["))
+    {
+        // Memory access
+        char* segmentExpression = strtok_r(NULL, ",", &savePtr);
+        char* offsetExpression = strtok_r(NULL, "]", &savePtr);
+        decomposeExpression(&segmentExpression, assembly, currentAssemblyLine, map, returnRegister + 1, sourceLine);
+        decomposeExpression(&offsetExpression, assembly, currentAssemblyLine, map, returnRegister + 2, sourceLine);
+        sprintf(assembly[*currentAssemblyLine], "LDR r%d r%d r%d\n", returnRegister, returnRegister + 1, returnRegister + 2);
+        (*currentAssemblyLine)++;
+        return;
+    }
     char* token2 = strtok_r(NULL, " ", &savePtr);
     char* token3 = strtok_r(NULL, "", &savePtr);
 
@@ -150,17 +161,6 @@ void decomposeExpression(char** expression, char** assembly, uint32_t* currentAs
             sprintf(assembly[*currentAssemblyLine + 1], "LRC r%d #%d\n", returnRegister + 2, sym->offset);
             sprintf(assembly[*currentAssemblyLine + 2], "LDR r%d r%d r%d\n", returnRegister, returnRegister + 1, returnRegister + 2);
             (*currentAssemblyLine) += 3;
-        }
-        else if (strstr(token1, "["))
-        {
-            // Parse the opening bracket off.
-            strtok_r(token1, "[", &savePtr);
-            char* segmentExpression = strtok_r(token1, ",", &savePtr);
-            char* offsetExpression = strtok_r(token1, "]", &savePtr);
-            decomposeExpression(&segmentExpression, assembly, currentAssemblyLine, map, returnRegister + 1, sourceLine);
-            decomposeExpression(&offsetExpression, assembly, currentAssemblyLine, map, returnRegister + 2, sourceLine);
-            sprintf(assembly[*currentAssemblyLine], "LDR r%d r%d r%d\n", returnRegister, returnRegister + 1, returnRegister + 2);
-            (*currentAssemblyLine)++;
         }
         else
         {
@@ -397,10 +397,15 @@ int main (int argc, char** argv)
                 }
                 else if (!strcmp(token, "var"))
                 {
-                    token = strtok_r(NULL, " ;", &savePtr);
+                    token = strtok_r(NULL, ";", &savePtr);
                     if (token == NULL)
                     {
-                        printf("Expected identifier after '%s' on line %d\n", token, lineCount);
+                        printf("Expected identifier after 'var' on line %d\n", lineCount);
+                        exit(1);
+                    }
+                    if (strstr(token, " "))
+                    {
+                        printf("Identifier cannon contain space on line %d\n", lineCount);
                         exit(1);
                     }
                     Symbol* sym = lookupSymbol(token, symbolMap);
@@ -476,6 +481,25 @@ int main (int argc, char** argv)
                             currentAssemblyLine += 3;
                         }
                     }
+                    else if (!strcmp(token, "["))
+                    {
+                        // Memory access
+                        char* segmentExpression = strtok_r(NULL, ",", &savePtr);
+                        char* offsetExpression = strtok_r(NULL, "]", &savePtr);
+                        token = strtok_r(NULL, " ", &savePtr);
+                        if (!strcmp(token, "="))
+                        {
+                            token = strtok_r(NULL, ";", &savePtr);
+                            // Decompose the right hand side into r0
+                            decomposeExpression(&token, assembly, &currentAssemblyLine, symbolMap, 0, lineCount);
+                            // Decompose the segment and offset of the memory destination into r1 and r2
+                            decomposeExpression(&segmentExpression, assembly, &currentAssemblyLine, symbolMap, 1, lineCount);
+                            decomposeExpression(&offsetExpression, assembly, &currentAssemblyLine, symbolMap, 2, lineCount);
+                            // Store the result into memory
+                            sprintf(assembly[currentAssemblyLine], "STR r0 r1 r2\n");
+                            currentAssemblyLine++;
+                        }
+                    }
                 }
 
                 // Move to the next non space token
@@ -498,3 +522,4 @@ int main (int argc, char** argv)
     fclose(asmfile);
     return 0;
 }
+
