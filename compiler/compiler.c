@@ -5,7 +5,7 @@
 
 #define MAX_SYMBOLS 1024
 #define MAX_ASSEMBLY_LINE_LENGTH 256
-#define ASSEMBLY_START_LENGTH 4096
+#define ASSEMBLY_START_LENGTH 256
 #define SEGMENT_SIZE 256
 #define CALLSTACK_SEGMENT 63
 #define CALLSTACK_DEPTH_OFFSET 0
@@ -295,6 +295,29 @@ uint32_t indexOfLastDot(char* string)
     return 0;
 }
 
+void allocAssembly(uint32_t currentSize, uint32_t newSize, char*** assembly)
+{
+    int i;
+    char** newAssembly = malloc(sizeof(char*) * newSize);
+    for (i = 0; i < newSize; i++)
+    {
+        newAssembly[i] = malloc(sizeof(char) * MAX_ASSEMBLY_LINE_LENGTH);
+        memset(newAssembly[i], 0, MAX_ASSEMBLY_LINE_LENGTH);
+    }
+    if (*assembly != NULL)
+    {
+        for (i = 0; i < currentSize; i++)
+        {
+            strcpy(newAssembly[i], (*assembly)[i]);
+            free((*assembly)[i]);
+        }
+    }
+    if (*assembly != NULL)
+        free(*assembly);
+
+    *assembly = newAssembly;
+}
+
 int main (int argc, char** argv)
 {
     char* filename = NULL;
@@ -320,12 +343,9 @@ int main (int argc, char** argv)
          exit(1);
     }
 
-    char** assembly = malloc(sizeof(char*) * ASSEMBLY_START_LENGTH);
-    for (i = 0; i < ASSEMBLY_START_LENGTH; i++)
-    {
-        assembly[i] = malloc(sizeof(char) * MAX_ASSEMBLY_LINE_LENGTH);
-        memset(assembly[i], 0, MAX_ASSEMBLY_LINE_LENGTH);
-    }
+    uint32_t assemblySize = ASSEMBLY_START_LENGTH;
+    char** assembly = NULL;
+    allocAssembly(0, assemblySize, &assembly);
     char* lineIn = NULL;
     char* savePtr;
     size_t toRead = 0;
@@ -346,6 +366,17 @@ int main (int argc, char** argv)
 
     while ((charsRead = getline(&lineIn, &toRead, src)) != -1)
     {
+        if (currentAssemblyLine > assemblySize - 64)
+        {
+            // Getting close to the end of the assembly buffer. Reallocate it twice as large.
+            allocAssembly(assemblySize, assemblySize * 2, &assembly);
+            assemblySize = assemblySize * 2;
+            if (instructionCount > 65536)
+            {
+                printf("Compiled program exceeds the maximum number of instructions\n");
+                exit(1);
+            }
+        }
         lineCount++;
         if (lineIn[0] != '\n' )
         {
