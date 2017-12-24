@@ -5,7 +5,7 @@
 
 #define MAX_SYMBOLS 1024
 #define MAX_ASSEMBLY_LINE_LENGTH 256
-#define ASSEMBLY_START_LENGTH 256
+#define ASSEMBLY_START_LENGTH 4096
 #define SEGMENT_SIZE 256
 #define CALLSTACK_SEGMENT 63
 #define CALLSTACK_DEPTH_OFFSET 0
@@ -106,7 +106,7 @@ void dumpSymbolMap(Symbol** map)
     }
 }
 
-void functionReturn(char** assembly, uint32_t* currentAssemblyLine)
+void functionReturn(char** assembly, uint32_t* currentAssemblyLine, uint16_t* instructionCount)
 {
     // Load current callstack depth
     sprintf(assembly[*currentAssemblyLine], "LRC r0 #%d\n", CALLSTACK_SEGMENT);
@@ -123,11 +123,12 @@ void functionReturn(char** assembly, uint32_t* currentAssemblyLine)
     // Jump to the return address
     sprintf(assembly[*currentAssemblyLine + 8], "JMP r4 r3\n");
     (*currentAssemblyLine) += 9;
+    (*instructionCount) += 9;
 }
 
 // Returns the result of the expression in the register specified by "returnRegister"
 // registers below "returnRegister" are considered to be in use by higher decompose calls
-void decomposeExpression(char** expression, char** assembly, uint32_t* currentAssemblyLine, Symbol** map, uint8_t returnRegister, uint32_t sourceLine)
+void decomposeExpression(char** expression, char** assembly, uint32_t* currentAssemblyLine, uint16_t* instructionCount, Symbol** map, uint8_t returnRegister, uint32_t sourceLine)
 {
     if (returnRegister > 12)
     {
@@ -141,10 +142,11 @@ void decomposeExpression(char** expression, char** assembly, uint32_t* currentAs
         // Memory access
         char* segmentExpression = strtok_r(NULL, ",", &savePtr);
         char* offsetExpression = strtok_r(NULL, "]", &savePtr);
-        decomposeExpression(&segmentExpression, assembly, currentAssemblyLine, map, returnRegister + 1, sourceLine);
-        decomposeExpression(&offsetExpression, assembly, currentAssemblyLine, map, returnRegister + 2, sourceLine);
+        decomposeExpression(&segmentExpression, assembly, currentAssemblyLine, instructionCount, map, returnRegister + 1, sourceLine);
+        decomposeExpression(&offsetExpression, assembly, currentAssemblyLine, instructionCount, map, returnRegister + 2, sourceLine);
         sprintf(assembly[*currentAssemblyLine], "LDR r%d r%d r%d\n", returnRegister, returnRegister + 1, returnRegister + 2);
         (*currentAssemblyLine)++;
+        (*instructionCount)++;
         return;
     }
     char* token2 = strtok_r(NULL, " ", &savePtr);
@@ -161,6 +163,7 @@ void decomposeExpression(char** expression, char** assembly, uint32_t* currentAs
             sprintf(assembly[*currentAssemblyLine + 1], "LRC r%d #%d\n", returnRegister + 2, sym->offset);
             sprintf(assembly[*currentAssemblyLine + 2], "LDR r%d r%d r%d\n", returnRegister, returnRegister + 1, returnRegister + 2);
             (*currentAssemblyLine) += 3;
+            (*instructionCount) += 3;
         }
         else
         {
@@ -176,6 +179,7 @@ void decomposeExpression(char** expression, char** assembly, uint32_t* currentAs
             {
                 sprintf(assembly[*currentAssemblyLine], "LRC r%d #%d\n", returnRegister, literal);
                 (*currentAssemblyLine)++;
+                (*instructionCount)++;
             }
         }
     }
@@ -187,82 +191,93 @@ void decomposeExpression(char** expression, char** assembly, uint32_t* currentAs
             Symbol* sym = lookupSymbol(token2, map);
             if (sym != NULL)
             {
-                decomposeExpression(&token2, assembly, currentAssemblyLine, map, returnRegister + 1, sourceLine);
+                decomposeExpression(&token2, assembly, currentAssemblyLine, instructionCount, map, returnRegister + 1, sourceLine);
                 sprintf(assembly[*currentAssemblyLine], "NOT r%d r%d\n", returnRegister, returnRegister + 1);
                 (*currentAssemblyLine)++;
+                (*instructionCount)++;
             }
         }
     }
     else
     {
-        decomposeExpression(&token1, assembly, currentAssemblyLine, map, returnRegister + 1, sourceLine);
-        decomposeExpression(&token3, assembly, currentAssemblyLine, map, returnRegister + 2, sourceLine);
+        decomposeExpression(&token1, assembly, currentAssemblyLine, instructionCount, map, returnRegister + 1, sourceLine);
+        decomposeExpression(&token3, assembly, currentAssemblyLine, instructionCount, map, returnRegister + 2, sourceLine);
         if (!strcmp(token2, "+"))
         {
             sprintf(assembly[*currentAssemblyLine], "ADD r%d r%d r%d\n", returnRegister, returnRegister + 1, returnRegister + 2);
             (*currentAssemblyLine)++;
+            (*instructionCount)++;
         }
         else if (!strcmp(token2, "-"))
         {
             sprintf(assembly[*currentAssemblyLine], "SUB r%d r%d r%d\n", returnRegister, returnRegister + 1, returnRegister + 2);
             (*currentAssemblyLine)++;
+            (*instructionCount)++;
         }
         else if (!strcmp(token2, "&"))
         {
             sprintf(assembly[*currentAssemblyLine], "AND r%d r%d r%d\n", returnRegister, returnRegister + 1, returnRegister + 2);
             (*currentAssemblyLine)++;
+            (*instructionCount)++;
         }
         else if (!strcmp(token2, "|"))
         {
             sprintf(assembly[*currentAssemblyLine], "OR r%d r%d r%d\n", returnRegister, returnRegister + 1, returnRegister + 2);
             (*currentAssemblyLine)++;
+            (*instructionCount)++;
         }
         else if (!strcmp(token2, "^"))
         {
             sprintf(assembly[*currentAssemblyLine], "XOR r%d r%d r%d\n", returnRegister, returnRegister + 1, returnRegister + 2);
             (*currentAssemblyLine)++;
+            (*instructionCount)++;
         }
         else if (!strcmp(token2, ">>"))
         {
             sprintf(assembly[*currentAssemblyLine], "LSR r%d r%d\n", returnRegister + 1, returnRegister + 2);
             sprintf(assembly[*currentAssemblyLine + 1], "CPY r%d r%d\n", returnRegister, returnRegister + 1);
             (*currentAssemblyLine) += 2;
+            (*instructionCount) += 2;
         }
         else if (!strcmp(token2, "<<"))
         {
             sprintf(assembly[*currentAssemblyLine], "LSL r%d r%d\n", returnRegister + 1, returnRegister + 2);
             sprintf(assembly[*currentAssemblyLine + 1], "CPY r%d r%d\n", returnRegister, returnRegister + 1);
             (*currentAssemblyLine) += 2;
+            (*instructionCount) += 2;
         }
         else if (!strcmp(token2, "=="))
         {
             sprintf(assembly[*currentAssemblyLine], "CMP r%d r%d r%d\n", returnRegister + 1, returnRegister + 1, returnRegister + 2);
             sprintf(assembly[*currentAssemblyLine + 1], "LRC r%d #1\n", returnRegister); // Start true (1)
-            sprintf(assembly[*currentAssemblyLine + 2], "LRC r%d #%d\n", returnRegister + 2, (*currentAssemblyLine + 6) / SEGMENT_SIZE);
-            sprintf(assembly[*currentAssemblyLine + 3], "LRC r%d #%d\n", returnRegister + 3, (*currentAssemblyLine + 6) % SEGMENT_SIZE);
+            sprintf(assembly[*currentAssemblyLine + 2], "LRC r%d #%d\n", returnRegister + 2, (*instructionCount + 6) / SEGMENT_SIZE);
+            sprintf(assembly[*currentAssemblyLine + 3], "LRC r%d #%d\n", returnRegister + 3, (*instructionCount + 6) % SEGMENT_SIZE);
             sprintf(assembly[*currentAssemblyLine + 4], "JEQ r%d r%d r%d\n", returnRegister + 1, returnRegister + 2, returnRegister + 3); // Jump over setting to false if equal
             sprintf(assembly[*currentAssemblyLine + 5], "LRC r%d #0\n", returnRegister); // Set false (0)
             (*currentAssemblyLine) += 6;
+            (*instructionCount) += 6;
         }
         else if (!strcmp(token2, "<"))
         {
             sprintf(assembly[*currentAssemblyLine], "CMP r%d r%d r%d\n", returnRegister + 1, returnRegister + 1, returnRegister + 2);
             sprintf(assembly[*currentAssemblyLine + 1], "LRC r%d #1\n", returnRegister); // Start true (1)
-            sprintf(assembly[*currentAssemblyLine + 2], "LRC r%d #%d\n", returnRegister + 2, (*currentAssemblyLine + 6) / SEGMENT_SIZE);
-            sprintf(assembly[*currentAssemblyLine + 3], "LRC r%d #%d\n", returnRegister + 3, (*currentAssemblyLine + 6) % SEGMENT_SIZE);
+            sprintf(assembly[*currentAssemblyLine + 2], "LRC r%d #%d\n", returnRegister + 2, (*instructionCount + 6) / SEGMENT_SIZE);
+            sprintf(assembly[*currentAssemblyLine + 3], "LRC r%d #%d\n", returnRegister + 3, (*instructionCount + 6) % SEGMENT_SIZE);
             sprintf(assembly[*currentAssemblyLine + 4], "JLT r%d r%d r%d\n", returnRegister + 1, returnRegister + 2, returnRegister + 3); // Jump over setting to false if less than
             sprintf(assembly[*currentAssemblyLine + 5], "LRC r%d #0\n", returnRegister); // Set false (0)
             (*currentAssemblyLine) += 6;
+            (*instructionCount) += 6;
         }
         else if (!strcmp(token2, ">"))
         {
             sprintf(assembly[*currentAssemblyLine], "CMP r%d r%d r%d\n", returnRegister + 1, returnRegister + 1, returnRegister + 2);
             sprintf(assembly[*currentAssemblyLine + 1], "LRC r%d #1\n", returnRegister); // Start true (1)
-            sprintf(assembly[*currentAssemblyLine + 2], "LRC r%d #%d\n", returnRegister + 2, (*currentAssemblyLine + 6) / SEGMENT_SIZE);
-            sprintf(assembly[*currentAssemblyLine + 3], "LRC r%d #%d\n", returnRegister + 3, (*currentAssemblyLine + 6) % SEGMENT_SIZE);
+            sprintf(assembly[*currentAssemblyLine + 2], "LRC r%d #%d\n", returnRegister + 2, (*instructionCount + 6) / SEGMENT_SIZE);
+            sprintf(assembly[*currentAssemblyLine + 3], "LRC r%d #%d\n", returnRegister + 3, (*instructionCount + 6) % SEGMENT_SIZE);
             sprintf(assembly[*currentAssemblyLine + 4], "JGT r%d r%d r%d\n", returnRegister + 1, returnRegister + 2, returnRegister + 3); // Jump over setting to false if greater than
             sprintf(assembly[*currentAssemblyLine + 5], "LRC r%d #0\n", returnRegister); // Set false (0)
             (*currentAssemblyLine) += 6;
+            (*instructionCount) += 6;
         }
     }
 }
@@ -316,9 +331,9 @@ int main (int argc, char** argv)
     size_t toRead = 0;
     ssize_t charsRead;
     int lineCount = 0;
-    uint32_t numInstructions = 0;
     Symbol** symbolMap = malloc(sizeof(Symbol*) * MAX_SYMBOLS);
-    uint32_t currentAssemblyLine = 0;
+    uint16_t instructionCount = 0; // True binary instructions count
+    uint32_t currentAssemblyLine = 0; // Number of lines in the assembly
     uint32_t endBlockLabelId = 1;
     int blockDepth = 0;
     BlockEnd** blockEnds = malloc(sizeof(BlockEnd*) * MAX_CODE_BLOCKS);
@@ -359,13 +374,14 @@ int main (int argc, char** argv)
                             sprintf(assembly[currentAssemblyLine], "LRL r0 r1 @_while_%d_%d\n", blockEnds[blockDepth]->blockType, blockEnds[blockDepth]->labelId);
                             sprintf(assembly[currentAssemblyLine + 1], "JMP r0 r1\n");
                             currentAssemblyLine += 2;
+                            instructionCount += 3;
                         }
                         sprintf(assembly[currentAssemblyLine], "@_end_%d_%d\n", blockEnds[blockDepth]->blockType, blockEnds[blockDepth]->labelId);
                         currentAssemblyLine++;
                     }
                     if (blockEnds[blockDepth]->blockType == Block_Function)
                     {
-                        functionReturn(assembly, &currentAssemblyLine);
+                        functionReturn(assembly, &currentAssemblyLine, &instructionCount);
                     }
                     blockEnds[blockDepth]->blockType = 0;
                     blockEnds[blockDepth]->labelId = 0;
@@ -379,26 +395,27 @@ int main (int argc, char** argv)
                     sprintf(assembly[currentAssemblyLine], "@_while_%d_%d\n", Block_While, endBlockLabelId);
                     currentAssemblyLine++;
                     // Load the result of the conditional expression into register 0
-                    decomposeExpression(&token, assembly, &currentAssemblyLine, symbolMap, 0, lineCount);
+                    decomposeExpression(&token, assembly, &currentAssemblyLine, &instructionCount, symbolMap, 0, lineCount);
                     // Compare the conditional expression with false (0)
                     sprintf(assembly[currentAssemblyLine], "LRC r1 #0\n");
                     sprintf(assembly[currentAssemblyLine + 1], "CMP r0 r0 r1\n");
                     sprintf(assembly[currentAssemblyLine + 2], "LRL r1 r2 @_end_%d_%d\n", blockEnds[blockDepth]->blockType, blockEnds[blockDepth]->labelId);
-                    // Jump past the if block if the conditional expression was false (0)
+                    // Jump past the while block if the conditional expression was false (0)
                     sprintf(assembly[currentAssemblyLine + 3], "JEQ r0 r1 r2\n");
                     currentAssemblyLine += 4;
+                    instructionCount += 5;
                     endBlockLabelId++;
                     blockDepth++;
                 }
                 else if (!strcmp(token, "if"))
                 {
-                    token = strtok_r(NULL, " {", &savePtr);
+                    token = strtok_r(NULL, "{", &savePtr);
                     blockEnds[blockDepth]->blockType = Block_If;
                     blockEnds[blockDepth]->labelId = endBlockLabelId;
                     endBlockLabelId++;
                     
                     // Load the result of the conditional expression into register 0
-                    decomposeExpression(&token, assembly, &currentAssemblyLine, symbolMap, 0, lineCount);
+                    decomposeExpression(&token, assembly, &currentAssemblyLine, &instructionCount, symbolMap, 0, lineCount);
                     // Compare the conditional expression with false (0)
                     sprintf(assembly[currentAssemblyLine], "LRC r1 #0\n");
                     sprintf(assembly[currentAssemblyLine + 1], "CMP r0 r0 r1\n");
@@ -406,6 +423,7 @@ int main (int argc, char** argv)
                     // Jump past the if block if the conditional expression was false (0)
                     sprintf(assembly[currentAssemblyLine + 3], "JEQ r0 r1 r2\n");
                     currentAssemblyLine += 4;
+                    instructionCount += 5;
                     blockDepth++;
                 }
                 else if (!strcmp(token, "var"))
@@ -449,12 +467,12 @@ int main (int argc, char** argv)
                 }
                 else if (!strcmp(token, "return"))
                 {
-                    functionReturn(assembly, &currentAssemblyLine);
+                    functionReturn(assembly, &currentAssemblyLine, &instructionCount);
                 }
                 else if (!strcmp(token, "call"))
                 {
                     token = strtok_r(NULL, " ;", &savePtr);
-                    uint32_t returnAssemblyLine = currentAssemblyLine + 12;
+                    uint16_t returnInstruction = instructionCount + 13;
                     // Load current callstack depth
                     sprintf(assembly[currentAssemblyLine], "LRC r0 #%d\n", CALLSTACK_SEGMENT);
                     sprintf(assembly[currentAssemblyLine + 1], "LRC r1 #%d\n", CALLSTACK_DEPTH_OFFSET);
@@ -462,12 +480,12 @@ int main (int argc, char** argv)
                     // Increment the callstack depth by 1 for the return segment
                     sprintf(assembly[currentAssemblyLine + 3], "ADDC r2 #1\n");
                     // Store the return segment in the callstack
-                    sprintf(assembly[currentAssemblyLine + 4], "LRC r3 #%d\n", returnAssemblyLine / SEGMENT_SIZE);
+                    sprintf(assembly[currentAssemblyLine + 4], "LRC r3 #%d\n", returnInstruction / SEGMENT_SIZE);
                     sprintf(assembly[currentAssemblyLine + 5], "STR r3 r0 r2\n");
                     // Increment the callstack depth by 1 for the return offset
                     sprintf(assembly[currentAssemblyLine + 6], "ADDC r2 #1\n");
                     // Store the return offset in the callstack
-                    sprintf(assembly[currentAssemblyLine + 7], "LRC r3 #%d\n", (returnAssemblyLine % SEGMENT_SIZE) + 1);
+                    sprintf(assembly[currentAssemblyLine + 7], "LRC r3 #%d\n", returnInstruction % SEGMENT_SIZE);
                     sprintf(assembly[currentAssemblyLine + 8], "STR r3 r0 r2\n");
                     // Store the callstack depth at 63.0
                     sprintf(assembly[currentAssemblyLine + 9], "STR r2 r0 r1\n");
@@ -475,6 +493,7 @@ int main (int argc, char** argv)
                     sprintf(assembly[currentAssemblyLine + 10], "LRL r0 r1 @%s\n", token);
                     sprintf(assembly[currentAssemblyLine + 11], "JMP r0 r1\n");
                     currentAssemblyLine += 12;
+                    instructionCount += 13;
                 }
                 else
                 {
@@ -485,13 +504,14 @@ int main (int argc, char** argv)
                         if (!strcmp(token, "="))
                         {
                             token = strtok_r(NULL, ";", &savePtr);
-                            decomposeExpression(&token, assembly, &currentAssemblyLine, symbolMap, 0, lineCount);
+                            decomposeExpression(&token, assembly, &currentAssemblyLine, &instructionCount, symbolMap, 0, lineCount);
 
                             // Store the result (r0) into the right hand side identifier
                             sprintf(assembly[currentAssemblyLine], "LRC r1 #%d\n", sym->segment);
                             sprintf(assembly[currentAssemblyLine + 1], "LRC r2 #%d\n", sym->offset);
                             sprintf(assembly[currentAssemblyLine + 2], "STR r0 r1 r2\n");
                             currentAssemblyLine += 3;
+                            instructionCount += 3;
                         }
                     }
                     else if (!strcmp(token, "["))
@@ -504,13 +524,14 @@ int main (int argc, char** argv)
                         {
                             token = strtok_r(NULL, ";", &savePtr);
                             // Decompose the right hand side into r0
-                            decomposeExpression(&token, assembly, &currentAssemblyLine, symbolMap, 0, lineCount);
+                            decomposeExpression(&token, assembly, &currentAssemblyLine, &instructionCount, symbolMap, 0, lineCount);
                             // Decompose the segment and offset of the memory destination into r1 and r2
-                            decomposeExpression(&segmentExpression, assembly, &currentAssemblyLine, symbolMap, 1, lineCount);
-                            decomposeExpression(&offsetExpression, assembly, &currentAssemblyLine, symbolMap, 2, lineCount);
+                            decomposeExpression(&segmentExpression, assembly, &currentAssemblyLine, &instructionCount, symbolMap, 1, lineCount);
+                            decomposeExpression(&offsetExpression, assembly, &currentAssemblyLine, &instructionCount, symbolMap, 2, lineCount);
                             // Store the result into memory
                             sprintf(assembly[currentAssemblyLine], "STR r0 r1 r2\n");
                             currentAssemblyLine++;
+                            instructionCount++;
                         }
                     }
                 }

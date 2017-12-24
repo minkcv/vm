@@ -1,0 +1,6 @@
+var name;
+name = 0;
+
+if name == 0 {
+    name = 3;
+}
