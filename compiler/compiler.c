@@ -121,7 +121,7 @@ void functionReturn(char** assembly, uint32_t* currentAssemblyLine)
     sprintf(assembly[*currentAssemblyLine + 6], "SUBC r2 #1\n");
     sprintf(assembly[*currentAssemblyLine + 7], "STR r2 r0 r1\n");
     // Jump to the return address
-    sprintf(assembly[*currentAssemblyLine + 8], "JMP r3 r4\n");
+    sprintf(assembly[*currentAssemblyLine + 8], "JMP r4 r3\n");
     (*currentAssemblyLine) += 9;
 }
 
@@ -467,7 +467,7 @@ int main (int argc, char** argv)
                     // Increment the callstack depth by 1 for the return offset
                     sprintf(assembly[currentAssemblyLine + 6], "ADDC r2 #1\n");
                     // Store the return offset in the callstack
-                    sprintf(assembly[currentAssemblyLine + 7], "LRC r3 #%d\n", returnAssemblyLine % SEGMENT_SIZE);
+                    sprintf(assembly[currentAssemblyLine + 7], "LRC r3 #%d\n", (returnAssemblyLine % SEGMENT_SIZE) + 1);
                     sprintf(assembly[currentAssemblyLine + 8], "STR r3 r0 r2\n");
                     // Store the callstack depth at 63.0
                     sprintf(assembly[currentAssemblyLine + 9], "STR r2 r0 r1\n");
