@@ -47,6 +47,12 @@ var tile4Y;
 
 // True (1) when a piece hits an existing tile
 var hitBelow;
+// True when the current piece can move right
+var canMoveRight;
+// True when the current piece can move left
+var canMoveLeft;
+// True when the current piece can rotate
+var canRotate;
 
 // Arguments and return values for getTileXY and getXYFromTile
 var getX;
@@ -81,12 +87,20 @@ while 1 {
     buttons = [ 127 , 0 ];
     buttons = buttons & 1; // Up button
     if buttons == 1 {
+        // TODO: rotations
     }
     buttons = [ 127 , 0 ];
-    buttons = buttons & 2; // Down button
-    if buttons == 2 {
+    buttons = buttons & 4; // Left button
+    if buttons == 4 {
     }
-    // TODO: rotations
+    buttons = [ 127 , 0 ];
+    buttons = buttons & 8; // Right button
+    if buttons == 8 {
+        call checkMoveRight;
+        if canMoveRight {
+            call movePieceRight;
+        }
+    }
 
     call checkHitBelow;
     if hitBelow {
@@ -136,6 +150,13 @@ func movePieceDown {
     tile4Y = tile4Y + 1;
 }
 
+func movePieceRight {
+    tile1X = tile1X + 1;
+    tile2X = tile2X + 1;
+    tile3X = tile3X + 1;
+    tile4X = tile4X + 1;
+}
+
 func checkHitBelow {
     hitBelow = 0;
     // Check if a tile is at the bottom
@@ -182,6 +203,51 @@ func checkHitBelow {
     call getTileXY;
     if getXY {
         hitBelow = 1;
+    }
+}
+
+func checkMoveRight {
+    canMoveRight = 1;
+    // Check the right boundary
+    if tile1X > nCols - 1 {
+        canMoveRight = 0;
+    }
+    if tile2X > nCols - 1 {
+        canMoveRight = 0;
+    }
+    if tile3X > nCols - 1 {
+        canMoveRight = 0;
+    }
+    if tile4X > nCols - 1 {
+        canMoveRight = 0;
+    }
+    // Check if a tile hits a tile below
+    getX = tile1X + 1;
+    getY = tile1Y;
+    call getTileXY;
+    if getXY {
+        canMoveRight = 0;
+        return;
+    }
+    getX = tile2X + 1;
+    getY = tile2Y;
+    call getTileXY;
+    if getXY {
+        canMoveRight = 0;
+        return;
+    }
+    getX = tile3X + 1;
+    getY = tile3Y;
+    call getTileXY;
+    if getXY {
+        canMoveRight = 0;
+        return;
+    }
+    getX = tile4X + 1;
+    getY = tile4Y;
+    call getTileXY;
+    if getXY {
+        canMoveRight = 0;
     }
 }
 
@@ -352,7 +418,7 @@ func initSprites {
     }
     spriteSegment = spriteSegment + 1;
     spriteIndex = 0;
-    while spriteIndex < 4 {
+    while spriteIndex < 64 {
         [ spriteSegment , spriteIndex ] = 0; // Disable
         [ spriteSegment , spriteIndex + 3 ] = tileWidth;
         [ spriteSegment , spriteIndex + 4 ] = tileHeight;
