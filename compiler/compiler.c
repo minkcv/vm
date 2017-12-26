@@ -526,6 +526,12 @@ int main (int argc, char** argv)
                     currentAssemblyLine += 12;
                     instructionCount += 13;
                 }
+                else if (!strcmp(token, "halt"))
+                {
+                    sprintf(assembly[currentAssemblyLine], "HALT\n");
+                    currentAssemblyLine++;
+                    instructionCount++;
+                }
                 else
                 {
                     Symbol* sym = lookupSymbol(token, symbolMap);
@@ -577,7 +583,7 @@ int main (int argc, char** argv)
     }
     fclose(src);
     printf("Read %d lines\n", lineCount);
-    dumpSymbolMap(symbolMap);
+    //dumpSymbolMap(symbolMap);
     uint32_t index = indexOfLastDot(filename);
     if (index == 0)
     {
