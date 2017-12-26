@@ -12,7 +12,7 @@ var leftPaddleY;
 var rightPaddleY;
 var buttons;
 var moveSpeed;
-moveSpeed = 4;
+moveSpeed = 2;
 var paddleHeight;
 paddleHeight = 64;
 var paddleWidth;
