@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 make &> /dev/null
 cd pong
 ../assembler -f pong.asm &> /dev/null
