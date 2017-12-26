@@ -27,7 +27,6 @@ Display* createDisplay(int width, int height, int scale)
 
 void updateDisplay(Display* display)
 {
-    SDL_Delay(16);
     if (display->scale != 1)
     {
         SDL_LockSurface(display->back);

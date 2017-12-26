@@ -30,6 +30,11 @@ void run(VM* vm)
     uint32_t displayWaitTime = 16; // 16ms = about 60 refreshes per second
     uint32_t cpuStartTime = SDL_GetTicks();
     uint32_t cpuInstructionCount = 0;
+
+    // Enforce the instructions per second limit in sync with the display refreshes
+    // 500,000 instructions per second is almost the same as 8064 instructions per 16 milliseconds
+    uint32_t instructionsPerSecondFactor = 62;
+
     int wait = 0;
     SDL_Event event;
     SDL_PollEvent(&event);
@@ -53,16 +58,18 @@ void run(VM* vm)
             vm->pc++;
             cpuInstructionCount++;
             free(decoded);
-            if (cpuInstructionCount > 500000)
+
+            if (cpuInstructionCount > INSTRUCTIONS_PER_SECOND / instructionsPerSecondFactor)
                 wait = 1;
         }
-        if ((SDL_GetTicks() - cpuStartTime) > 1000)
+        if ((SDL_GetTicks() - cpuStartTime) > 1000 / instructionsPerSecondFactor)
         {
-            // A second has passed, reset the instruction count and timer
-            if (cpuInstructionCount < INSTRUCTIONS_PER_SECOND)
+            // 16 milliseconds have passed
+            // Reset the instruction count and timer
+            if (cpuInstructionCount < INSTRUCTIONS_PER_SECOND / instructionsPerSecondFactor)
             {
                 printf("Running below desired instructions per second\n");
-                printf("Desired: %d Actual: %d\n", INSTRUCTIONS_PER_SECOND, cpuInstructionCount);
+                printf("Desired: %d Actual: %d\n", INSTRUCTIONS_PER_SECOND / instructionsPerSecondFactor, cpuInstructionCount);
             }
             cpuInstructionCount = 0;
             cpuStartTime = SDL_GetTicks();
