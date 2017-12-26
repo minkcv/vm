@@ -44,4 +44,6 @@
 #define COLOR_DEPTH 8
 // Number of colors in the color palette, directly related to the above number
 #define NUM_COLORS 256
+
+#define INSTRUCTIONS_PER_SECOND 500000
 #endif

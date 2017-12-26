@@ -56,15 +56,17 @@ void run(VM* vm)
             if (cpuInstructionCount > 500000)
                 wait = 1;
         }
-        else // Waiting
+        if ((SDL_GetTicks() - cpuStartTime) > 1000)
         {
-            if ((SDL_GetTicks() - cpuStartTime) > 1000)
+            // A second has passed, reset the instruction count and timer
+            if (cpuInstructionCount < INSTRUCTIONS_PER_SECOND)
             {
-                // Stop waiting
-                cpuInstructionCount = 0;
-                cpuStartTime = SDL_GetTicks();
-                wait = 0;
+                printf("Running below desired instructions per second\n");
+                printf("Desired: %d Actual: %d\n", INSTRUCTIONS_PER_SECOND, cpuInstructionCount);
             }
+            cpuInstructionCount = 0;
+            cpuStartTime = SDL_GetTicks();
+            wait = 0;
         }
         if (displayStartTime + displayWaitTime < SDL_GetTicks())
         {
