@@ -1,0 +1,372 @@
+// Tetris in Vaporlang
+// 2017 Will Smith (minkcv)
+
+var previousGPUState;
+var GPUState;
+var spriteIndex;
+var spriteSegment;
+var buttons;
+var moveSpeed;
+var i;
+var x;
+var y;
+moveSpeed = 4;
+
+// Constants for piece type
+var pieceL;
+var pieceReverseL;
+var pieceS;
+var pieceReverseS;
+var pieceLine;
+var pieceSquare;
+pieceL = 0;
+pieceReverseL = 1;
+pieceS = 2;
+pieceReverseS = 3;
+pieceLine = 4;
+pieceSquare = 5;
+
+var currentPieceType;
+
+var currentRotation;
+
+var tileWidth;
+var tileHeight;
+tileWidth = 4;
+tileHeight = 4;
+
+// Current piece tiles
+var tile1X;
+var tile1Y;
+var tile2X;
+var tile2Y;
+var tile3X;
+var tile3Y;
+var tile4X;
+var tile4Y;
+
+// True (1) when a piece hits an existing tile
+var hitBelow;
+
+// Arguments and return values for getTileXY and getXYFromTile
+var getX;
+var getY;
+var getXY;
+
+// Arguments to setTileXY
+var setX;
+var setY;
+var setXY; // True or false value of tile
+
+var nCols;
+nCols = 8;
+var nRows;
+nRows = 16;
+var nRowsCols;
+nRowsCols = 128; // nRows * nCols
+
+var tileIndex;
+var tileIndex2;
+var rowIndex;
+var colIndex;
+
+call initSprites;
+call reset;
+[ 127 , 17 ] = 1; // Enable GPU
+
+call newPiece;
+
+// Main loop
+while 1 {
+    buttons = [ 127 , 0 ];
+    buttons = buttons & 1; // Up button
+    if buttons == 1 {
+    }
+    buttons = [ 127 , 0 ];
+    buttons = buttons & 2; // Down button
+    if buttons == 2 {
+    }
+    // TODO: rotations
+
+    call checkHitBelow;
+    if hitBelow {
+        call addPieceToTiles;
+        call newPiece;
+    }
+    if hitBelow == 0 {
+        call movePieceDown;
+    }
+
+    call render;
+    call waitScreen;
+}
+
+func newPiece {
+    // Test code
+    tile1X = 0;
+    tile1Y = 0;
+    tile2X = 1;
+    tile2Y = 0;
+    tile3X = 2;
+    tile3Y = 0;
+    tile4X = 3;
+    tile4Y = 0;
+}
+
+func addPieceToTiles {
+    setXY = 1;
+    setX = tile1X;
+    setY = tile1Y;
+    call setTileXY;
+    setX = tile2X;
+    setY = tile2Y;
+    call setTileXY;
+    setX = tile3X;
+    setY = tile3Y;
+    call setTileXY;
+    setX = tile4X;
+    setY = tile4Y;
+    call setTileXY;
+}
+
+func movePieceDown {
+    tile1Y = tile1Y + 1;
+    tile2Y = tile2Y + 1;
+    tile3Y = tile3Y + 1;
+    tile4Y = tile4Y + 1;
+}
+
+func checkHitBelow {
+    hitBelow = 0;
+    // Check if a tile is at the bottom
+    if tile1Y == nRows - 1{
+        hitBelow = 1;
+        return;
+    }
+    if tile2Y == nRows - 1{
+        hitBelow = 1;
+        return;
+    }
+    if tile3Y == nRows - 1{
+        hitBelow = 1;
+        return;
+    }
+    if tile4Y == nRows - 1{
+        hitBelow = 1;
+        return;
+    }
+    // Check if a tile hits a tile below
+    getX = tile1X;
+    getY = tile1Y + 1;
+    call getTileXY;
+    if getXY {
+        hitBelow = 1;
+        return;
+    }
+    getX = tile2X;
+    getY = tile2Y + 1;
+    call getTileXY;
+    if getXY {
+        hitBelow = 1;
+        return;
+    }
+    getX = tile3X;
+    getY = tile3Y + 1;
+    call getTileXY;
+    if getXY {
+        hitBelow = 1;
+        return;
+    }
+    getX = tile4X;
+    getY = tile4Y + 1;
+    call getTileXY;
+    if getXY {
+        hitBelow = 1;
+    }
+}
+
+func getTileXY {
+    tileIndex = 0;
+    rowIndex = 0;
+    colIndex = 0;
+    while rowIndex < getX {
+        rowIndex = rowIndex + 1;
+        tileIndex = tileIndex + 1;
+    }
+    while colIndex < getY {
+        colIndex = colIndex + 1;
+        tileIndex = tileIndex + nCols;
+    }
+    getXY = [ 0 , tileIndex ];
+}
+
+func getXYFromTile {
+    getX = 0;
+    getY = 0;
+    while tileIndex > nCols - 1 {
+        getY = getY + 1;
+        tileIndex = tileIndex - nCols;
+    }
+    getX = tileIndex;
+}
+
+func setTileXY {
+    tileIndex = 0;
+    rowIndex = 0;
+    colIndex = 0;
+    while rowIndex < setX {
+        rowIndex = rowIndex + 1;
+        tileIndex = tileIndex + 1;
+    }
+    while colIndex < setY {
+        colIndex = colIndex + 1;
+        tileIndex = tileIndex + nCols;
+    }
+    [ 0 , tileIndex ] = setXY;
+}
+
+func render {
+    spriteIndex = 0;
+    spriteSegment = 64;
+    tileIndex2 = 0;
+    while tileIndex2 < nRowsCols {
+        [ spriteSegment , spriteIndex ] = 0; // Disable
+        if [ 0 , tileIndex2 ] {
+            [ spriteSegment , spriteIndex ] = 128; // Enable
+        }
+        tileIndex = tileIndex2;
+        call getXYFromTile;
+        i = 0;
+        x = 0;
+        while i < getX {
+            x = x + tileWidth;
+            i = i + 1;
+        }
+        [ spriteSegment , spriteIndex + 1 ] = x;
+
+        i = 0;
+        y = 0;
+        while i < getY {
+            y = y + tileHeight;
+            i = i + 1;
+        }
+        [ spriteSegment , spriteIndex + 2 ] = y;
+        
+        if spriteIndex == 240 {
+            spriteSegment = spriteSegment + 1;
+        }
+        spriteIndex = spriteIndex + 16;
+        tileIndex2 = tileIndex2 + 1;
+    }
+    spriteSegment = spriteSegment + 1;
+    spriteIndex = 0;
+    i = 0;
+    x = 0;
+    while i < tile1X {
+        x = x + tileWidth;
+        i = i + 1;
+    }
+    i = 0;
+    y = 0;
+    while i < tile1Y {
+        y = y + tileHeight;
+        i = i + 1;
+    }
+    [ spriteSegment , spriteIndex ] = 128;
+    [ spriteSegment , spriteIndex + 1 ] = x;
+    [ spriteSegment , spriteIndex + 2 ] = y;
+    spriteIndex = spriteIndex + 16;
+    i = 0;
+    x = 0;
+    while i < tile2X {
+        x = x + tileWidth;
+        i = i + 1;
+    }
+    i = 0;
+    y = 0;
+    while i < tile2Y {
+        y = y + tileHeight;
+        i = i + 1;
+    }
+    [ spriteSegment , spriteIndex ] = 128;
+    [ spriteSegment , spriteIndex + 1 ] = x;
+    [ spriteSegment , spriteIndex + 2 ] = y;
+    spriteIndex = spriteIndex + 16;
+    i = 0;
+    x = 0;
+    while i < tile3X {
+        x = x + tileWidth;
+        i = i + 1;
+    }
+    i = 0;
+    y = 0;
+    while i < tile3Y {
+        y = y + tileHeight;
+        i = i + 1;
+    }
+    [ spriteSegment , spriteIndex ] = 128;
+    [ spriteSegment , spriteIndex + 1 ] = x;
+    [ spriteSegment , spriteIndex + 2 ] = y;
+    spriteIndex = spriteIndex + 16;
+    i = 0;
+    x = 0;
+    while i < tile4X {
+        x = x + tileWidth;
+        i = i + 1;
+    }
+    i = 0;
+    y = 0;
+    while i < tile4Y {
+        y = y + tileHeight;
+        i = i + 1;
+    }
+    [ spriteSegment , spriteIndex ] = 128;
+    [ spriteSegment , spriteIndex + 1 ] = x;
+    [ spriteSegment , spriteIndex + 2 ] = y;
+}
+
+func reset {
+    // Clear the rows and columns
+    tileIndex = 0;
+    while tileIndex < nRowsCols {
+        [ 0 , tileIndex ] = 0;
+        tileIndex = tileIndex + 1;
+    }
+}
+
+func initSprites {
+    spriteIndex = 0;
+    spriteSegment = 64;
+    tileIndex = 0;
+    while tileIndex < nRowsCols {
+        [ spriteSegment , spriteIndex ] = 0; // Disable
+        [ spriteSegment , spriteIndex + 3 ] = tileWidth;
+        [ spriteSegment , spriteIndex + 4 ] = tileHeight;
+        [ spriteSegment , spriteIndex + 5 ] = 128; // Sprite data segment
+        [ spriteSegment , spriteIndex + 7 ] = 255; // White
+        if spriteIndex == 240 {
+            spriteSegment = spriteSegment + 1;
+        }
+        spriteIndex = spriteIndex + 16;
+        tileIndex = tileIndex + 1;
+    }
+    spriteSegment = spriteSegment + 1;
+    spriteIndex = 0;
+    while spriteIndex < 4 {
+        [ spriteSegment , spriteIndex ] = 0; // Disable
+        [ spriteSegment , spriteIndex + 3 ] = tileWidth;
+        [ spriteSegment , spriteIndex + 4 ] = tileHeight;
+        [ spriteSegment , spriteIndex + 5 ] = 128; // Sprite data segment
+        [ spriteSegment , spriteIndex + 7 ] = 255; // White
+        spriteIndex = spriteIndex + 16;
+    }
+}
+
+func waitScreen {
+    while  GPUState == previousGPUState {
+        GPUState = [ 127 , 17 ];
+        GPUState = GPUState & 2;
+    }
+    previousGPUState = GPUState;
+}
+
