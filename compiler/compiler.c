@@ -20,11 +20,19 @@ enum BlockType
     Block_Function = 2,
 };
 
+enum SymbolType
+{
+    Symbol_Variable,
+    Symbol_Constant,
+};
+
 typedef struct
 {
     uint8_t segment;
     uint8_t offset;
     char* identifier;
+    uint16_t value;
+    enum SymbolType symbolType;
 } Symbol;
 
 typedef struct
@@ -50,12 +58,11 @@ Symbol* lookupSymbol(char* identifier, Symbol** map)
     return NULL;
 }
 
-Symbol* addSymbolToMap(char* identifier, Symbol** map)
+Symbol* addVariableToMap(char* identifier, Symbol** map)
 {
     int i = 0; // Where the new symbol will go in the map
     int segment = SYMBOL_START_SEGMENT;
     int offset = 0;
-    Symbol* existing = NULL;
     while (i < MAX_SYMBOLS)
     {
         if (map[0] == NULL) // No symbols yet
@@ -64,8 +71,8 @@ Symbol* addSymbolToMap(char* identifier, Symbol** map)
         if (map[i] == NULL) // Previous symbol was the last
         {
             // Use the next available segment/offset pair.
-            segment = existing->segment;
-            offset = existing->offset;
+            segment = map[i - 1]->segment;
+            offset = map[i - 1]->offset;
             if (offset == SEGMENT_SIZE - 1)
             {
                 segment++;
@@ -76,7 +83,6 @@ Symbol* addSymbolToMap(char* identifier, Symbol** map)
 
             break;
         }
-        existing = map[i];
         i++;
     }
     Symbol* sym = malloc(sizeof(Symbol));
@@ -84,6 +90,24 @@ Symbol* addSymbolToMap(char* identifier, Symbol** map)
     strcpy(sym->identifier, identifier);
     sym->segment = segment;
     sym->offset = offset;
+    sym->symbolType = Symbol_Variable;
+    map[i] = sym;
+    return sym;
+}
+
+Symbol* addConstantToMap(char* identifier, Symbol** map, uint16_t value)
+{
+    int i; // Where the new symbol will go in the map
+    for (i = 0; i < MAX_SYMBOLS; i++)
+    {
+        if (map[i] == NULL) // Previous symbol was the last
+            break;
+    }
+    Symbol* sym = malloc(sizeof(Symbol));
+    sym->identifier = malloc(sizeof(char) * (strlen(identifier) + 1));
+    strcpy(sym->identifier, identifier);
+    sym->value = value;
+    sym->symbolType = Symbol_Constant;
     map[i] = sym;
     return sym;
 }
@@ -158,19 +182,29 @@ void decomposeExpression(char** expression, char** assembly, uint32_t* currentAs
         Symbol* sym = lookupSymbol(token1, map);
         if (sym != NULL)
         {
-            // Identifier
-            sprintf(assembly[*currentAssemblyLine], "LRC r%d #%d\n", returnRegister + 1, sym->segment);
-            sprintf(assembly[*currentAssemblyLine + 1], "LRC r%d #%d\n", returnRegister + 2, sym->offset);
-            sprintf(assembly[*currentAssemblyLine + 2], "LDR r%d r%d r%d\n", returnRegister, returnRegister + 1, returnRegister + 2);
-            (*currentAssemblyLine) += 3;
-            (*instructionCount) += 3;
+            if (sym->symbolType == Symbol_Variable)
+            {
+                // Variable
+                sprintf(assembly[*currentAssemblyLine], "LRC r%d #%d\n", returnRegister + 1, sym->segment);
+                sprintf(assembly[*currentAssemblyLine + 1], "LRC r%d #%d\n", returnRegister + 2, sym->offset);
+                sprintf(assembly[*currentAssemblyLine + 2], "LDR r%d r%d r%d\n", returnRegister, returnRegister + 1, returnRegister + 2);
+                (*currentAssemblyLine) += 3;
+                (*instructionCount) += 3;
+            }
+            else if (sym->symbolType == Symbol_Constant)
+            {
+                // Constant
+                sprintf(assembly[*currentAssemblyLine], "LRC r%d #%d\n", returnRegister , sym->value);
+                (*currentAssemblyLine)++;
+                (*instructionCount)++;
+            }
         }
         else
         {
             // Literal integer
             char* end;
             uint8_t literal = (uint8_t)strtol(token1, &end, 10);
-            if (!strcmp(token1, end))
+            if ('\0' == end)
             {
                 printf("Failed to parse %s as identifier or literal int\n", token1);
                 exit(1);
@@ -476,7 +510,32 @@ int main (int argc, char** argv)
                         printf("Redefinition of %s on line %d\n", token, lineCount);
                         exit(1);
                     }
-                    addSymbolToMap(token, symbolMap);
+                    addVariableToMap(token, symbolMap);
+                }
+                else if (!strcmp(token, "const"))
+                {
+                    token = strtok_r(NULL, " ", &savePtr);
+                    if (token == NULL)
+                    {
+                        printf("Expected identifier after 'const' on line %d\n", lineCount);
+                        exit(1);
+                    }
+                    Symbol* sym = lookupSymbol(token, symbolMap);
+                    if (sym != NULL)
+                    {
+                        printf("Redefinition of %s on line %d\n", token, lineCount);
+                        exit(1);
+                    }
+                    char* identifier = token;
+                    token = strtok_r(NULL, ";", &savePtr);
+                    char* end;
+                    uint16_t value = (uint16_t)strtol(token, &end, 10);
+                    if ('\0' ==  end)
+                    {
+                        printf("Failed to parse %s as identifier or literal int\n", token);
+                        exit(1);
+                    }
+                    addConstantToMap(identifier, symbolMap, value);
                 }
                 else if (!strcmp(token, "func"))
                 {
