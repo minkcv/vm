@@ -6,34 +6,25 @@ var GPUState;
 var spriteIndex;
 var spriteSegment;
 var buttons;
-var moveSpeed;
+const moveSpeed 4;
 var i;
 var x;
 var y;
-moveSpeed = 4;
 
 // Constants for piece type
-var pieceL;
-var pieceReverseL;
-var pieceS;
-var pieceReverseS;
-var pieceLine;
-var pieceSquare;
-pieceL = 0;
-pieceReverseL = 1;
-pieceS = 2;
-pieceReverseS = 3;
-pieceLine = 4;
-pieceSquare = 5;
+const pieceL 0;
+const pieceReverseL 1;
+const pieceS 2;
+const pieceReverseS 3;
+const pieceLine 4;
+const pieceSquare 5;
 
 var currentPieceType;
 
 var currentRotation;
 
-var tileWidth;
-var tileHeight;
-tileWidth = 4;
-tileHeight = 4;
+const tileWidth 4;
+const tileHeight 4;
 
 // Current piece tiles
 var tile1X;
@@ -64,17 +55,15 @@ var setX;
 var setY;
 var setXY; // True or false value of tile
 
-var nCols;
-nCols = 8;
-var nRows;
-nRows = 16;
-var nRowsCols;
-nRowsCols = 128; // nRows * nCols
+const nCols 8;
+const nRows 16;
+const nRowsCols 128; // nRows * nCols
 
 var tileIndex;
 var tileIndex2;
 var rowIndex;
 var colIndex;
+
 
 call initSprites;
 call reset;
