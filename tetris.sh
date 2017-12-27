@@ -1,4 +1,6 @@
 #!/bin/bash
+rm tetris/tetris.asm &> /dev/null
+rm tetris/tetris.bin &> /dev/null
 cd compiler
 make &> /dev/null
 cd ..

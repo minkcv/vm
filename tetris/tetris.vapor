@@ -92,6 +92,10 @@ while 1 {
     buttons = [ 127 , 0 ];
     buttons = buttons & 4; // Left button
     if buttons == 4 {
+        call checkMoveLeft;
+        if canMoveLeft {
+            call movePieceLeft;
+        }
     }
     buttons = [ 127 , 0 ];
     buttons = buttons & 8; // Right button
@@ -157,6 +161,13 @@ func movePieceRight {
     tile4X = tile4X + 1;
 }
 
+func movePieceLeft {
+    tile1X = tile1X - 1;
+    tile2X = tile2X - 1;
+    tile3X = tile3X - 1;
+    tile4X = tile4X - 1;
+}
+
 func checkHitBelow {
     hitBelow = 0;
     // Check if a tile is at the bottom
@@ -209,19 +220,23 @@ func checkHitBelow {
 func checkMoveRight {
     canMoveRight = 1;
     // Check the right boundary
-    if tile1X > nCols - 1 {
+    if tile1X == nCols - 1 {
         canMoveRight = 0;
+        return;
     }
-    if tile2X > nCols - 1 {
+    if tile2X == nCols - 1 {
         canMoveRight = 0;
+        return;
     }
-    if tile3X > nCols - 1 {
+    if tile3X == nCols - 1 {
         canMoveRight = 0;
+        return;
     }
-    if tile4X > nCols - 1 {
+    if tile4X == nCols - 1 {
         canMoveRight = 0;
+        return;
     }
-    // Check if a tile hits a tile below
+    // Check if a tile hits a tile to the right
     getX = tile1X + 1;
     getY = tile1Y;
     call getTileXY;
@@ -248,6 +263,55 @@ func checkMoveRight {
     call getTileXY;
     if getXY {
         canMoveRight = 0;
+    }
+}
+
+func checkMoveLeft {
+    canMoveLeft = 1;
+    // Check the left boundary
+    if tile1X == 0 {
+        canMoveLeft = 0;
+        return;
+    }
+    if tile2X == 0 {
+        canMoveLeft = 0;
+        return;
+    }
+    if tile3X == 0 {
+        canMoveLeft = 0;
+        return;
+    }
+    if tile4X == 0 {
+        canMoveLeft = 0;
+        return;
+    }
+    // Check if a tile hits a tile to the left
+    getX = tile1X - 1;
+    getY = tile1Y;
+    call getTileXY;
+    if getXY {
+        canMoveLeft = 0;
+        return;
+    }
+    getX = tile2X - 1;
+    getY = tile2Y;
+    call getTileXY;
+    if getXY {
+        canMoveLeft = 0;
+        return;
+    }
+    getX = tile3X - 1;
+    getY = tile3Y;
+    call getTileXY;
+    if getXY {
+        canMoveLeft = 0;
+        return;
+    }
+    getX = tile4X - 1;
+    getY = tile4Y;
+    call getTileXY;
+    if getXY {
+        canMoveLeft = 0;
     }
 }
 

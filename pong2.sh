@@ -1,4 +1,6 @@
 #!/bin/bash
+rm pong2/pong2.bin &> /dev/null
+rm pong2/pong2.asm &> /dev/null
 cd compiler
 make &> /dev/null
 cd ..
