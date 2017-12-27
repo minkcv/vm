@@ -63,24 +63,29 @@ Symbol* addVariableToMap(char* identifier, Symbol** map)
     int i = 0; // Where the new symbol will go in the map
     int segment = SYMBOL_START_SEGMENT;
     int offset = 0;
+    Symbol* lastVariable = NULL;
     while (i < MAX_SYMBOLS)
     {
-        if (map[0] == NULL) // No symbols yet
-            break;
+        if (map[i] != NULL)
+            if (map[i]->symbolType == Symbol_Variable)
+                lastVariable = map[i];
 
         if (map[i] == NULL) // Previous symbol was the last
         {
-            // Use the next available segment/offset pair.
-            segment = map[i - 1]->segment;
-            offset = map[i - 1]->offset;
-            if (offset == SEGMENT_SIZE - 1)
+            if (lastVariable != NULL)
             {
-                segment++;
-                offset = 0;
-            }
-            else
-                offset++;
+                // Use the next available segment/offset pair.
+                segment = lastVariable->segment;
+                offset = lastVariable->offset;
+                if (offset == SEGMENT_SIZE - 1)
+                {
+                    segment++;
+                    offset = 0;
+                }
+                else
+                    offset++;
 
+            }
             break;
         }
         i++;
@@ -124,7 +129,10 @@ void dumpSymbolMap(Symbol** map)
             break;
         if (sym != NULL)
         {
-            printf("%s %d %d\n", sym->identifier, sym->segment, sym->offset);
+            if (sym->symbolType == Symbol_Variable)
+                printf("%s %d %d\n", sym->identifier, sym->segment, sym->offset);
+            else if (sym->symbolType == Symbol_Constant)
+                printf("%s %d\n", sym->identifier, sym->value);
         }
         i++;
     }
@@ -539,7 +547,7 @@ int main (int argc, char** argv)
                 }
                 else if (!strcmp(token, "func"))
                 {
-                    token = strtok_r(NULL, " {", &savePtr);
+                    token = strtok_r(NULL, "{", &savePtr);
                     if (token == NULL)
                     {
                         printf("Expected identifier after '%s' on line %d\n", token, lineCount);
@@ -591,7 +599,7 @@ int main (int argc, char** argv)
                     currentAssemblyLine++;
                     instructionCount++;
                 }
-                else
+                else if (strcmp(token, ";") && strcmp(token, "\n"))
                 {
                     Symbol* sym = lookupSymbol(token, symbolMap);
                     if (sym != NULL)
@@ -629,6 +637,11 @@ int main (int argc, char** argv)
                             currentAssemblyLine++;
                             instructionCount++;
                         }
+                    }
+                    else
+                    {
+                        printf("Unknown token %s on line %d\n", token, lineCount);
+                        exit(1);
                     }
                 }
 
