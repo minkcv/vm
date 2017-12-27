@@ -13,7 +13,7 @@ VM* createVM(uint16_t* code, uint8_t* rom, Display* display)
     vm->code = code;
     vm->pc = code;
     vm->display = display;
-    vm->gpu = createGPU(display);
+    vm->gpu = createGPU();
     vm->ipu = createIPU();
     memset(vm->memory, 0, sizeof(vm->memory[0][0]) * MEMORY_SEGMENT_COUNT * MEMORY_SEGMENT_SIZE);
     memset(vm->regs, 0, sizeof(vm->regs[0]) * REGISTER_COUNT);
@@ -46,7 +46,8 @@ void run(VM* vm)
         }
         if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP)
         {
-            updateIPU(vm->ipu, event.key, vm->memory);
+            if (event.key.repeat == 0)
+                updateIPU(vm->ipu, event.key, vm->memory);
         }
 
         // Executing

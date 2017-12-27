@@ -13,14 +13,13 @@ struct Display
     SDL_Window* window;
     SDL_Renderer* renderer;
     SDL_Texture* back;
-    SDL_Color* colors; // Colors of the color palette
-    int ncolors;
     int width;
     int height;
     int scale;
+    int pitch;
 };
 
-Display* createDisplay(int width, int height, int scale);
+Display* createDisplay(int width, int height, int scale, int pitch);
 
 void updateDisplay(Display* display, GPU* gpu);
 

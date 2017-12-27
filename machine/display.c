@@ -1,6 +1,6 @@
 #include "display.h"
 
-Display* createDisplay(int width, int height, int scale)
+Display* createDisplay(int width, int height, int scale, int pitch)
 {
     SDL_Init(SDL_INIT_VIDEO);
 
@@ -8,11 +8,12 @@ Display* createDisplay(int width, int height, int scale)
     display->width = width;
     display->height = height;
     display->scale = scale;
+    display->pitch = pitch;
     display->window = SDL_CreateWindow("vapor Spec", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
             width * scale, height * scale, 0);
     display->renderer = SDL_CreateRenderer(display->window, -1, 0);
     display->back = SDL_CreateTexture(display->renderer, 
-            SDL_PIXELFORMAT_INDEX8, SDL_TEXTUREACCESS_STREAMING, width, height);
+            SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, width, height);
     //SDL_Palette* palette = display->screen->format->palette;
     //display->colors = palette->colors;
     //display->ncolors = palette->ncolors;

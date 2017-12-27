@@ -1,12 +1,12 @@
 #include "gpu.h"
 #include <stdlib.h>
 
-GPU* createGPU(Display* display)
+GPU* createGPU()
 {
     GPU* gpu = (GPU*)malloc(sizeof(GPU));
     gpu->active = 1;
-    gpu->pitch = display->pitch;
-    gpu->pixels = malloc(sizeof(uint8_t) * display->width * display->height / 4);
+    gpu->pitch = SCREEN_WIDTH * 4;
+    gpu->pixels = malloc(sizeof(uint8_t) * 4 * SCREEN_WIDTH * SCREEN_HEIGHT);
     return gpu;
 }
 
@@ -48,7 +48,9 @@ void readSpritesFromMem(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SE
 void drawSprites(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_SIZE])
 {
     int i;
-    uint8_t* pixels = (uint8_t*)gpu->pixels;
+    uint8_t* pixels = gpu->pixels;
+    // TODO: get background color
+    memset(pixels, 0, SCREEN_WIDTH * SCREEN_HEIGHT * 4 * sizeof(uint8_t));
     for (i = 0; i < NUM_SPRITES; i++)
     {
         if (gpu->sprAttrs[i].active && 
@@ -94,19 +96,36 @@ void drawSprites(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_S
                     uint8_t bits2 = (fourPixels >> 4) & 0x3;
                     uint8_t bits3 = (fourPixels >> 2) & 0x3;
                     uint8_t bits4 = fourPixels & 0x3;
+                    // TODO: get rgb
                     uint8_t pixel1 = gpu->sprAttrs[i].colors[bits1];
                     uint8_t pixel2 = gpu->sprAttrs[i].colors[bits2];
                     uint8_t pixel3 = gpu->sprAttrs[i].colors[bits3];
                     uint8_t pixel4 = gpu->sprAttrs[i].colors[bits4];
-                    uint8_t* curPixel = (uint8_t*)(pixels + x + (y * gpu->pitch) + (w * 4) + (h * gpu->pitch));
+                    uint8_t* curPixel = pixels + (x * 4) + (y * gpu->pitch) + (w * 4 * 4) + (h * gpu->pitch);
                     if (!(gpu->sprAttrs[i].color4Alpha && bits1 == 0x3))
+                    {
                         *curPixel = pixel1;
+                        *(curPixel + 1) = pixel1;
+                        *(curPixel + 2) = pixel1;
+                    }
                     if (!(gpu->sprAttrs[i].color4Alpha && bits2 == 0x3))
-                        *(curPixel + 1) = pixel2;
+                    {
+                        *(curPixel + 4) = pixel2;
+                        *(curPixel + 5) = pixel2;
+                        *(curPixel + 6) = pixel2;
+                    }
                     if (!(gpu->sprAttrs[i].color4Alpha && bits3 == 0x3))
-                        *(curPixel + 2) = pixel3;
+                    {
+                        *(curPixel + 8) = pixel3;
+                        *(curPixel + 9) = pixel3;
+                        *(curPixel + 10) = pixel3;
+                    }
                     if (!(gpu->sprAttrs[i].color4Alpha && bits4 == 0x3))
-                        *(curPixel + 3) = pixel4;
+                    {
+                        *(curPixel + 12) = pixel4;
+                        *(curPixel + 13) = pixel4;
+                        *(curPixel + 14) = pixel4;
+                    }
                 }
             }
         }

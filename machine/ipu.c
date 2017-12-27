@@ -2,7 +2,6 @@
 
 IPU* createIPU()
 {
-    SDL_EnableKeyRepeat(0, 0); // DISABLE key repeat
     IPU* ipu = (IPU*)malloc(sizeof(IPU));
     JOYSTICK* js1 = (JOYSTICK*)malloc(sizeof(JOYSTICK));
     js1->buttons[0] = SDLK_UP;

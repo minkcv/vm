@@ -3,13 +3,11 @@
 
 #include "constants.h"
 #include "vm.h"
-#include "display.h"
 #include <stdint.h>
 #include <SDL.h>
 
 typedef struct VM VM;
 typedef struct GPU GPU;
-typedef struct Display Display;
 
 // Sprite Attribute
 // Describes a sprite and how it should be rendered
@@ -40,7 +38,7 @@ struct GPU
     unsigned int refreshed : 1; // Changes 0 -> 1 or 1 -> 0 when the display refreshes
 };
 
-GPU* createGPU(Display* display);
+GPU* createGPU();
 
 void updateGPU(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_SIZE]);
 
