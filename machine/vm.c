@@ -13,7 +13,7 @@ VM* createVM(uint16_t* code, uint8_t* rom, Display* display)
     vm->code = code;
     vm->pc = code;
     vm->display = display;
-    vm->gpu = createGPU(display->back);
+    vm->gpu = createGPU(display);
     vm->ipu = createIPU();
     memset(vm->memory, 0, sizeof(vm->memory[0][0]) * MEMORY_SEGMENT_COUNT * MEMORY_SEGMENT_SIZE);
     memset(vm->regs, 0, sizeof(vm->regs[0]) * REGISTER_COUNT);
@@ -80,10 +80,13 @@ void run(VM* vm)
             updateGPU(vm->gpu, vm->memory);
             if (vm->gpu->active)
             {
-                drawBackground(vm->gpu, vm->memory);
+                uint8_t backgroundColor = vm->memory[BACK_COLOR_SEG][BACK_COLOR_OFFSET];
+                // TODO: SDL2
+                SDL_SetRenderDrawColor(vm->display->renderer, 0, 0, 0, 255);
+                SDL_RenderFillRect(vm->display->renderer, NULL);
                 readSpritesFromMem(vm->gpu, vm->memory);
                 drawSprites(vm->gpu, vm->memory);
-                updateDisplay(vm->display);
+                updateDisplay(vm->display, vm->gpu);
             }
             displayStartTime = SDL_GetTicks();
         }

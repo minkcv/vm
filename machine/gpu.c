@@ -1,11 +1,12 @@
 #include "gpu.h"
 #include <stdlib.h>
 
-GPU* createGPU(SDL_Surface* back)
+GPU* createGPU(Display* display)
 {
     GPU* gpu = (GPU*)malloc(sizeof(GPU));
-    gpu->back = back;
     gpu->active = 1;
+    gpu->pitch = display->pitch;
+    gpu->pixels = malloc(sizeof(uint8_t) * display->width * display->height / 4);
     return gpu;
 }
 
@@ -47,8 +48,7 @@ void readSpritesFromMem(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SE
 void drawSprites(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_SIZE])
 {
     int i;
-    SDL_LockSurface(gpu->back);
-    uint8_t* pixels = (uint8_t*)gpu->back->pixels;
+    uint8_t* pixels = (uint8_t*)gpu->pixels;
     for (i = 0; i < NUM_SPRITES; i++)
     {
         if (gpu->sprAttrs[i].active && 
@@ -98,7 +98,7 @@ void drawSprites(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_S
                     uint8_t pixel2 = gpu->sprAttrs[i].colors[bits2];
                     uint8_t pixel3 = gpu->sprAttrs[i].colors[bits3];
                     uint8_t pixel4 = gpu->sprAttrs[i].colors[bits4];
-                    uint8_t* curPixel = (uint8_t*)(pixels + x + (y * gpu->back->pitch) + (w * 4) + (h * gpu->back->pitch));
+                    uint8_t* curPixel = (uint8_t*)(pixels + x + (y * gpu->pitch) + (w * 4) + (h * gpu->pitch));
                     if (!(gpu->sprAttrs[i].color4Alpha && bits1 == 0x3))
                         *curPixel = pixel1;
                     if (!(gpu->sprAttrs[i].color4Alpha && bits2 == 0x3))
@@ -111,11 +111,5 @@ void drawSprites(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_S
             }
         }
     }
-    SDL_UnlockSurface(gpu->back);
 }
 
-void drawBackground(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_SIZE])
-{
-    uint8_t color = memory[BACK_COLOR_SEG][BACK_COLOR_OFFSET];
-    SDL_FillRect(gpu->back, NULL, color);
-}

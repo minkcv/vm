@@ -3,11 +3,13 @@
 
 #include "constants.h"
 #include "vm.h"
+#include "display.h"
 #include <stdint.h>
 #include <SDL.h>
 
 typedef struct VM VM;
 typedef struct GPU GPU;
+typedef struct Display Display;
 
 // Sprite Attribute
 // Describes a sprite and how it should be rendered
@@ -32,20 +34,19 @@ typedef struct
 struct GPU
 {
     SpriteAttr sprAttrs[NUM_SPRITES];
-    SDL_Surface* back; // Screen back buffer
+    uint8_t* pixels;
+    int pitch;
     unsigned int active : 1;
     unsigned int refreshed : 1; // Changes 0 -> 1 or 1 -> 0 when the display refreshes
 };
 
-GPU* createGPU(SDL_Surface* back);
+GPU* createGPU(Display* display);
 
 void updateGPU(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_SIZE]);
 
 void readSpritesFromMem(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_SIZE]);
 
 void drawSprites(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_SIZE]);
-
-void drawBackground(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_SIZE]);
 
 
 #endif
