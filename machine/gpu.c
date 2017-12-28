@@ -1,11 +1,13 @@
 #include "gpu.h"
 #include <stdlib.h>
 
-GPU* createGPU(SDL_Surface* back)
+GPU* createGPU()
 {
     GPU* gpu = (GPU*)malloc(sizeof(GPU));
-    gpu->back = back;
     gpu->active = 1;
+    gpu->bytesPerPixel = 3; // From SDL_PIXELFORMAT_RGB24 in display.c
+    gpu->pitch = SCREEN_WIDTH * gpu->bytesPerPixel;
+    gpu->pixels = malloc(sizeof(uint8_t) * gpu->bytesPerPixel * SCREEN_WIDTH * SCREEN_HEIGHT);
     return gpu;
 }
 
@@ -47,8 +49,17 @@ void readSpritesFromMem(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SE
 void drawSprites(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_SIZE])
 {
     int i;
-    SDL_LockSurface(gpu->back);
-    uint8_t* pixels = (uint8_t*)gpu->back->pixels;
+    uint8_t* pixels = gpu->pixels;
+    uint8_t bgColorIndex = memory[BACK_COLOR_SEG][BACK_COLOR_OFFSET];
+    uint8_t bgRed = getRed(bgColorIndex);
+    uint8_t bgGreen = getGreen(bgColorIndex);
+    uint8_t bgBlue = getBlue(bgColorIndex);
+    for (i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT * gpu->bytesPerPixel; i+=gpu->bytesPerPixel)
+    {
+        *(pixels + i) = bgRed;
+        *(pixels + i + 1) = bgGreen;
+        *(pixels + i + 2) = bgBlue;
+    }
     for (i = 0; i < NUM_SPRITES; i++)
     {
         if (gpu->sprAttrs[i].active && 
@@ -90,32 +101,59 @@ void drawSprites(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_S
                         fourPixels |= (fourReversedPixels & 0x0C) << 2;
                         fourPixels |= (fourReversedPixels & 0x3) << 6;
                     }
+                    // Sprite color palette indicies
                     uint8_t bits1 = (fourPixels >> 6) & 0x3; // MSB
                     uint8_t bits2 = (fourPixels >> 4) & 0x3;
                     uint8_t bits3 = (fourPixels >> 2) & 0x3;
                     uint8_t bits4 = fourPixels & 0x3;
+                    // These are full color palette indicies
                     uint8_t pixel1 = gpu->sprAttrs[i].colors[bits1];
                     uint8_t pixel2 = gpu->sprAttrs[i].colors[bits2];
                     uint8_t pixel3 = gpu->sprAttrs[i].colors[bits3];
                     uint8_t pixel4 = gpu->sprAttrs[i].colors[bits4];
-                    uint8_t* curPixel = (uint8_t*)(pixels + x + (y * gpu->back->pitch) + (w * 4) + (h * gpu->back->pitch));
+                    uint8_t* curPixel = pixels + (x * gpu->bytesPerPixel) + (y * gpu->pitch) + (w * gpu->bytesPerPixel * 4) + (h * gpu->pitch);
                     if (!(gpu->sprAttrs[i].color4Alpha && bits1 == 0x3))
-                        *curPixel = pixel1;
+                    {
+                        *curPixel = getRed(pixel1);
+                        *(curPixel + 1) = getGreen(pixel1);
+                        *(curPixel + 2) = getBlue(pixel1);
+                    }
                     if (!(gpu->sprAttrs[i].color4Alpha && bits2 == 0x3))
-                        *(curPixel + 1) = pixel2;
+                    {
+                        *(curPixel + 3) = getRed(pixel2);
+                        *(curPixel + 4) = getGreen(pixel2);
+                        *(curPixel + 5) = getBlue(pixel2);
+                    }
                     if (!(gpu->sprAttrs[i].color4Alpha && bits3 == 0x3))
-                        *(curPixel + 2) = pixel3;
+                    {
+                        *(curPixel + 6) = getRed(pixel3);
+                        *(curPixel + 7) = getGreen(pixel3);
+                        *(curPixel + 8) = getBlue(pixel3);
+                    }
                     if (!(gpu->sprAttrs[i].color4Alpha && bits4 == 0x3))
-                        *(curPixel + 3) = pixel4;
+                    {
+                        *(curPixel + 9) = getRed(pixel4);
+                        *(curPixel + 10) = getGreen(pixel4);
+                        *(curPixel + 11) = getBlue(pixel4);
+                    }
                 }
             }
         }
     }
-    SDL_UnlockSurface(gpu->back);
 }
 
-void drawBackground(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_SIZE])
+uint8_t getRed(uint8_t paletteIndex)
 {
-    uint8_t color = memory[BACK_COLOR_SEG][BACK_COLOR_OFFSET];
-    SDL_FillRect(gpu->back, NULL, color);
+    return (paletteIndex / 32) * 36;
 }
+
+uint8_t getGreen(uint8_t paletteIndex)
+{
+    return (paletteIndex % 32) / 4 * 36;
+}
+
+uint8_t getBlue(uint8_t paletteIndex)
+{
+    return (paletteIndex % 4) * 85;
+}
+

@@ -3,14 +3,15 @@
 
 #include "constants.h"
 #include "instruction.h"
+#include "display.h"
 #include "gpu.h"
 #include "ipu.h"
-#include "display.h"
 #include <stdint.h>
 #include <SDL.h>
 
 typedef struct VM VM;
 typedef struct GPU GPU;
+typedef struct Display Display;
 
 struct VM
 {
@@ -33,3 +34,4 @@ Instruction* decode(uint16_t* instr);
 void exec(VM* vm, Instruction* instr);
 
 #endif
+

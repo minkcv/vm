@@ -32,12 +32,14 @@ typedef struct
 struct GPU
 {
     SpriteAttr sprAttrs[NUM_SPRITES];
-    SDL_Surface* back; // Screen back buffer
+    uint8_t* pixels;
+    int pitch;
+    int bytesPerPixel;
     unsigned int active : 1;
     unsigned int refreshed : 1; // Changes 0 -> 1 or 1 -> 0 when the display refreshes
 };
 
-GPU* createGPU(SDL_Surface* back);
+GPU* createGPU();
 
 void updateGPU(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_SIZE]);
 
@@ -45,7 +47,10 @@ void readSpritesFromMem(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SE
 
 void drawSprites(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_SIZE]);
 
-void drawBackground(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_SIZE]);
+uint8_t getRed(uint8_t paletteIndex);
+uint8_t getGreen(uint8_t paletteIndex);
+uint8_t getBlue(uint8_t paletteIndex);
 
 
 #endif
+

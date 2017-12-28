@@ -26,9 +26,9 @@ This project can be viewed as a challenge to people like  [demoscene](https://en
 
 ### How do I build and run it?
 #### Linux:
-Install SDL1.2 and libpng if you don't already have them. Systems with apt should try:
+Install SDL2 and libpng if you don't already have them. Systems with apt should try:
 
-    sudo apt install libsdl1.2-dev libpng-dev
+    sudo apt install libsdl2-dev libpng-dev
 
 To build and test the vm on linux, run one of the included programs:
 
@@ -38,7 +38,7 @@ To build and test the vm on linux, run one of the included programs:
 #### Windows (x86):
 See the releases section on github for a pre-built exe and pre-assembled games.
 I haven't built the assembler or sprite converter for windows.
-If you want to build for Windows then you will need the SDL1.2 dev files and the Platform Toolset v120 (from Visual Studio 2013).
+If you want to build for Windows then you will need the SDL2 dev files and the Platform Toolset v120 (from Visual Studio 2013).
 
 ### How do I make a program/game?
 1. Have some assembly programming knowledge (and some patience).

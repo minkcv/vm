@@ -40,7 +40,7 @@ int main (int argc, char** argv)
         exit(1);
     }
 
-    Display* display = createDisplay(SCREEN_WIDTH, SCREEN_HEIGHT, scale);
+    Display* display = createDisplay(SCREEN_WIDTH, SCREEN_HEIGHT, scale, SCREEN_WIDTH / 4);
     uint16_t* code = readBinary(programName, 0);
     uint8_t* rom = NULL;
     if (romName != NULL) // ROM is optional
