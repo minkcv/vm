@@ -40,10 +40,9 @@
 #define GPU_FLAG_SEG 127
 #define GPU_FLAG_OFFSET 17
 
-// Color depth aka bits per pixel
-#define COLOR_DEPTH 8
-// Number of colors in the color palette, directly related to the above number
+// Number of colors in the color palette
 #define NUM_COLORS 256
 
 #define INSTRUCTIONS_PER_SECOND 500000
 #endif
+

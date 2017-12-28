@@ -57,3 +57,4 @@ void quitDisplay(Display* display)
     display = NULL;
     SDL_Quit();
 }
+

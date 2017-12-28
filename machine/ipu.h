@@ -22,3 +22,4 @@ void updateIPU(IPU* ipu, SDL_KeyboardEvent kEvent,
 void updateJoystick(JOYSTICK* js, SDL_KeyboardEvent kEvent);
 
 #endif
+

@@ -196,3 +196,4 @@ void exec(VM* vm, Instruction* instr)
             break;
     }
 }
+

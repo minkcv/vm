@@ -28,3 +28,4 @@ void dumpColors(SDL_Color* colors, int ncolors);
 void quitDisplay(Display* display);
 
 #endif
+

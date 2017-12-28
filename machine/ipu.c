@@ -60,3 +60,4 @@ void updateJoystick(JOYSTICK* js, SDL_KeyboardEvent kEvent)
         }
     }
 }
+
