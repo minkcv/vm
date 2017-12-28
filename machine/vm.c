@@ -81,10 +81,6 @@ void run(VM* vm)
             updateGPU(vm->gpu, vm->memory);
             if (vm->gpu->active)
             {
-                uint8_t backgroundColor = vm->memory[BACK_COLOR_SEG][BACK_COLOR_OFFSET];
-                // TODO: SDL2
-                SDL_SetRenderDrawColor(vm->display->renderer, 0, 0, 0, 255);
-                SDL_RenderFillRect(vm->display->renderer, NULL);
                 readSpritesFromMem(vm->gpu, vm->memory);
                 drawSprites(vm->gpu, vm->memory);
                 updateDisplay(vm->display, vm->gpu);

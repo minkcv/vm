@@ -46,6 +46,10 @@ void readSpritesFromMem(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SE
 
 void drawSprites(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_SIZE]);
 
+uint8_t getRed(uint8_t paletteIndex);
+uint8_t getGreen(uint8_t paletteIndex);
+uint8_t getBlue(uint8_t paletteIndex);
+
 
 #endif
 
