@@ -6,7 +6,7 @@ var GPUState;
 var spriteIndex;
 var spriteSegment;
 var buttons;
-const moveSpeed 4;
+var savedButtons;
 var i;
 var x;
 var y;
@@ -73,28 +73,7 @@ call newPiece;
 
 // Main loop
 while 1 {
-    buttons = [ 127 , 0 ];
-    buttons = buttons & 1; // Up button
-    if buttons == 1 {
-        // TODO: rotations
-    }
-    buttons = [ 127 , 0 ];
-    buttons = buttons & 4; // Left button
-    if buttons == 4 {
-        call checkMoveLeft;
-        if canMoveLeft {
-            call movePieceLeft;
-        }
-    }
-    buttons = [ 127 , 0 ];
-    buttons = buttons & 8; // Right button
-    if buttons == 8 {
-        call checkMoveRight;
-        if canMoveRight {
-            call movePieceRight;
-        }
-    }
-
+    savedButtons = [ 127 , 0 ];
     call checkHitBelow;
     if hitBelow {
         call addPieceToTiles;
@@ -102,6 +81,28 @@ while 1 {
     }
     if hitBelow == 0 {
         call movePieceDown;
+    }
+
+    buttons = [ 127 , 0 ];
+    savedButtons = savedButtons | buttons;
+    if savedButtons & 1 == 1 {
+        // TODO: rotations
+    }
+    buttons = [ 127 , 0 ];
+    savedButtons = savedButtons | buttons;
+    if savedButtons & 4 == 4 { // Left
+        call checkMoveLeft;
+        if canMoveLeft {
+            call movePieceLeft;
+        }
+    }
+    buttons = [ 127 , 0 ];
+    savedButtons = savedButtons | buttons;
+    if savedButtons & 8 == 8 { // Right
+        call checkMoveRight;
+        if canMoveRight {
+            call movePieceRight;
+        }
     }
 
     call render;
