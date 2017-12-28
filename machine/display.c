@@ -9,7 +9,7 @@ Display* createDisplay(int width, int height, int scale, int pitch)
     display->height = height;
     display->scale = scale;
     display->pitch = pitch;
-    display->window = SDL_CreateWindow("vapor Spec", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
+    display->window = SDL_CreateWindow("Vapor Spec", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
             width * scale, height * scale, 0);
     display->renderer = SDL_CreateRenderer(display->window, -1, 0);
     display->back = SDL_CreateTexture(display->renderer, 
