@@ -13,7 +13,7 @@ Display* createDisplay(int width, int height, int scale, int pitch)
             width * scale, height * scale, 0);
     display->renderer = SDL_CreateRenderer(display->window, -1, 0);
     display->back = SDL_CreateTexture(display->renderer, 
-            SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, width, height);
+            SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING, width, height);
     //SDL_Palette* palette = display->screen->format->palette;
     //display->colors = palette->colors;
     //display->ncolors = palette->ncolors;

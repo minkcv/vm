@@ -5,8 +5,9 @@ GPU* createGPU()
 {
     GPU* gpu = (GPU*)malloc(sizeof(GPU));
     gpu->active = 1;
-    gpu->pitch = SCREEN_WIDTH * 4;
-    gpu->pixels = malloc(sizeof(uint8_t) * 4 * SCREEN_WIDTH * SCREEN_HEIGHT);
+    gpu->bytesPerPixel = 3; // From SDL_PIXELFORMAT_RGB24 in display.c
+    gpu->pitch = SCREEN_WIDTH * gpu->bytesPerPixel;
+    gpu->pixels = malloc(sizeof(uint8_t) * gpu->bytesPerPixel * SCREEN_WIDTH * SCREEN_HEIGHT);
     return gpu;
 }
 
@@ -53,12 +54,11 @@ void drawSprites(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_S
     uint8_t bgRed = getRed(bgColorIndex);
     uint8_t bgGreen = getGreen(bgColorIndex);
     uint8_t bgBlue = getBlue(bgColorIndex);
-    for (i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT * 4; i+=4)
+    for (i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT * gpu->bytesPerPixel; i+=gpu->bytesPerPixel)
     {
         *(pixels + i) = bgRed;
         *(pixels + i + 1) = bgGreen;
         *(pixels + i + 2) = bgBlue;
-        *(pixels + i + 3) = 0xFF;
     }
     for (i = 0; i < NUM_SPRITES; i++)
     {
@@ -111,34 +111,30 @@ void drawSprites(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_S
                     uint8_t pixel2 = gpu->sprAttrs[i].colors[bits2];
                     uint8_t pixel3 = gpu->sprAttrs[i].colors[bits3];
                     uint8_t pixel4 = gpu->sprAttrs[i].colors[bits4];
-                    uint8_t* curPixel = pixels + (x * 4) + (y * gpu->pitch) + (w * 4 * 4) + (h * gpu->pitch);
+                    uint8_t* curPixel = pixels + (x * gpu->bytesPerPixel) + (y * gpu->pitch) + (w * gpu->bytesPerPixel * 4) + (h * gpu->pitch);
                     if (!(gpu->sprAttrs[i].color4Alpha && bits1 == 0x3))
                     {
                         *curPixel = getRed(pixel1);
                         *(curPixel + 1) = getGreen(pixel1);
                         *(curPixel + 2) = getBlue(pixel1);
-                        *(curPixel + 3) = 255;
                     }
                     if (!(gpu->sprAttrs[i].color4Alpha && bits2 == 0x3))
                     {
-                        *(curPixel + 4) = getRed(pixel2);
-                        *(curPixel + 5) = getGreen(pixel2);
-                        *(curPixel + 6) = getBlue(pixel2);
-                        *(curPixel + 7) = 255;
+                        *(curPixel + 3) = getRed(pixel2);
+                        *(curPixel + 4) = getGreen(pixel2);
+                        *(curPixel + 5) = getBlue(pixel2);
                     }
                     if (!(gpu->sprAttrs[i].color4Alpha && bits3 == 0x3))
                     {
-                        *(curPixel + 8) = getRed(pixel3);
-                        *(curPixel + 9) = getGreen(pixel3);
-                        *(curPixel + 10) = getBlue(pixel3);
-                        *(curPixel + 11) = 255;
+                        *(curPixel + 6) = getRed(pixel3);
+                        *(curPixel + 7) = getGreen(pixel3);
+                        *(curPixel + 8) = getBlue(pixel3);
                     }
                     if (!(gpu->sprAttrs[i].color4Alpha && bits4 == 0x3))
                     {
-                        *(curPixel + 12) = getRed(pixel4);
-                        *(curPixel + 13) = getGreen(pixel4);
-                        *(curPixel + 14) = getBlue(pixel4);
-                        *(curPixel + 15) = 255;
+                        *(curPixel + 9) = getRed(pixel4);
+                        *(curPixel + 10) = getGreen(pixel4);
+                        *(curPixel + 11) = getBlue(pixel4);
                     }
                 }
             }
