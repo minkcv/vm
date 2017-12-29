@@ -81,7 +81,6 @@ var colIndex;
 
 var waitCounter;
 
-
 call initSprites;
 call reset;
 [ 127 , 17 ] = 1; // Enable GPU
@@ -106,6 +105,10 @@ while 1 {
                 call movePieceRight;
             }
         }
+    }
+    if buttons & 2 == 2 {
+        // Drop piece
+        waitCounter = 0;
     }
     prevButtons = buttons;
     if waitCounter == 0 {
