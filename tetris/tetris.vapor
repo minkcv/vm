@@ -35,8 +35,8 @@ var currentPieceType;
 
 var currentRotation;
 
-const tileWidth 4;
-const tileHeight 4;
+const tileWidth 8;
+const tileHeight 8;
 
 // Current piece tiles
 var tile1X;
@@ -90,7 +90,24 @@ call newPiece;
 
 // Main loop
 while 1 {
-    buttons = buttons | [ 127 , 0 ];
+    buttons = [ 127 , 0 ];
+    if buttons & 4 == 4 { // Left
+        if prevButtons & 4 == 0 {
+            call checkMoveLeft;
+            if canMoveLeft {
+                call movePieceLeft;
+            }
+        }
+    }
+    if buttons & 8 == 8 { // Right
+        if prevButtons & 8 == 0 {
+            call checkMoveRight;
+            if canMoveRight {
+                call movePieceRight;
+            }
+        }
+    }
+    prevButtons = buttons;
     if waitCounter == 0 {
         call checkHitBelow;
         if hitBelow {
@@ -103,18 +120,6 @@ while 1 {
 
         if buttons & 1 == 1 {
             // TODO: rotations
-        }
-        if buttons & 4 == 4 { // Left
-            call checkMoveLeft;
-            if canMoveLeft {
-                call movePieceLeft;
-            }
-        }
-        if buttons & 8 == 8 { // Right
-            call checkMoveRight;
-            if canMoveRight {
-                call movePieceRight;
-            }
         }
 
         // Slow things down the fewer tiles we have
@@ -129,7 +134,6 @@ while 1 {
                 }
             }
         }
-        buttons = 0;
     }
     waitCounter = waitCounter - 1;
 
