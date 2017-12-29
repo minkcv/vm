@@ -6,10 +6,21 @@ var GPUState;
 var spriteIndex;
 var spriteSegment;
 var buttons;
-var savedButtons;
+
+// General purpose iterators and temporary variables
 var i;
+var i2;
 var x;
 var y;
+var x2;
+var y2;
+
+var renderTileX;
+var renderTileY;
+var renderSegment;
+var renderAddress;
+
+const pieceSegment 79;
 
 // Constants for piece type
 const pieceL 0;
@@ -57,7 +68,10 @@ var setXY; // True or false value of tile
 
 const nCols 8;
 const nRows 16;
-const nRowsCols 128; // nRows * nCols
+
+// Number of tiles at [ 0 , 0 ] through [ 0 , 255 ]
+// Stored in xy pairs
+var nTiles;
 
 var tileIndex;
 var tileIndex2;
@@ -73,7 +87,6 @@ call newPiece;
 
 // Main loop
 while 1 {
-    savedButtons = [ 127 , 0 ];
     call checkHitBelow;
     if hitBelow {
         call addPieceToTiles;
@@ -84,21 +97,16 @@ while 1 {
     }
 
     buttons = [ 127 , 0 ];
-    savedButtons = savedButtons | buttons;
-    if savedButtons & 1 == 1 {
+    if buttons & 1 == 1 {
         // TODO: rotations
     }
-    buttons = [ 127 , 0 ];
-    savedButtons = savedButtons | buttons;
-    if savedButtons & 4 == 4 { // Left
+    if buttons & 4 == 4 { // Left
         call checkMoveLeft;
         if canMoveLeft {
             call movePieceLeft;
         }
     }
-    buttons = [ 127 , 0 ];
-    savedButtons = savedButtons | buttons;
-    if savedButtons & 8 == 8 { // Right
+    if buttons & 8 == 8 { // Right
         call checkMoveRight;
         if canMoveRight {
             call movePieceRight;
@@ -122,19 +130,18 @@ func newPiece {
 }
 
 func addPieceToTiles {
-    setXY = 1;
-    setX = tile1X;
-    setY = tile1Y;
-    call setTileXY;
-    setX = tile2X;
-    setY = tile2Y;
-    call setTileXY;
-    setX = tile3X;
-    setY = tile3Y;
-    call setTileXY;
-    setX = tile4X;
-    setY = tile4Y;
-    call setTileXY;
+    [ 0 , nTiles ] = tile1X;
+    [ 0 , nTiles + 1 ] = tile1Y;
+    nTiles = nTiles + 2;
+    [ 0 , nTiles ] = tile2X;
+    [ 0 , nTiles + 1 ] = tile2Y;
+    nTiles = nTiles + 2;
+    [ 0 , nTiles ] = tile3X;
+    [ 0 , nTiles + 1 ] = tile3Y;
+    nTiles = nTiles + 2;
+    [ 0 , nTiles ] = tile4X;
+    [ 0 , nTiles + 1 ] = tile4Y;
+    nTiles = nTiles + 2;
 }
 
 func movePieceDown {
@@ -178,32 +185,36 @@ func checkHitBelow {
         return;
     }
     // Check if a tile hits a tile below
-    getX = tile1X;
-    getY = tile1Y + 1;
-    call getTileXY;
-    if getXY {
-        hitBelow = 1;
-        return;
-    }
-    getX = tile2X;
-    getY = tile2Y + 1;
-    call getTileXY;
-    if getXY {
-        hitBelow = 1;
-        return;
-    }
-    getX = tile3X;
-    getY = tile3Y + 1;
-    call getTileXY;
-    if getXY {
-        hitBelow = 1;
-        return;
-    }
-    getX = tile4X;
-    getY = tile4Y + 1;
-    call getTileXY;
-    if getXY {
-        hitBelow = 1;
+    i = 0;
+    while i < nTiles {
+        x = [ 0 , i ];
+        y = [ 0 , i + 1 ];
+        if tile1X == x {
+            if tile1Y + 1 == y {
+                hitBelow = 1;
+                return;
+            }
+        }
+        if tile2X == x {
+            if tile2Y + 1 == y {
+                hitBelow = 1;
+                return;
+            }
+        }
+        if tile3X == x {
+            if tile3Y + 1 == y {
+                hitBelow = 1;
+                return;
+            }
+        }
+        if tile4X == x {
+            if tile4Y + 1 == y {
+                hitBelow = 1;
+                return;
+            }
+        }
+
+        i = i + 2;
     }
 }
 
@@ -227,33 +238,7 @@ func checkMoveRight {
         return;
     }
     // Check if a tile hits a tile to the right
-    getX = tile1X + 1;
-    getY = tile1Y;
-    call getTileXY;
-    if getXY {
-        canMoveRight = 0;
-        return;
-    }
-    getX = tile2X + 1;
-    getY = tile2Y;
-    call getTileXY;
-    if getXY {
-        canMoveRight = 0;
-        return;
-    }
-    getX = tile3X + 1;
-    getY = tile3Y;
-    call getTileXY;
-    if getXY {
-        canMoveRight = 0;
-        return;
-    }
-    getX = tile4X + 1;
-    getY = tile4Y;
-    call getTileXY;
-    if getXY {
-        canMoveRight = 0;
-    }
+    // TODO
 }
 
 func checkMoveLeft {
@@ -276,189 +261,70 @@ func checkMoveLeft {
         return;
     }
     // Check if a tile hits a tile to the left
-    getX = tile1X - 1;
-    getY = tile1Y;
-    call getTileXY;
-    if getXY {
-        canMoveLeft = 0;
-        return;
-    }
-    getX = tile2X - 1;
-    getY = tile2Y;
-    call getTileXY;
-    if getXY {
-        canMoveLeft = 0;
-        return;
-    }
-    getX = tile3X - 1;
-    getY = tile3Y;
-    call getTileXY;
-    if getXY {
-        canMoveLeft = 0;
-        return;
-    }
-    getX = tile4X - 1;
-    getY = tile4Y;
-    call getTileXY;
-    if getXY {
-        canMoveLeft = 0;
-    }
-}
-
-func getTileXY {
-    tileIndex = 0;
-    rowIndex = 0;
-    colIndex = 0;
-    while rowIndex < getX {
-        rowIndex = rowIndex + 1;
-        tileIndex = tileIndex + 1;
-    }
-    while colIndex < getY {
-        colIndex = colIndex + 1;
-        tileIndex = tileIndex + nCols;
-    }
-    getXY = [ 0 , tileIndex ];
-}
-
-func getXYFromTile {
-    getX = 0;
-    getY = 0;
-    while tileIndex > nCols - 1 {
-        getY = getY + 1;
-        tileIndex = tileIndex - nCols;
-    }
-    getX = tileIndex;
-}
-
-func setTileXY {
-    tileIndex = 0;
-    rowIndex = 0;
-    colIndex = 0;
-    while rowIndex < setX {
-        rowIndex = rowIndex + 1;
-        tileIndex = tileIndex + 1;
-    }
-    while colIndex < setY {
-        colIndex = colIndex + 1;
-        tileIndex = tileIndex + nCols;
-    }
-    [ 0 , tileIndex ] = setXY;
+    // TODO
 }
 
 func render {
-    spriteIndex = 0;
-    spriteSegment = 64;
-    tileIndex2 = 0;
-    while tileIndex2 < nRowsCols {
-        [ spriteSegment , spriteIndex ] = 0; // Disable
-        if [ 0 , tileIndex2 ] {
-            [ spriteSegment , spriteIndex ] = 128; // Enable
-        }
-        tileIndex = tileIndex2;
-        call getXYFromTile;
-        i = 0;
-        x = 0;
-        while i < getX {
-            x = x + tileWidth;
-            i = i + 1;
-        }
-        [ spriteSegment , spriteIndex + 1 ] = x;
-
-        i = 0;
-        y = 0;
-        while i < getY {
-            y = y + tileHeight;
-            i = i + 1;
-        }
-        [ spriteSegment , spriteIndex + 2 ] = y;
+    renderAddress = 0;
+    renderSegment = 64;
+    i = 0;
+    while i < nTiles {
+        renderTileX = [ 0 , i ];
+        renderTileY = [ 0 , i + 1 ];
+        call renderTile;
         
-        if spriteIndex == 240 {
-            spriteSegment = spriteSegment + 1;
+        if renderAddress == 240 {
+            renderSegment = renderSegment + 1;
         }
-        spriteIndex = spriteIndex + 16;
-        tileIndex2 = tileIndex2 + 1;
+        renderAddress = renderAddress + 16;
+        i = i + 2;
     }
-    spriteSegment = spriteSegment + 1;
-    spriteIndex = 0;
-    i = 0;
-    x = 0;
-    while i < tile1X {
-        x = x + tileWidth;
-        i = i + 1;
+    renderSegment = pieceSegment;
+    renderAddress = 0;
+    renderTileX = tile1X;
+    renderTileY = tile1Y;
+    call renderTile;
+    renderAddress = renderAddress + 16;
+    renderTileX = tile2X;
+    renderTileY = tile2Y;
+    call renderTile;
+    renderAddress = renderAddress + 16;
+    renderTileX = tile3X;
+    renderTileY = tile3Y;
+    call renderTile;
+    renderAddress = renderAddress + 16;
+    renderTileX = tile4X;
+    renderTileY = tile4Y;
+    call renderTile;
+}
+
+// IN: renderTileX renderTileY renderSegment renderAddress
+func renderTile {
+    [ renderSegment , renderAddress ] = 128; // Enable
+    x2 = 0;
+    i2 = 0;
+    while i2 < tileWidth {
+        x2 = x2 + renderTileX;
+        i2 = i2 + 1;
     }
-    i = 0;
-    y = 0;
-    while i < tile1Y {
-        y = y + tileHeight;
-        i = i + 1;
+    y2 = 0;
+    i2 = 0;
+    while i2 < tileHeight {
+        y2 = y2 + renderTileY;
+        i2 = i2 + 1;
     }
-    [ spriteSegment , spriteIndex ] = 128;
-    [ spriteSegment , spriteIndex + 1 ] = x;
-    [ spriteSegment , spriteIndex + 2 ] = y;
-    spriteIndex = spriteIndex + 16;
-    i = 0;
-    x = 0;
-    while i < tile2X {
-        x = x + tileWidth;
-        i = i + 1;
-    }
-    i = 0;
-    y = 0;
-    while i < tile2Y {
-        y = y + tileHeight;
-        i = i + 1;
-    }
-    [ spriteSegment , spriteIndex ] = 128;
-    [ spriteSegment , spriteIndex + 1 ] = x;
-    [ spriteSegment , spriteIndex + 2 ] = y;
-    spriteIndex = spriteIndex + 16;
-    i = 0;
-    x = 0;
-    while i < tile3X {
-        x = x + tileWidth;
-        i = i + 1;
-    }
-    i = 0;
-    y = 0;
-    while i < tile3Y {
-        y = y + tileHeight;
-        i = i + 1;
-    }
-    [ spriteSegment , spriteIndex ] = 128;
-    [ spriteSegment , spriteIndex + 1 ] = x;
-    [ spriteSegment , spriteIndex + 2 ] = y;
-    spriteIndex = spriteIndex + 16;
-    i = 0;
-    x = 0;
-    while i < tile4X {
-        x = x + tileWidth;
-        i = i + 1;
-    }
-    i = 0;
-    y = 0;
-    while i < tile4Y {
-        y = y + tileHeight;
-        i = i + 1;
-    }
-    [ spriteSegment , spriteIndex ] = 128;
-    [ spriteSegment , spriteIndex + 1 ] = x;
-    [ spriteSegment , spriteIndex + 2 ] = y;
+    [ renderSegment , renderAddress + 1 ] = x2;
+    [ renderSegment , renderAddress + 2 ] = y2;
 }
 
 func reset {
-    // Clear the rows and columns
-    tileIndex = 0;
-    while tileIndex < nRowsCols {
-        [ 0 , tileIndex ] = 0;
-        tileIndex = tileIndex + 1;
-    }
 }
 
 func initSprites {
     spriteIndex = 0;
     spriteSegment = 64;
-    tileIndex = 0;
-    while tileIndex < nRowsCols {
+    i = 0;
+    while i < 128 {
         [ spriteSegment , spriteIndex ] = 0; // Disable
         [ spriteSegment , spriteIndex + 3 ] = tileWidth;
         [ spriteSegment , spriteIndex + 4 ] = tileHeight;
@@ -468,16 +334,15 @@ func initSprites {
             spriteSegment = spriteSegment + 1;
         }
         spriteIndex = spriteIndex + 16;
-        tileIndex = tileIndex + 1;
+        i = i + 1;
     }
-    spriteSegment = spriteSegment + 1;
     spriteIndex = 0;
     while spriteIndex < 64 {
-        [ spriteSegment , spriteIndex ] = 0; // Disable
-        [ spriteSegment , spriteIndex + 3 ] = tileWidth;
-        [ spriteSegment , spriteIndex + 4 ] = tileHeight;
-        [ spriteSegment , spriteIndex + 5 ] = 128; // Sprite data segment
-        [ spriteSegment , spriteIndex + 7 ] = 255; // White
+        [ pieceSegment , spriteIndex ] = 0; // Disable
+        [ pieceSegment , spriteIndex + 3 ] = tileWidth;
+        [ pieceSegment , spriteIndex + 4 ] = tileHeight;
+        [ pieceSegment , spriteIndex + 5 ] = 128; // Sprite data segment
+        [ pieceSegment , spriteIndex + 7 ] = 255; // White
         spriteIndex = spriteIndex + 16;
     }
 }
