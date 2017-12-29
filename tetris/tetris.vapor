@@ -6,6 +6,7 @@ var GPUState;
 var spriteIndex;
 var spriteSegment;
 var buttons;
+var prevButtons;
 
 // General purpose iterators and temporary variables
 var i;
@@ -78,6 +79,8 @@ var tileIndex2;
 var rowIndex;
 var colIndex;
 
+var waitCounter;
+
 
 call initSprites;
 call reset;
@@ -87,31 +90,48 @@ call newPiece;
 
 // Main loop
 while 1 {
-    call checkHitBelow;
-    if hitBelow {
-        call addPieceToTiles;
-        call newPiece;
-    }
-    if hitBelow == 0 {
-        call movePieceDown;
-    }
+    buttons = buttons | [ 127 , 0 ];
+    if waitCounter == 0 {
+        call checkHitBelow;
+        if hitBelow {
+            call addPieceToTiles;
+            call newPiece;
+        }
+        if hitBelow == 0 {
+            call movePieceDown;
+        }
 
-    buttons = [ 127 , 0 ];
-    if buttons & 1 == 1 {
-        // TODO: rotations
-    }
-    if buttons & 4 == 4 { // Left
-        call checkMoveLeft;
-        if canMoveLeft {
-            call movePieceLeft;
+        if buttons & 1 == 1 {
+            // TODO: rotations
         }
-    }
-    if buttons & 8 == 8 { // Right
-        call checkMoveRight;
-        if canMoveRight {
-            call movePieceRight;
+        if buttons & 4 == 4 { // Left
+            call checkMoveLeft;
+            if canMoveLeft {
+                call movePieceLeft;
+            }
         }
+        if buttons & 8 == 8 { // Right
+            call checkMoveRight;
+            if canMoveRight {
+                call movePieceRight;
+            }
+        }
+
+        // Slow things down the fewer tiles we have
+        // because having more of them will also slow things down.
+        waitCounter = 40;
+        if nTiles > 30 {
+            waitCounter = 30;
+            if nTiles > 50 {
+                waitCounter = 20;
+                if nTiles > 70 {
+                    waitCounter = 10;
+                }
+            }
+        }
+        buttons = 0;
     }
+    waitCounter = waitCounter - 1;
 
     call render;
     call waitScreen;
