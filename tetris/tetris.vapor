@@ -580,6 +580,103 @@ func rotateS {
 func rotateReverseS {
 }
 func rotateLine {
+    if currentRotation == 0 {
+        // (gap)
+        // 1234
+        dest1X = tile2X;
+        dest1Y = tile2Y - 1;
+        dest3X = tile2X;
+        dest3Y = tile2Y + 1;
+        dest4X = tile2X;
+        dest4Y = tile1Y + 2;
+        if dest4Y > nRows - 1 {
+            return;
+        }
+        i = 0;
+        while i < nTiles {
+            x = [ 0 , i ];
+            y = [ 0 , i + 1 ];
+            if dest1Y == y {
+                if dest1X == x {
+                    return;
+                }
+            }
+            if dest2Y == y {
+                if dest2X == x {
+                    return;
+                }
+            }
+            if dest3Y == y {
+                if dest3X == x {
+                    return;
+                }
+            }
+            if dest4Y == y {
+                if dest4X == x {
+                    return;
+                }
+            }
+            i = i + 1;
+        }
+        tile1X = dest1X;
+        tile1Y = dest1Y;
+        tile3X = dest3X;
+        tile3Y = dest3Y;
+        tile4X = dest4X;
+        tile4Y = dest4Y;
+        currentRotation = 1;
+        return;
+    }
+    // Else currentRotation 1
+    // g1
+    // a2
+    // p3
+    //  4
+    dest1X = tile1X - 1;
+    dest1Y = tile2Y;
+    dest3X = tile2X + 1;
+    dest3Y = tile2Y;
+    dest4X = tile2X + 2;
+    dest4Y = tile2Y;
+    if dest4X > nCols - 1 {
+        return;
+    }
+    if tile1X == 0 {
+        return;
+    }
+    i = 0;
+    while i < nTiles {
+        x = [ 0 , i ];
+        y = [ 0 , i + 1 ];
+        if dest1Y == y {
+            if dest1X == x {
+                return;
+            }
+        }
+        if dest2Y == y {
+            if dest2X == x {
+                return;
+            }
+        }
+        if dest3Y == y {
+            if dest3X == x {
+                return;
+            }
+        }
+        if dest4Y == y {
+            if dest4X == x {
+                return;
+            }
+        }
+        i = i + 1;
+    }
+    tile1X = dest1X;
+    tile1Y = dest1Y;
+    tile3X = dest3X;
+    tile3Y = dest3Y;
+    tile4X = dest4X;
+    tile4Y = dest4Y;
+    currentRotation = 0;
 }
 
 func newPiece {
