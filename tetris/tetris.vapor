@@ -16,6 +16,7 @@ var y;
 var x2;
 var y2;
 
+var updateRender; // True when render is needed
 var renderTileX;
 var renderTileY;
 var renderSegment;
@@ -52,14 +53,22 @@ var tile3Y;
 var tile4X;
 var tile4Y;
 
+// For checking rotations
+var dest1X;
+var dest1Y;
+var dest2X;
+var dest2Y;
+var dest3X;
+var dest3Y;
+var dest4X;
+var dest4Y;
+
 // True (1) when a piece hits an existing tile
 var hitBelow;
 // True when the current piece can move right
 var canMoveRight;
 // True when the current piece can move left
 var canMoveLeft;
-// True when the current piece can rotate
-var canRotate;
 
 // Arguments and return values for getTileXY and getXYFromTile
 var getX;
@@ -117,6 +126,11 @@ while 1 {
         // Drop piece
         waitCounter = 0;
     }
+    if buttons & 1 == 1 {
+        if prevButtons & 1 == 0 {
+            call rotatePiece;
+        }
+    }
     prevButtons = buttons;
     if waitCounter == 0 {
         call checkHitBelow;
@@ -128,9 +142,6 @@ while 1 {
             call movePieceDown;
         }
 
-        if buttons & 1 == 1 {
-            // TODO: rotations
-        }
 
         // Slow things down the fewer tiles we have
         // because having more of them will also slow things down.
@@ -152,6 +163,7 @@ while 1 {
 }
 
 func addPieceToTiles {
+    updateRender = 1;
     [ 0 , nTiles ] = tile1X;
     [ 0 , nTiles + 1 ] = tile1Y;
     nTiles = nTiles + 2;
@@ -349,7 +361,230 @@ func checkMoveLeft {
     }
 }
 
+func rotatePiece {
+    if currentPieceType == pieceSquare {
+        return;
+    }
+    if currentPieceType == pieceL {
+        call rotateL;
+        return;
+    }
+    if currentPieceType == pieceReverseL {
+        call rotateReverseL;
+        return;
+    }
+    if currentPieceType == pieceS {
+        call rotateS;
+        return;
+    }
+    if currentPieceType == pieceReverseS {
+        call rotateReverseS;
+        return;
+    }
+    if currentPieceType == pieceLine {
+        call rotateLine;
+        return;
+    }
+}
+
+func rotateL {
+    if currentRotation == 0 {
+        // 123
+        //   4
+        dest1X = tile2X;
+        dest2Y = tile4Y;
+        dest3X = tile2X;
+        dest3Y = tile3Y + 2;
+        dest4X = tile1X;
+        dest4Y = tile4Y + 1;
+        if dest3Y > nRows - 1 {
+            return;
+        }
+        i = 0;
+        while i < nTiles {
+            x = [ 0 , i ];
+            y = [ 0 , i + 1 ];
+            if dest1Y == y {
+                if dest1X == x {
+                    return;
+                }
+            }
+            if dest2Y == y {
+                if dest2X == x {
+                    return;
+                }
+            }
+            if dest3Y == y {
+                if dest3X == x {
+                    return;
+                }
+            }
+            if dest4Y == y {
+                if dest4X == x {
+                    return;
+                }
+            }
+            i = i + 1;
+        }
+        tile1X = dest1X;
+        tile2Y = dest2Y;
+        tile3X = dest3X;
+        tile3Y = dest3Y;
+        tile4X = dest4X;
+        tile4Y = dest4Y;
+        currentRotation = 1;
+        return;
+    }
+    if currentRotation == 1 {
+        //  1
+        //  2
+        // 43
+        dest1X = tile1X + 1;
+        dest1Y = tile2Y;
+        dest3X = tile4X;
+        dest3Y = tile2Y;
+        dest4Y = tile1Y;
+        if dest1X > nCols - 1 {
+            return;
+        }
+        i = 0;
+        while i < nTiles {
+            x = [ 0 , i ];
+            y = [ 0 , i + 1 ];
+            if dest1Y == y {
+                if dest1X == x {
+                    return;
+                }
+            }
+            if dest2Y == y {
+                if dest2X == x {
+                    return;
+                }
+            }
+            if dest3Y == y {
+                if dest3X == x {
+                    return;
+                }
+            }
+            if dest4Y == y {
+                if dest4X == x {
+                    return;
+                }
+            }
+            i = i + 1;
+        }
+        tile1X = dest1X;
+        tile1Y = dest1Y;
+        tile3X = dest3X;
+        tile3Y = dest3Y;
+        tile4Y = dest4Y;
+        currentRotation = 2;
+        return;
+    }
+    if currentRotation == 2 {
+        // 4
+        // 321
+        dest1X = tile4X;
+        dest1Y = tile1Y + 1;
+        dest2X = tile4X;
+        dest3Y = tile4Y;
+        dest4X = tile2X;
+        if dest1Y > nRows - 1 {
+            return;
+        }
+        i = 0;
+        while i < nTiles {
+            x = [ 0 , i ];
+            y = [ 0 , i + 1 ];
+            if dest1Y == y {
+                if dest1X == x {
+                    return;
+                }
+            }
+            if dest2Y == y {
+                if dest2X == x {
+                    return;
+                }
+            }
+            if dest3Y == y {
+                if dest3X == x {
+                    return;
+                }
+            }
+            if dest4Y == y {
+                if dest4X == x {
+                    return;
+                }
+            }
+            i = i + 1;
+        }
+        tile1X = dest1X;
+        tile1Y = dest1Y;
+        tile2X = dest2X;
+        tile3Y = dest3Y;
+        tile4X = dest4X;
+        currentRotation = 3;
+        return;
+    }
+    // Else currentRotation 3
+    // 34
+    // 2
+    // 1
+    dest1Y = tile3Y;
+    dest2X = tile4X;
+    dest2Y = tile4Y;
+    dest3X = tile4X + 1;
+    dest4X = tile4X + 1;
+    dest4Y = tile2Y;
+    if dest3X > nCols - 1 {
+        return;
+    }
+    i = 0;
+    while i < nTiles {
+        x = [ 0 , i ];
+        y = [ 0 , i + 1 ];
+        if dest1Y == y {
+            if dest1X == x {
+                return;
+            }
+        }
+        if dest2Y == y {
+            if dest2X == x {
+                return;
+            }
+        }
+        if dest3Y == y {
+            if dest3X == x {
+                return;
+            }
+        }
+        if dest4Y == y {
+            if dest4X == x {
+                return;
+            }
+        }
+        i = i + 1;
+    }
+    tile1Y = dest1Y;
+    tile2X = dest2X;
+    tile2Y = dest2Y;
+    tile3X = dest3X;
+    tile4X = dest4X;
+    tile4Y = dest4Y;
+    currentRotation = 0;
+}
+func rotateReverseL {
+}
+func rotateS {
+}
+func rotateReverseS {
+}
+func rotateLine {
+}
+
 func newPiece {
+    currentRotation = 0;
+    currentPieceType = nextPieceType;
     if nextPieceType == pieceL {
         tile1X = 3;
         tile1Y = 0;
@@ -425,19 +660,22 @@ func newPiece {
 }
 
 func render {
-    renderAddress = 16;
-    renderSegment = 64;
-    i = 0;
-    while i < nTiles {
-        renderTileX = [ 0 , i ];
-        renderTileY = [ 0 , i + 1 ];
-        call renderTile;
-        
-        if renderAddress == 240 {
-            renderSegment = renderSegment + 1;
+    if updateRender {
+        renderAddress = 16;
+        renderSegment = 64;
+        i = 0;
+        while i < nTiles {
+            renderTileX = [ 0 , i ];
+            renderTileY = [ 0 , i + 1 ];
+            call renderTile;
+            
+            if renderAddress == 240 {
+                renderSegment = renderSegment + 1;
+            }
+            renderAddress = renderAddress + 16;
+            i = i + 2;
         }
-        renderAddress = renderAddress + 16;
-        i = i + 2;
+        updateRender = 0;
     }
     renderSegment = pieceSegment;
     renderAddress = 0;
