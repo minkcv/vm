@@ -254,7 +254,39 @@ func checkMoveRight {
         return;
     }
     // Check if a tile hits a tile to the right
-    // TODO
+    i = 0;
+    while i < nTiles {
+        // Optimization note, instead of adding 1 to each tilex,
+        // just subtract one from current tile x
+        x = [ 0 , i ];
+        x = x - 1;
+        y = [ 0 , i + 1 ];
+        if tile1Y == y {
+            if tile1X == x {
+                canMoveRight = 0;
+                return;
+            }
+        }
+        if tile2Y == y {
+            if tile2X == x {
+                canMoveRight = 0;
+                return;
+            }
+        }
+        if tile3Y == y {
+            if tile3X == x {
+                canMoveRight = 0;
+                return;
+            }
+        }
+        if tile4Y == y {
+            if tile4X == x {
+                canMoveRight = 0;
+                return;
+            }
+        }
+        i = i + 1;
+    }
 }
 
 func checkMoveLeft {
@@ -277,7 +309,39 @@ func checkMoveLeft {
         return;
     }
     // Check if a tile hits a tile to the left
-    // TODO
+    i = 0;
+    while i < nTiles {
+        // Optimization note, instead of subtracting 1 from each tilex,
+        // just add one to current tile x
+        x = [ 0 , i ];
+        x = x + 1;
+        y = [ 0 , i + 1 ];
+        if tile1Y == y {
+            if tile1X == x {
+                canMoveLeft = 0;
+                return;
+            }
+        }
+        if tile2Y == y {
+            if tile2X == x {
+                canMoveLeft = 0;
+                return;
+            }
+        }
+        if tile3Y == y {
+            if tile3X == x {
+                canMoveLeft = 0;
+                return;
+            }
+        }
+        if tile4Y == y {
+            if tile4X == x {
+                canMoveLeft = 0;
+                return;
+            }
+        }
+        i = i + 1;
+    }
 }
 
 func newPiece {
