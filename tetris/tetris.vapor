@@ -667,6 +667,95 @@ func rotateS {
     currentRotation = 0;
 }
 func rotateReverseS {
+    if currentRotation == 0 {
+        // 12
+        //  34
+        dest1X = tile2X;
+        dest2Y = tile3Y;
+        dest3X = tile1X;
+        dest4X = tile1X;
+        dest4Y = tile3Y + 1;
+        if dest4Y > nRows - 1 {
+            return;
+        }
+        i = 0;
+        while i < nTiles {
+            x = [ 0 , i ];
+            y = [ 0 , i + 1 ];
+            if dest1Y == y {
+                if dest1X == x {
+                    return;
+                }
+            }
+            if dest2Y == y {
+                if dest2X == x {
+                    return;
+                }
+            }
+            if dest3Y == y {
+                if dest3X == x {
+                    return;
+                }
+            }
+            if dest4Y == y {
+                if dest4X == x {
+                    return;
+                }
+            }
+            i = i + 1;
+        }
+        tile1X = dest1X;
+        tile2Y = dest2Y;
+        tile3X = dest3X;
+        tile4X = dest4X;
+        tile4Y = dest4Y;
+        currentRotation = 1;
+        return;
+    }
+    // Else currentRotation 1
+    //  1
+    // 32
+    // 4
+    dest1X = tile3X;
+    dest2Y = tile1Y;
+    dest3X = tile2X;
+    dest4X = tile2X + 1;
+    dest4Y = tile2Y;
+    if dest4X > nCols - 1 {
+        return;
+    }
+    i = 0;
+    while i < nTiles {
+        x = [ 0 , i ];
+        y = [ 0 , i + 1 ];
+        if dest1Y == y {
+            if dest1X == x {
+                return;
+            }
+        }
+        if dest2Y == y {
+            if dest2X == x {
+                return;
+            }
+        }
+        if dest3Y == y {
+            if dest3X == x {
+                return;
+            }
+        }
+        if dest4Y == y {
+            if dest4X == x {
+                return;
+            }
+        }
+        i = i + 1;
+    }
+    tile1X = dest1X;
+    tile2Y = dest2Y;
+    tile3X = dest3X;
+    tile4X = dest4X;
+    tile4Y = dest4Y;
+    currentRotation = 0;
 }
 func rotateLine {
     if currentRotation == 0 {
@@ -808,9 +897,9 @@ func newPiece {
         return;
     }
     if nextPieceType == pieceReverseS {
-        tile1X = 4;
+        tile1X = 3;
         tile1Y = 0;
-        tile2X = 3;
+        tile2X = 4;
         tile2Y = 0;
         tile3X = 4;
         tile3Y = 1;
