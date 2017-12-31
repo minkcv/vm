@@ -576,6 +576,95 @@ func rotateL {
 func rotateReverseL {
 }
 func rotateS {
+    if currentRotation == 0 {
+        //  21
+        // 43
+        dest1X = tile2X;
+        dest1Y = tile3Y + 1;
+        dest2Y = tile3Y;
+        dest3X = tile4X;
+        dest4Y = tile2Y;
+        if dest1Y > nRows - 1 {
+            return;
+        }
+        i = 0;
+        while i < nTiles {
+            x = [ 0 , i ];
+            y = [ 0 , i + 1 ];
+            if dest1Y == y {
+                if dest1X == x {
+                    return;
+                }
+            }
+            if dest2Y == y {
+                if dest2X == x {
+                    return;
+                }
+            }
+            if dest3Y == y {
+                if dest3X == x {
+                    return;
+                }
+            }
+            if dest4Y == y {
+                if dest4X == x {
+                    return;
+                }
+            }
+            i = i + 1;
+        }
+        tile1X = dest1X;
+        tile1Y = dest1Y;
+        tile2Y = dest2Y;
+        tile3X = dest3X;
+        tile4Y = dest4Y;
+        currentRotation = 1;
+        return;
+    }
+    // Else currentRotation 1
+    // 4
+    // 32
+    //  1
+    dest1X = tile1X + 1;
+    dest1Y = tile4Y;
+    dest2Y = tile4Y;
+    dest3X = tile2X;
+    dest4Y = tile3Y;
+    if dest1X > nCols - 1 {
+        return;
+    }
+    i = 0;
+    while i < nTiles {
+        x = [ 0 , i ];
+        y = [ 0 , i + 1 ];
+        if dest1Y == y {
+            if dest1X == x {
+                return;
+            }
+        }
+        if dest2Y == y {
+            if dest2X == x {
+                return;
+            }
+        }
+        if dest3Y == y {
+            if dest3X == x {
+                return;
+            }
+        }
+        if dest4Y == y {
+            if dest4X == x {
+                return;
+            }
+        }
+        i = i + 1;
+    }
+    tile1X = dest1X;
+    tile1Y = dest1Y;
+    tile2Y = dest2Y;
+    tile3X = dest3X;
+    tile4Y = dest4Y;
+    currentRotation = 0;
 }
 func rotateReverseS {
 }
