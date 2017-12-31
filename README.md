@@ -43,3 +43,4 @@ If you want to build for Windows then you will need the SDL2 dev files and the P
 ### How do I make a program/game?
 1. Have some assembly programming knowledge (and some patience).
 2. Check out the `/docs` folder.
+
