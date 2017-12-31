@@ -221,7 +221,7 @@ void decomposeExpression(char** expression, char** assembly, uint32_t* currentAs
         (*instructionCount) += 6;
         return;
     }
-    char* token1 = strtok_r(*expression, " ", &savePtr);
+    char* token1 = strtok_r(*expression, " \n;", &savePtr);
     if (!strcmp(token1, "["))
     {
         // Memory access
@@ -236,7 +236,7 @@ void decomposeExpression(char** expression, char** assembly, uint32_t* currentAs
     }
 
     // Now try to parse symbols, literals, and operators.
-    char* token2 = strtok_r(NULL, " ", &savePtr);
+    char* token2 = strtok_r(NULL, " \n;", &savePtr);
     char* token3 = strtok_r(NULL, "", &savePtr);
 
     if (token2 == NULL)
@@ -267,16 +267,16 @@ void decomposeExpression(char** expression, char** assembly, uint32_t* currentAs
             // Literal integer
             char* end;
             uint8_t literal = (uint8_t)strtol(token1, &end, 10);
-            if ('\0' == end)
-            {
-                printf("Failed to parse %s as identifier or literal int\n", token1);
-                exit(1);
-            }
-            else
+            if (end != token1)
             {
                 sprintf(assembly[*currentAssemblyLine], "LRC r%d #%d\n", returnRegister, literal);
                 (*currentAssemblyLine)++;
                 (*instructionCount)++;
+            }
+            else
+            {
+                printf("Failed to parse %s as identifier or literal int\n", token1);
+                exit(1);
             }
         }
     }
@@ -293,6 +293,11 @@ void decomposeExpression(char** expression, char** assembly, uint32_t* currentAs
                 (*currentAssemblyLine)++;
                 (*instructionCount)++;
             }
+        }
+        else
+        {
+            printf("Unknown expression on line %d\n", sourceLine);
+            exit(1);
         }
     }
     else
@@ -629,7 +634,7 @@ int main (int argc, char** argv)
                         token = strtok_r(NULL, " ", &savePtr);
                         if (!strcmp(token, "="))
                         {
-                            token = strtok_r(NULL, ";", &savePtr);
+                            token = strtok_r(NULL, "\n;", &savePtr);
                             decomposeExpression(&token, assembly, &currentAssemblyLine, &instructionCount, symbolMap, 0, lineCount);
 
                             // Store the result (r0) into the right hand side identifier
