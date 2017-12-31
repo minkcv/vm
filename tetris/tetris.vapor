@@ -30,6 +30,7 @@ const pieceS 2;
 const pieceReverseS 3;
 const pieceLine 4;
 const pieceSquare 5;
+var nextPieceType;
 
 var currentPieceType;
 
@@ -142,18 +143,6 @@ while 1 {
 
     call render;
     call waitScreen;
-}
-
-func newPiece {
-    // Test code
-    tile1X = 0;
-    tile1Y = 0;
-    tile2X = 1;
-    tile2Y = 0;
-    tile3X = 2;
-    tile3Y = 0;
-    tile4X = 3;
-    tile4Y = 0;
 }
 
 func addPieceToTiles {
@@ -289,6 +278,81 @@ func checkMoveLeft {
     }
     // Check if a tile hits a tile to the left
     // TODO
+}
+
+func newPiece {
+    if nextPieceType == pieceL {
+        tile1X = 3;
+        tile1Y = 0;
+        tile2X = 4;
+        tile2Y = 0;
+        tile3X = 5;
+        tile3Y = 0;
+        tile4X = 5;
+        tile4Y = 1;
+        nextPieceType = pieceS;
+        return;
+    }
+    if nextPieceType == pieceReverseL {
+        tile1X = 3;
+        tile1Y = 0;
+        tile2X = 4;
+        tile2Y = 0;
+        tile3X = 5;
+        tile3Y = 0;
+        tile4X = 3;
+        tile4Y = 1;
+        nextPieceType = pieceL;
+        return;
+    }
+    if nextPieceType == pieceS {
+        tile1X = 5;
+        tile1Y = 0;
+        tile2X = 4;
+        tile2Y = 0;
+        tile3X = 4;
+        tile3Y = 1;
+        tile4X = 3;
+        tile4Y = 1;
+        nextPieceType = pieceLine;
+        return;
+    }
+    if nextPieceType == pieceReverseS {
+        tile1X = 4;
+        tile1Y = 0;
+        tile2X = 3;
+        tile2Y = 0;
+        tile3X = 4;
+        tile3Y = 1;
+        tile4X = 5;
+        tile4Y = 1;
+        nextPieceType = pieceSquare;
+        return;
+    }
+    if nextPieceType == pieceLine {
+        tile1X = 3;
+        tile1Y = 0;
+        tile2X = 4;
+        tile2Y = 0;
+        tile3X = 5;
+        tile3Y = 0;
+        tile4X = 6;
+        tile4Y = 0;
+        nextPieceType = pieceReverseS;
+        return;
+    }
+    if nextPieceType == pieceSquare {
+        tile1X = 3;
+        tile1Y = 0;
+        tile2X = 3;
+        tile2Y = 1;
+        tile3X = 4;
+        tile3Y = 0;
+        tile4X = 4;
+        tile4Y = 1;
+        nextPieceType = pieceReverseL;
+        return;
+    }
 }
 
 func render {
