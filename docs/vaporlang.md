@@ -58,11 +58,13 @@ Functions are declared with `func <name> {` and must have a closing `}`. Functio
         xposition = xposition + 2;
     }
 
-
 #### Memory Access
-Addressing memory is done with brackets `[`, `]` via segment and offset. The whitespace around the the brackets and comma is necessary.
+Addressing memory is done with brackets `[`, `]` via segment and offset. The whitespace around the the brackets and comma is necessary. Operators cannot go after memory access.
 
+    // Valid
     [ 0 , index ] = 1;
     [ 0 , index + 1 ] = 2;
     xposition = xposition + [ 0 , index ];
+    // Not valid
+    xposition = [ 0 , index ] + 1;
 

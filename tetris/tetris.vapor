@@ -313,8 +313,7 @@ func checkMoveLeft {
     while i < nTiles {
         // Optimization note, instead of subtracting 1 from each tilex,
         // just add one to current tile x
-        x = [ 0 , i ];
-        x = x + 1;
+        x = 1 + [ 0 , i ];
         y = [ 0 , i + 1 ];
         if tile1Y == y {
             if tile1X == x {
