@@ -1,7 +1,7 @@
 # Vapor Lang
 This file describes the syntax of the provided compiler. The language is slightly higher level than assembly.
 
-Vapor lang supports named global variables, functions, conditional flow, loops, memory access, and some operators.
+Vapor lang supports named global variables, constants, functions, conditional flow, loops, memory access, and some operators.
 Variable declarations and assignments must end in semicolons. Functions and control flow blocks must be bounded by open and close curly braces `{`,`}`.
 The compiler is very whitespace sensitive, not in terms of logic (like python), but in terms of parsing.
 The compiler stores variables and the call stack in memory segments 59 through 63 (inclusive). The maximum number of variables is 1024 and the maximum call stack size is 127 calls.
@@ -12,6 +12,11 @@ Comments begin with two forward slashes. Anything on the same line as a comment 
     // Whole line comment
     var test;// Comment after declaration
     var test2;      //After a bunch of whitespace
+
+#### Constants
+Constants are declared with `const`. Constants are faster than variables in terms of execution and should be used in favor of variables when possible. Constants can be values 0 through 255.
+
+    const width 16;
 
 #### Variables
 Variables are declared with `var`. All variables have global scope and must be declared before being used. Variables can only hold values 0 through 255 (a byte). Variables cannot be initialized when declared.
