@@ -21,6 +21,7 @@ var renderTileY;
 var renderSegment;
 var renderAddress;
 
+// Current piece sprites go here
 const pieceSegment 79;
 
 // Constants for piece type
@@ -30,14 +31,16 @@ const pieceS 2;
 const pieceReverseS 3;
 const pieceLine 4;
 const pieceSquare 5;
+
 var nextPieceType;
-
 var currentPieceType;
-
 var currentRotation;
 
 const tileWidth 8;
 const tileHeight 8;
+
+const leftMargin 80;
+const topMargin 20;
 
 // Current piece tiles
 var tile1X;
@@ -81,6 +84,9 @@ var rowIndex;
 var colIndex;
 
 var waitCounter;
+
+// Set background to grayish
+[ 127 , 16 ] = 73;
 
 call initSprites;
 call reset;
@@ -419,7 +425,7 @@ func newPiece {
 }
 
 func render {
-    renderAddress = 0;
+    renderAddress = 16;
     renderSegment = 64;
     i = 0;
     while i < nTiles {
@@ -467,6 +473,8 @@ func renderTile {
         y2 = y2 + renderTileY;
         i2 = i2 + 1;
     }
+    x2 = x2 + leftMargin;
+    y2 = y2 + topMargin;
     [ renderSegment , renderAddress + 1 ] = x2;
     [ renderSegment , renderAddress + 2 ] = y2;
 }
@@ -475,7 +483,30 @@ func reset {
 }
 
 func initSprites {
-    spriteIndex = 0;
+    // Black background for tile area
+    [ 64 , 0 ] = 128;
+    [ 64 , 1 ] = leftMargin; // X
+    [ 64 , 2 ] = topMargin; // Y
+    i = 0;
+    x = 0;
+    while i < nCols {
+        x = x + tileWidth;
+        i = i + 1;
+    }
+    i = 0;
+    y = 0;
+    while i < nRows {
+        y = y + tileHeight;
+        i = i + 1;
+    }
+    [ 64 , 3 ] = x; // Width
+    [ 64 , 4 ] = y; // Height
+    // Use data at end of ROM as color info
+    [ 64 , 5 ] = 255;
+    [ 64 , 7 ] = 0; // Black
+
+    // Tiles start at [ 64 , 16 ]
+    spriteIndex = 16;
     spriteSegment = 64;
     i = 0;
     while i < 128 {
