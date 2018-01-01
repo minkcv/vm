@@ -17,6 +17,7 @@ var x2;
 var y2;
 
 var updateRender; // True when render is needed
+var clearRender; // True to reset tile sprites to disabled
 var renderTileX;
 var renderTileY;
 var renderSegment;
@@ -63,6 +64,13 @@ var dest3Y;
 var dest4X;
 var dest4Y;
 
+// For counting tiles in each row of each newly placed tile
+var row1Tiles;
+var row2Tiles;
+var row3Tiles;
+var row4Tiles;
+var clearY; // Argument to clearRowY
+
 // True (1) when a piece hits an existing tile
 var hitBelow;
 // True when the current piece can move right
@@ -86,11 +94,6 @@ const nRows 16;
 // Number of tiles at [ 0 , 0 ] through [ 0 , 255 ]
 // Stored in xy pairs
 var nTiles;
-
-var tileIndex;
-var tileIndex2;
-var rowIndex;
-var colIndex;
 
 var waitCounter;
 
@@ -172,7 +175,7 @@ while 1 {
 }
 
 func addPieceToTiles {
-    if tile1Y < 1 {
+    if tile1Y == 0 {
         if tile1X < 6 {
             if tile1X > 2 {
                 paused = 1;
@@ -194,6 +197,113 @@ func addPieceToTiles {
     [ 0 , nTiles ] = tile4X;
     [ 0 , nTiles + 1 ] = tile4Y;
     nTiles = nTiles + 2;
+    call clearRows;
+}
+
+func clearRows {
+    row1Tiles = 0;
+    row2Tiles = 0;
+    row3Tiles = 0;
+    row4Tiles = 0;
+    i = 0;
+    while i < nTiles {
+        y = [ 0 , i + 1 ];
+        if y == tile1Y {
+            row1Tiles = row1Tiles + 1;
+        }
+        if y == tile2Y {
+            row2Tiles = row2Tiles + 1;
+        }
+        if y == tile3Y {
+            row3Tiles = row3Tiles + 1;
+        }
+        if y == tile4Y {
+            row4Tiles = row4Tiles + 1;
+        }
+        i = i + 2;
+    }
+    if row1Tiles == nCols {
+        clearY = tile1Y;
+        call clearRowY
+        clearRender = 1;
+    i = 0;
+    while i < nTiles {
+        y = [ 0 , i + 1 ];
+        if y < clearY + 1 {
+            [ 0 , i + 1 ] = y + 1;
+        }
+        i = i + 2;
+    }
+    }
+    if row2Tiles == nCols {
+        if tile2Y - tile1Y > 0 { // Not equal
+            clearY = tile2Y;
+            call clearRowY
+            clearRender = 1;
+            i = 0;
+            while i < nTiles {
+                y = [ 0 , i + 1 ];
+                if y < clearY + 1 {
+                    [ 0 , i + 1 ] = y + 1;
+                }
+                i = i + 2;
+            }
+        }
+    }
+    if row3Tiles == nCols {
+        if tile3Y - tile2Y > 0 {
+            if tile3Y - tile1Y > 0 {
+                clearY = tile3Y;
+                call clearRowY
+                clearRender = 1;
+                i = 0;
+                while i < nTiles {
+                    y = [ 0 , i + 1 ];
+                    if y < clearY + 1 {
+                        [ 0 , i + 1 ] = y + 1;
+                    }
+                    i = i + 2;
+                }
+            }
+        }
+    }
+    if row4Tiles == nCols {
+        if tile4Y - tile3Y > 0 {
+            if tile4Y - tile2Y > 0 {
+                if tile4Y - tile1Y > 0 {
+                    clearY = tile4Y;
+                    call clearRowY
+                    clearRender = 1;
+                    i = 0;
+                    while i < nTiles {
+                        y = [ 0 , i + 1 ];
+                        if y < clearY + 1 {
+                            [ 0 , i + 1 ] = y + 1;
+                        }
+                        i = i + 2;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// IN: clearY: the row to clear
+func clearRowY {
+    i = 0;
+    while i < nTiles {
+        y = [ 0 , i + 1 ];
+        if y == clearY {
+            // Replace this tile with one off the end of the array
+            x2 = [ 0 , nTiles - 2 ];
+            y2 = [ 0 , nTiles - 1 ];
+            [ 0 , i ] = x2;
+            [ 0 , i + 1 ] = y2;
+            nTiles = nTiles - 2;
+            i = i - 2;
+        }
+        i = i + 2;
+    }
 }
 
 func movePieceDown {
@@ -321,7 +431,7 @@ func checkMoveRight {
                 return;
             }
         }
-        i = i + 1;
+        i = i + 2;
     }
 }
 
@@ -375,7 +485,7 @@ func checkMoveLeft {
                 return;
             }
         }
-        i = i + 1;
+        i = i + 2;
     }
 }
 
@@ -442,7 +552,7 @@ func rotateReverseL {
                     return;
                 }
             }
-            i = i + 1;
+            i = i + 2;
         }
         tile1X = dest1X;
         tile2Y = dest2Y;
@@ -489,7 +599,7 @@ func rotateReverseL {
                     return;
                 }
             }
-            i = i + 1;
+            i = i + 2;
         }
         tile1X = dest1X;
         tile1Y = dest1Y;
@@ -534,7 +644,7 @@ func rotateReverseL {
                     return;
                 }
             }
-            i = i + 1;
+            i = i + 2;
         }
         tile1X = dest1X;
         tile1Y = dest1Y;
@@ -581,7 +691,7 @@ func rotateReverseL {
                 return;
             }
         }
-        i = i + 1;
+        i = i + 2;
     }
     tile1Y = dest1Y;
     tile2X = dest2X;
@@ -627,7 +737,7 @@ func rotateL {
                     return;
                 }
             }
-            i = i + 1;
+            i = i + 2;
         }
         tile1X = dest1X;
         tile2Y = dest2Y;
@@ -673,7 +783,7 @@ func rotateL {
                     return;
                 }
             }
-            i = i + 1;
+            i = i + 2;
         }
         tile1X = dest1X;
         tile1Y = dest1Y;
@@ -719,7 +829,7 @@ func rotateL {
                     return;
                 }
             }
-            i = i + 1;
+            i = i + 2;
         }
         tile1X = dest1X;
         tile1Y = dest1Y;
@@ -767,7 +877,7 @@ func rotateL {
                 return;
             }
         }
-        i = i + 1;
+        i = i + 2;
     }
 
     tile1Y = dest1Y;
@@ -814,7 +924,7 @@ func rotateS {
                     return;
                 }
             }
-            i = i + 1;
+            i = i + 2;
         }
         tile1X = dest1X;
         tile1Y = dest1Y;
@@ -860,7 +970,7 @@ func rotateS {
                 return;
             }
         }
-        i = i + 1;
+        i = i + 2;
     }
     tile1X = dest1X;
     tile1Y = dest1Y;
@@ -905,7 +1015,7 @@ func rotateReverseS {
                     return;
                 }
             }
-            i = i + 1;
+            i = i + 2;
         }
         tile1X = dest1X;
         tile2Y = dest2Y;
@@ -951,7 +1061,7 @@ func rotateReverseS {
                 return;
             }
         }
-        i = i + 1;
+        i = i + 2;
     }
     tile1X = dest1X;
     tile2Y = dest2Y;
@@ -997,7 +1107,7 @@ func rotateLine {
                     return;
                 }
             }
-            i = i + 1;
+            i = i + 2;
         }
         tile1X = dest1X;
         tile1Y = dest1Y;
@@ -1049,7 +1159,7 @@ func rotateLine {
                 return;
             }
         }
-        i = i + 1;
+        i = i + 2;
     }
     tile1X = dest1X;
     tile1Y = dest1Y;
@@ -1138,6 +1248,20 @@ func newPiece {
 }
 
 func render {
+    if clearRender {
+        renderAddress = 16;
+        renderSegment = 64;
+        i = 0;
+        while i < 253 {
+            [ renderSegment , renderAddress ] = 0; // Disable
+            if renderAddress == 240 {
+                renderSegment = renderSegment + 1;
+            }
+            renderAddress = renderAddress + 16;
+            i = i + 2;
+        }
+        clearRender = 0;
+    }
     if updateRender {
         renderAddress = 16;
         renderSegment = 64;
