@@ -17,6 +17,9 @@ var y;
 var x2;
 var y2;
 
+// Randomness for next piece
+var random;
+
 var updateRender; // True when render is needed
 var clearRender; // True to reset tile sprites to disabled
 var renderTileX;
@@ -181,6 +184,11 @@ while 1 {
         }
     }
 
+    random = random ^ nTiles;
+    random = random ^ tile1X;
+    random = random ^ tile4Y;
+    random = random ^ currentRotation;
+    random = random ^ prevButtons;
     prevButtons = buttons;
     call render;
     call waitScreen;
@@ -1178,9 +1186,14 @@ func rotateLine {
 }
 
 func newPiece {
-    currentRotation = 0;
     currentPieceType = nextPieceType;
-    if nextPieceType == pieceReverseL {
+    nextPieceType = random;
+    nextPieceType = nextPieceType & 7;
+    if nextPieceType > 5 {
+        nextPieceType = nextPieceType >> 1;
+    }
+    currentRotation = 0;
+    if currentPieceType == pieceReverseL {
         tile1X = 3;
         tile1Y = 0;
         tile2X = 4;
@@ -1189,10 +1202,9 @@ func newPiece {
         tile3Y = 0;
         tile4X = 5;
         tile4Y = 1;
-        nextPieceType = pieceS;
         return;
     }
-    if nextPieceType == pieceL {
+    if currentPieceType == pieceL {
         tile1X = 3;
         tile1Y = 0;
         tile2X = 4;
@@ -1201,10 +1213,9 @@ func newPiece {
         tile3Y = 0;
         tile4X = 3;
         tile4Y = 1;
-        nextPieceType = pieceReverseL;
         return;
     }
-    if nextPieceType == pieceS {
+    if currentPieceType == pieceS {
         tile1X = 5;
         tile1Y = 0;
         tile2X = 4;
@@ -1213,10 +1224,9 @@ func newPiece {
         tile3Y = 1;
         tile4X = 3;
         tile4Y = 1;
-        nextPieceType = pieceLine;
         return;
     }
-    if nextPieceType == pieceReverseS {
+    if currentPieceType == pieceReverseS {
         tile1X = 3;
         tile1Y = 0;
         tile2X = 4;
@@ -1225,10 +1235,9 @@ func newPiece {
         tile3Y = 1;
         tile4X = 5;
         tile4Y = 1;
-        nextPieceType = pieceSquare;
         return;
     }
-    if nextPieceType == pieceLine {
+    if currentPieceType == pieceLine {
         tile1X = 3;
         tile1Y = 0;
         tile2X = 4;
@@ -1237,10 +1246,9 @@ func newPiece {
         tile3Y = 0;
         tile4X = 6;
         tile4Y = 0;
-        nextPieceType = pieceReverseS;
         return;
     }
-    if nextPieceType == pieceSquare {
+    if currentPieceType == pieceSquare {
         tile1X = 3;
         tile1Y = 0;
         tile2X = 3;
@@ -1249,7 +1257,6 @@ func newPiece {
         tile3Y = 0;
         tile4X = 4;
         tile4Y = 1;
-        nextPieceType = pieceL;
         return;
     }
 }
