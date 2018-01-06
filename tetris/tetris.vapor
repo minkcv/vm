@@ -11,6 +11,7 @@ var prevButtons;
 // General purpose iterators and temporary variables
 var i;
 var i2;
+var color;
 var x;
 var y;
 var x2;
@@ -22,6 +23,7 @@ var renderTileX;
 var renderTileY;
 var renderSegment;
 var renderAddress;
+var renderTileColor;
 
 // Current piece sprites go here
 const pieceSegment 79;
@@ -94,6 +96,16 @@ const nRows 16;
 // Number of tiles at [ 0 , 0 ] through [ 0 , 255 ]
 // Stored in xy pairs
 var nTiles;
+
+// Colors stored at [ 1 , 0 ] through [ 1 , 255 ]
+// stored in 2 byte pairs but only the first byte is used
+
+const blue 3;
+const red 224;
+const green 28;
+const cyan 31;
+const magenta 227;
+const yellow 252;
 
 var waitCounter;
 
@@ -187,15 +199,19 @@ func addPieceToTiles {
     updateRender = 1;
     [ 0 , nTiles ] = tile1X;
     [ 0 , nTiles + 1 ] = tile1Y;
+    [ 1 , nTiles ] = currentPieceType;
     nTiles = nTiles + 2;
     [ 0 , nTiles ] = tile2X;
     [ 0 , nTiles + 1 ] = tile2Y;
+    [ 1 , nTiles ] = currentPieceType;
     nTiles = nTiles + 2;
     [ 0 , nTiles ] = tile3X;
     [ 0 , nTiles + 1 ] = tile3Y;
+    [ 1 , nTiles ] = currentPieceType;
     nTiles = nTiles + 2;
     [ 0 , nTiles ] = tile4X;
     [ 0 , nTiles + 1 ] = tile4Y;
+    [ 1 , nTiles ] = currentPieceType;
     nTiles = nTiles + 2;
     call clearRows;
 }
@@ -297,8 +313,10 @@ func clearRowY {
             // Replace this tile with one off the end of the array
             x2 = [ 0 , nTiles - 2 ];
             y2 = [ 0 , nTiles - 1 ];
+            color = [ 1 , nTiles - 2 ];
             [ 0 , i ] = x2;
             [ 0 , i + 1 ] = y2;
+            [ 1 , i ] = color;
             nTiles = nTiles - 2;
             i = i - 2;
         }
@@ -1258,6 +1276,7 @@ func render {
         while i < nTiles {
             renderTileX = [ 0 , i ];
             renderTileY = [ 0 , i + 1 ];
+            renderTileColor = [ 1 , i ];
             call renderTile;
             
             if renderAddress == 240 {
@@ -1272,22 +1291,26 @@ func render {
     renderAddress = 0;
     renderTileX = tile1X;
     renderTileY = tile1Y;
+    renderTileColor = currentPieceType;
     call renderTile;
     renderAddress = renderAddress + 16;
     renderTileX = tile2X;
     renderTileY = tile2Y;
+    renderTileColor = currentPieceType;
     call renderTile;
     renderAddress = renderAddress + 16;
     renderTileX = tile3X;
     renderTileY = tile3Y;
+    renderTileColor = currentPieceType;
     call renderTile;
     renderAddress = renderAddress + 16;
     renderTileX = tile4X;
     renderTileY = tile4Y;
+    renderTileColor = currentPieceType;
     call renderTile;
 }
 
-// IN: renderTileX renderTileY renderSegment renderAddress
+// IN: renderTileX renderTileY renderSegment renderAddress, renderTileColor
 func renderTile {
     [ renderSegment , renderAddress ] = 128; // Enable
     x2 = 0;
@@ -1304,8 +1327,29 @@ func renderTile {
     }
     x2 = x2 + leftMargin;
     y2 = y2 + topMargin;
+    i2 = 0;
+    color = 0;
+    if renderTileColor == 0 {
+        color = red;
+    }
+    if renderTileColor == 1 {
+        color = green;
+    }
+    if renderTileColor == 2 {
+        color = blue;
+    }
+    if renderTileColor == 3 {
+        color = cyan;
+    }
+    if renderTileColor == 4 {
+        color = magenta;
+    }
+    if renderTileColor == 5 {
+        color = yellow;
+    }
     [ renderSegment , renderAddress + 1 ] = x2;
     [ renderSegment , renderAddress + 2 ] = y2;
+    [ renderSegment , renderAddress + 7 ] = color;
 }
 
 func reset {
