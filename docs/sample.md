@@ -1,4 +1,4 @@
-# Sample Code
+# Sample Assembly Code
 
 ## Enabling the GPU (rendering)
 ```

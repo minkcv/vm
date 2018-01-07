@@ -22,15 +22,23 @@ Put `.spr` files together like as follows to have them all in one ROM file:
 
 Any other data that you want to put in the ROM will have to be done yourself.
 
+#### Using the compiler
+See `vaporlang.md` for information on the capabilities of the compiler. Build the compiler by running `make` in the `compiler` folder.
+Use the compiler like:
+
+    ./compiler -f myprogram.vapor
+
+An output `myprogram.asm` will be created which can be assembled as described above.
+
 #### Running
 Run the binary with
 
     ./main -f myprogram.bin
 
 Optionally add:
-- `-s #`, where # is a number, if you want to scale the display up.
+- `-s #`, where # is a number you want to scale the display by.
 - `-r myrom.rom` to load up to 32768 bytes into the ROM section of memory.
 - `&> /dev/null` at the end to suppress print statements.
 
-Consider creating a shell script for your program that is similar to the included `mars.sh` script.
+Consider creating a shell script for your program that is similar to the included `games/mars.sh` script.
 
