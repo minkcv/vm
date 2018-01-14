@@ -91,6 +91,7 @@ uint8_t* readRom(const char* filename, int print)
         exit(1);
     }
     uint8_t* rom = malloc(sizeof(uint8_t) * 128 * MEMORY_SEGMENT_SIZE);
+    memset(rom, 0, sizeof(uint8_t) * 128 * MEMORY_SEGMENT_SIZE);
     size_t bytesRead = fread(rom, sizeof(uint8_t), 128 * MEMORY_SEGMENT_SIZE, romfile);
     printf("Read %zd bytes from the rom\n", bytesRead);
     if (print)
