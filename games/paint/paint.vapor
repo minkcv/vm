@@ -1,0 +1,205 @@
+// Character Paint
+// 2018 Will Smith (minkcv)
+
+var buttons1;
+var buttons2;
+
+const tileWidth 16;
+const tileHeight 16;
+const tilesPerRow 16;
+const tilesPerCol 12;
+const bytesPerTile 64;
+
+const color1Segment 0;
+const color2Segment 1;
+const tileSegment 2;
+
+const cursorSpriteSegment 79;
+
+// Loop index
+var i;
+
+var cursorChanged;
+var cursorX;
+var cursorY;
+var cursorTile;
+var cursorColor1;
+var cursorColor2;
+var cursorXY;
+
+// Arguments to renderTile
+var renderTileX;
+var renderTileY;
+var renderTileXY;
+var renderTileTile;
+var renderTileColor1;
+var renderTileColor2;
+var renderTileXW;
+var renderTileYH;
+
+var spriteSegment;
+var spriteIndex;
+var GPUState;
+var previousGPUState;
+
+[ 127 , 16 ] = 73;
+// Enable GPU
+[ 127 , 17 ] = 1;
+
+// Main loop
+while 1 {
+    buttons1 = [ 127 , 0 ];
+    buttons2 = [ 127 , 1 ];
+    if buttons1 & 128 == 128 {
+        call setTile;
+    }
+    if buttons1 & 4 == 4 {
+        call renderLastTile;
+        cursorX = cursorX - 1;
+        if cursorX > tilesPerRow - 1 {
+            cursorX = tilesPerRow - 1;
+        }
+        call renderCursor;
+    }
+    if buttons1 & 8 == 8 {
+        call renderLastTile;
+        cursorX = cursorX + 1;
+        if cursorX > tilesPerRow - 1 {
+            cursorX = 0;
+        }
+        call renderCursor;
+    }
+    if buttons1 & 16 == 16 {
+        cursorColor1 = cursorColor1 + 1;
+        call renderCursor;
+    }
+    if buttons1 & 32 == 32 {
+        cursorColor1 = cursorColor1 - 1;
+        call renderCursor;
+    }
+    if buttons2 & 16 == 16 {
+        cursorColor2 = cursorColor2 + 1;
+        call renderCursor;
+    }
+    if buttons2 & 32 == 32 {
+        cursorColor2 = cursorColor2 - 1;
+        call renderCursor;
+    }
+    if buttons1 & 1 == 1 {
+        call renderLastTile;
+        cursorY = cursorY - 1;
+        if cursorY > tilesPerCol - 1 {
+            cursorY = tilesPerCol - 1;
+        }
+        call renderCursor;
+    }
+    if buttons1 & 2 == 2 {
+        call renderLastTile;
+        cursorY = cursorY + 1;
+        if cursorY > tilesPerCol - 1 {
+            cursorY = 0;
+        }
+        call renderCursor;
+    }
+
+    call waitScreen;
+}
+
+func setTile {
+    i = 0;
+    cursorXY = cursorX;
+    while i < cursorY {
+        cursorXY = cursorXY + tilesPerRow;
+        i = i + 1;
+    }
+    [ color1Segment , cursorXY ] = cursorColor1;
+    [ color2Segment , cursorXY ] = cursorColor2;
+    [ tileSegment , cursorXY ] = cursorTile;
+}
+
+func renderCursor {
+    i = 0;
+    renderTileXW = 0;
+    while i < cursorX {
+        renderTileXW = renderTileXW + tileWidth;
+        i = i + 1;
+    }
+    i = 0;
+    renderTileYH = 0;
+    while i < cursorY {
+        renderTileYH = renderTileYH + tileHeight;
+        i = i + 1;
+    }
+    [ cursorSpriteSegment , 0 ] = 128; // Enable
+    [ cursorSpriteSegment , 1 ] = renderTileXW;
+    [ cursorSpriteSegment , 2 ] = renderTileYH;
+    [ cursorSpriteSegment , 3 ] = tileWidth;
+    [ cursorSpriteSegment , 4 ] = tileHeight;
+    [ cursorSpriteSegment , 5 ] = 128;
+    [ cursorSpriteSegment , 6 ] = 0;
+    [ cursorSpriteSegment , 7 ] = cursorColor1;
+    [ cursorSpriteSegment , 8 ] = cursorColor2;
+}
+
+// Call before moving the cursor
+// Render the tile that the cursor was previously on
+func renderLastTile {
+    renderTileX = cursorX;
+    renderTileY = cursorY;
+    call renderTile;
+}
+
+// IN:
+// renderTileX
+// renderTileY
+func renderTile {
+    spriteSegment = 64;
+    spriteIndex = 0;   
+    i = 0;
+    renderTileXY = renderTileX;
+    while i < renderTileY {
+        renderTileXY = renderTileXY + tilesPerRow;
+        i = i + 1;
+    }
+    i = 0;
+    while i < renderTileXY {
+        if spriteIndex == 240 {
+            spriteSegment = spriteSegment + 1;
+        }
+        spriteIndex = spriteIndex + 16;
+        i = i + 1;
+    }
+    i = 0;
+    renderTileXW = 0;
+    while i < renderTileX {
+        renderTileXW = renderTileXW + tileWidth;
+        i = i + 1;
+    }
+    i = 0;
+    renderTileYH = 0;
+    while i < renderTileY {
+        renderTileYH = renderTileYH + tileHeight;
+        i = i + 1;
+    }
+    renderTileTile = [ tileSegment , renderTileXY ];
+    renderTileColor1 = [ color1Segment , renderTileXY ];
+    renderTileColor2 = [ color2Segment , renderTileXY ];
+    [ spriteSegment , spriteIndex ] = 128; // Enable
+    [ spriteSegment , spriteIndex + 1 ] = renderTileXW;
+    [ spriteSegment , spriteIndex + 2 ] = renderTileYH;
+    [ spriteSegment , spriteIndex + 3 ] = tileWidth;
+    [ spriteSegment , spriteIndex + 4 ] = tileHeight;
+    [ spriteSegment , spriteIndex + 5 ] = 128;
+    [ spriteSegment , spriteIndex + 6 ] = 0;
+    [ spriteSegment , spriteIndex + 7 ] = renderTileColor1;
+    [ spriteSegment , spriteIndex + 8 ] = renderTileColor2;
+}
+
+func waitScreen {
+    while GPUState == previousGPUState {
+        GPUState = [ 127 , 17 ];
+        GPUState = GPUState & 2;
+    }
+    previousGPUState = GPUState;
+}
+

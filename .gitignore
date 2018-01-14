@@ -13,4 +13,8 @@ compiler/tests/*.bin
 **/pong2.asm
 **/tetris.asm
 **/tetris.bin
+**/paint.bin
+**/paint.asm
+**/paint.rom
+games/paint/*.spr
 
