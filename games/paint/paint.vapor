@@ -98,20 +98,28 @@ while 1 {
         }
     }
     if buttons1 & 16 == 16 {
-        cursorColor1 = cursorColor1 + 1;
-        call renderCursor;
+        if prevButtons1 & 16 == 0 {
+            cursorColor1 = cursorColor1 + 1;
+            call renderCursor;
+        }
     }
     if buttons1 & 32 == 32 {
-        cursorColor1 = cursorColor1 - 1;
-        call renderCursor;
+        if prevButtons1 & 32 == 0 {
+            cursorColor1 = cursorColor1 - 1;
+            call renderCursor;
+        }
     }
     if buttons2 & 16 == 16 {
-        cursorColor2 = cursorColor2 + 1;
-        call renderCursor;
+        if prevButtons2 & 16 == 0 {
+            cursorColor2 = cursorColor2 + 1;
+            call renderCursor;
+        }
     }
     if buttons2 & 32 == 32 {
-        cursorColor2 = cursorColor2 - 1;
-        call renderCursor;
+        if prevButtons2 & 32 == 0 {
+            cursorColor2 = cursorColor2 - 1;
+            call renderCursor;
+        }
     }
     if buttons1 & 1 == 1 { // Up
         if prevButtons1 & 1 == 0 {
