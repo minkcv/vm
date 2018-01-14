@@ -3,6 +3,8 @@
 
 var buttons1;
 var buttons2;
+var prevButtons1;
+var prevButtons2;
 
 const tileWidth 16;
 const tileHeight 16;
@@ -19,7 +21,8 @@ const cursorSpriteSegment 79;
 // Loop index
 var i;
 
-var cursorChanged;
+var moveSpeed;
+var tileSpeed;
 var cursorX;
 var cursorY;
 var cursorTile;
@@ -39,6 +42,8 @@ var renderTileYH;
 
 var spriteSegment;
 var spriteIndex;
+var tileSpriteSegment;
+var tileSpriteOffset;
 var GPUState;
 var previousGPUState;
 
@@ -50,24 +55,48 @@ var previousGPUState;
 while 1 {
     buttons1 = [ 127 , 0 ];
     buttons2 = [ 127 , 1 ];
-    if buttons1 & 128 == 128 {
+    moveSpeed = 1;
+    if buttons1 & 64 == 64 { // R Shift
+        moveSpeed = 5;
+    }
+    tileSpeed = 1;
+    if buttons2 & 64 == 64 {
+        tileSpeed = 5;
+    }
+    if buttons1 & 128 == 128 { // Enter
         call setTile;
     }
-    if buttons1 & 4 == 4 {
-        call renderLastTile;
-        cursorX = cursorX - 1;
-        if cursorX > tilesPerRow - 1 {
-            cursorX = tilesPerRow - 1;
+    if buttons1 & 4 == 4 { // Left
+        if prevButtons1 & 4 == 0 {
+            call renderLastTile;
+            cursorX = cursorX - moveSpeed;
+            if cursorX > tilesPerRow - 1 {
+                cursorX = tilesPerRow - 1;
+            }
+            call renderCursor;
         }
-        call renderCursor;
     }
-    if buttons1 & 8 == 8 {
-        call renderLastTile;
-        cursorX = cursorX + 1;
-        if cursorX > tilesPerRow - 1 {
-            cursorX = 0;
+    if buttons1 & 8 == 8 { // Right
+        if prevButtons1 & 8 == 0 {
+            call renderLastTile;
+            cursorX = cursorX + moveSpeed;
+            if cursorX > tilesPerRow - 1 {
+                cursorX = 0;
+            }
+            call renderCursor;
         }
-        call renderCursor;
+    }
+    if buttons2 & 1 == 1 { // W
+        if prevButtons2 & 1 == 0 {
+            cursorTile = cursorTile + tileSpeed;
+            call renderCursor;
+        }
+    }
+    if buttons2 & 2 == 2 { // S
+        if prevButtons2 & 2 == 0 {
+            cursorTile = cursorTile - tileSpeed;
+            call renderCursor;
+        }
     }
     if buttons1 & 16 == 16 {
         cursorColor1 = cursorColor1 + 1;
@@ -85,23 +114,29 @@ while 1 {
         cursorColor2 = cursorColor2 - 1;
         call renderCursor;
     }
-    if buttons1 & 1 == 1 {
-        call renderLastTile;
-        cursorY = cursorY - 1;
-        if cursorY > tilesPerCol - 1 {
-            cursorY = tilesPerCol - 1;
+    if buttons1 & 1 == 1 { // Up
+        if prevButtons1 & 1 == 0 {
+            call renderLastTile;
+            cursorY = cursorY - moveSpeed;
+            if cursorY > tilesPerCol - 1 {
+                cursorY = tilesPerCol - 1;
+            }
+            call renderCursor;
         }
-        call renderCursor;
     }
-    if buttons1 & 2 == 2 {
-        call renderLastTile;
-        cursorY = cursorY + 1;
-        if cursorY > tilesPerCol - 1 {
-            cursorY = 0;
+    if buttons1 & 2 == 2 { // Down
+        if prevButtons1 & 2 == 0 {
+            call renderLastTile;
+            cursorY = cursorY + moveSpeed;
+            if cursorY > tilesPerCol - 1 {
+                cursorY = 0;
+            }
+            call renderCursor;
         }
-        call renderCursor;
     }
 
+    prevButtons1 = buttons1;
+    prevButtons2 = buttons2;
     call waitScreen;
 }
 
@@ -130,13 +165,24 @@ func renderCursor {
         renderTileYH = renderTileYH + tileHeight;
         i = i + 1;
     }
+    tileSpriteSegment = 128;
+    tileSpriteOffset = 0;
+    i = 0;
+    renderTileTile = [ tileSegment , renderTileXY ];
+    while i < cursorTile {
+        if tileSpriteOffset == 192 {
+            tileSpriteSegment = tileSpriteSegment + 1;
+        }
+        tileSpriteOffset = tileSpriteOffset + bytesPerTile;
+        i = i + 1;
+    }
     [ cursorSpriteSegment , 0 ] = 128; // Enable
     [ cursorSpriteSegment , 1 ] = renderTileXW;
     [ cursorSpriteSegment , 2 ] = renderTileYH;
     [ cursorSpriteSegment , 3 ] = tileWidth;
     [ cursorSpriteSegment , 4 ] = tileHeight;
-    [ cursorSpriteSegment , 5 ] = 128;
-    [ cursorSpriteSegment , 6 ] = 0;
+    [ cursorSpriteSegment , 5 ] = tileSpriteSegment;
+    [ cursorSpriteSegment , 6 ] = tileSpriteOffset;
     [ cursorSpriteSegment , 7 ] = cursorColor1;
     [ cursorSpriteSegment , 8 ] = cursorColor2;
 }
@@ -184,13 +230,24 @@ func renderTile {
     renderTileTile = [ tileSegment , renderTileXY ];
     renderTileColor1 = [ color1Segment , renderTileXY ];
     renderTileColor2 = [ color2Segment , renderTileXY ];
+    tileSpriteSegment = 128;
+    tileSpriteOffset = 0;
+    i = 0;
+    renderTileTile = [ tileSegment , renderTileXY ];
+    while i < renderTileTile {
+        if tileSpriteOffset == 192 {
+            tileSpriteSegment = tileSpriteSegment + 1;
+        }
+        tileSpriteOffset = tileSpriteOffset + bytesPerTile;
+        i = i + 1;
+    }
     [ spriteSegment , spriteIndex ] = 128; // Enable
     [ spriteSegment , spriteIndex + 1 ] = renderTileXW;
     [ spriteSegment , spriteIndex + 2 ] = renderTileYH;
     [ spriteSegment , spriteIndex + 3 ] = tileWidth;
     [ spriteSegment , spriteIndex + 4 ] = tileHeight;
-    [ spriteSegment , spriteIndex + 5 ] = 128;
-    [ spriteSegment , spriteIndex + 6 ] = 0;
+    [ spriteSegment , spriteIndex + 5 ] = tileSpriteSegment;
+    [ spriteSegment , spriteIndex + 6 ] = tileSpriteOffset;
     [ spriteSegment , spriteIndex + 7 ] = renderTileColor1;
     [ spriteSegment , spriteIndex + 8 ] = renderTileColor2;
 }
