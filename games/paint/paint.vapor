@@ -47,7 +47,6 @@ var tileSpriteOffset;
 var GPUState;
 var previousGPUState;
 
-[ 127 , 16 ] = 73;
 // Enable GPU
 [ 127 , 17 ] = 1;
 
