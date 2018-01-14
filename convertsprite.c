@@ -67,6 +67,10 @@ int main (int argc, char** argv)
     height = png_get_image_height(pngPtr, infoPtr);
     colorType = png_get_color_type(pngPtr, infoPtr);
     bitDepth = png_get_bit_depth(pngPtr, infoPtr);
+    //printf("Image width: %d\n", width);
+    //printf("Image height: %d\n", height);
+    //printf("Color type: %d\n", colorType);
+    //printf("Bit depth: %d\n", bitDepth);
     numberOfPasses = png_set_interlace_handling(pngPtr);
     png_read_update_info(pngPtr, infoPtr);
     setjmp(png_jmpbuf(pngPtr));
