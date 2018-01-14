@@ -1,6 +1,8 @@
 *.swp
 main
 **/mars.bin
+**/mars.rom
+games/mars/*.spr
 assembler
 convertsprite
 **/pong.bin

@@ -2,6 +2,9 @@
 cd ..
 make &> /dev/null
 cd games/mars
+rm *.spr
+rm mars.rom
+rm mars.bin
 ../../assembler -f mars.asm &> /dev/null
 ../../convertsprite astronaut.png &> /dev/null
 ../../convertsprite stars.png &> /dev/null
