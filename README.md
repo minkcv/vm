@@ -14,11 +14,12 @@ A virtual machine with no physical hardware spec.
 - A speed of 500,000 instructions per second (0.5 MIPS)
 
 ### Included Programs:
-Three programs are included to demonstrate the capabilities of the vm. "Mars" is a simple scene showing colored sprites that the player can move around in. "Pong" is a clone of the classic Atari game for 2 players. Pong2 is pong written in vaporlang, a language created specifically for this platform. Tetris is a much larger game written in vaporlang.
+Three programs are included to demonstrate the capabilities of the vm. "Mars" is a simple scene showing colored sprites that the player can move around in. "Pong" is a clone of the classic Atari game for 2 players. Pong2 is pong written in vaporlang, a language created specifically for this platform. Tetris is a much larger game written in vaporlang. Paint is a multi color character editor.
 
 ![demo](https://github.com/minkcv/vm/blob/master/etc/mars.png)
 ![pong](https://github.com/minkcv/vm/blob/master/etc/pong.png)
 ![tetris](https://github.com/minkcv/vm/blob/master/etc/tetris.png)
+![paint](https://github.com/minkcv/vm/blob/master/etc/paint.png)
 
 ### Why did you make this? Who is it for?
 This is a hobby project to allow myself and others to write games for a very simple architecture without some of the annoyances that physical architectures impose.
