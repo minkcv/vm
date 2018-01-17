@@ -1,0 +1,182 @@
+// Breakout
+// 2018 Will Smith (minkcv)
+
+var previousGPUState;
+var GPUState;
+
+var ballX;
+var ballY;
+var ballMoveRight;
+var ballMoveUp;
+var ballMoveSpeed;
+const ballWidth 4;
+const ballHeight 4;
+var paddleX;
+const paddleY 176;
+const paddleMoveSpeed 2;
+const paddleHeight 4;
+var paddleWidth;
+
+const blockXSegment 0;
+const blockYSegment 1;
+const blockWidth 16;
+const blockHeight 4;
+var wavesCleared;
+var nBlocks;
+var spriteIndex;
+var spriteSegment;
+var i;
+var i2;
+var x;
+var y;
+var buttons;
+
+// Enable GPU
+[ 127 , 17 ] = 1;
+
+call initSprites;
+call createBlocks1;
+call reset;
+
+// Main loop
+while 1 {
+    buttons = [ 127 , 0 ];
+    if buttons & 4 == 4 { // Left
+        if paddleX > 0 {
+            paddleX = paddleX - paddleMoveSpeed;
+        }
+    }
+    if buttons & 8 == 8 { // Right
+        if paddleX < 255 - paddleWidth + paddleMoveSpeed - 2 {
+            paddleX = paddleX + paddleMoveSpeed;
+        }
+    }
+
+    if ballMoveRight {
+        ballX = ballX + ballMoveSpeed;
+    }
+    if ballMoveRight == 0 {
+        ballX = ballX - ballMoveSpeed;
+    }
+
+    if ballX > 255 - ballMoveSpeed + 2 {
+        ballMoveRight = 0;
+    }
+    if ballX == 0 {
+        ballMoveRight = 1;
+    }
+    if ballMoveUp {
+        ballY = ballY - ballMoveSpeed;
+    }
+    // Check paddle collision
+    if ballMoveUp == 0 {
+        if ballY + ballHeight > paddleY - ballMoveSpeed {
+            if ballY < paddleY + paddleHeight {
+                if ballX > paddleX {
+                    if ballX < paddleX + paddleWidth {
+                        ballMoveUp = 1; // Bounce
+                    }
+                }
+            }
+        }
+    }
+    if ballMoveUp == 0 {
+        ballY = ballY + ballMoveSpeed;
+    }
+
+    if ballY > 192 - ballHeight {
+        ballMoveUp = 1;
+    }
+    if ballY == 0 {
+        ballMoveUp = 0;
+    }
+    call render;
+    call waitScreen;
+}
+
+func render {
+    spriteSegment = 64;
+    // Paddle Sprite
+    [ spriteSegment , 1 ] = paddleX;
+    [ spriteSegment , 2 ] = paddleY;
+    [ spriteSegment , 3 ] = paddleWidth;
+    // Ball Sprite
+    [ spriteSegment , 17 ] = ballX;
+    [ spriteSegment , 18 ] = ballY;
+    spriteIndex = 32; // Blocks start at 32
+    i = 0;
+    while i < nBlocks {
+        [ 64 , spriteIndex ] = 128; // Enable
+        x = [ blockXSegment , i ];
+        y = [ blockYSegment , i ];
+        [ spriteSegment , spriteIndex + 1 ] = x;
+        [ spriteSegment , spriteIndex + 2 ] = y;
+        if spriteIndex == 240 {
+            spriteSegment = spriteSegment + 1;
+        }
+        spriteIndex = spriteIndex + 16;
+        i = i + 1;
+    }
+}
+
+func createBlocks1 {
+    nBlocks = 4;
+    [ blockXSegment , 0 ] = 0;
+    [ blockXSegment , 1 ] = 24;
+    [ blockXSegment , 2 ] = 48;
+    [ blockXSegment , 3 ] = 72;
+
+    [ blockYSegment , 0 ] = 24;
+    [ blockYSegment , 1 ] = 24;
+    [ blockYSegment , 2 ] = 24;
+    [ blockYSegment , 3 ] = 24;
+}
+
+func reset {
+    ballX = 128;
+    ballY = 170;
+    ballMoveUp = 1;
+    ballMoveRight = 1;
+    ballMoveSpeed = 1;
+    paddleX = 100;
+    paddleWidth = 64;
+}
+
+func initSprites {
+    // Paddle Sprite
+    spriteSegment = 64;
+    [ spriteSegment , 0 ] = 128;
+    [ spriteSegment , 2 ] = paddleY;
+    [ spriteSegment , 4 ] = paddleHeight;
+    [ spriteSegment , 5 ] = 128;
+    [ spriteSegment , 7 ] = 255;
+    // Ball Sprite
+    [ spriteSegment , 16 ] = 128;
+    [ spriteSegment , 19 ] = ballWidth;
+    [ spriteSegment , 20 ] = ballHeight;
+    [ spriteSegment , 21 ] = 128;
+    [ spriteSegment , 23 ] = 255;
+    // Blocks start at 32
+    spriteIndex = 32;
+    i = 0;
+    while i < 255 {
+        [ spriteSegment , spriteIndex + 3 ] = blockWidth;
+        [ spriteSegment , spriteIndex + 4 ] = blockHeight;
+        [ spriteSegment , spriteIndex + 5 ] = 128; // Sprite data segment
+        [ spriteSegment , spriteIndex + 7 ] = 255; // White
+        if spriteIndex == 240 {
+            spriteSegment = spriteSegment + 1;
+        }
+        spriteIndex = spriteIndex + 16;
+        i = i + 1;
+    }
+}
+
+func waitScreen {
+    while GPUState == previousGPUState {
+        GPUState = [ 127 , 17 ];
+        GPUState = GPUState & 2;
+    }
+    previousGPUState = GPUState;
+}
+
