@@ -14,17 +14,11 @@ Display* createDisplay(int width, int height, int scale, int pitch)
     display->renderer = SDL_CreateRenderer(display->window, -1, 0);
     display->back = SDL_CreateTexture(display->renderer, 
             SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING, width, height);
-    //SDL_Palette* palette = display->screen->format->palette;
-    //display->colors = palette->colors;
-    //display->ncolors = palette->ncolors;
-    //SDL_Surface* temp = SDL_LoadBMP("title.bmp");
-    //display->back = SDL_DisplayFormat(temp);
-    //SDL_FreeSurface(temp);
-    //updateDisplay(display);
-    //SDL_Delay(2000); // Show splash screen for 2 seconds
-    // Clear the back buffer with the first color in the color palette (black)
-    //SDL_FillRect(display->back, NULL, 0x00); 
-
+    SDL_Surface* splash = SDL_LoadBMP("title.bmp");
+    SDL_Texture* splashTex = SDL_CreateTextureFromSurface(display->renderer, splash);
+    SDL_RenderCopy(display->renderer, splashTex, NULL, NULL);
+    SDL_RenderPresent(display->renderer);
+    SDL_Delay(2000); // Show splash screen for 2 seconds
     return display;
 }
 
