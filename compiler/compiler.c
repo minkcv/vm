@@ -13,6 +13,7 @@
 #define MAX_BLOCK_LABEL_LENGTH 256
 #define SYMBOL_START_SEGMENT 59
 
+
 enum BlockType
 {
     Block_If = 0,
@@ -449,6 +450,8 @@ int main (int argc, char** argv)
         lineCount++;
         if (lineIn[0] != '\n' )
         {
+            sprintf(assembly[currentAssemblyLine], "; %s", lineIn);
+            currentAssemblyLine++;
             char* token = strtok_r(lineIn, " ;\n", &savePtr);
             while (token != NULL)
             {
