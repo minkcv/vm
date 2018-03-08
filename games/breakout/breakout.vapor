@@ -19,6 +19,7 @@ var paddleWidth;
 
 const blockXSegment 0;
 const blockYSegment 1;
+const blockColorSegment 2;
 const blockWidth 16;
 const blockHeight 4;
 var wavesCleared;
@@ -29,14 +30,17 @@ var i;
 var i2;
 var x;
 var y;
+var c;
+var collideIndex;
 var buttons;
 
-// Enable GPU
-[ 127 , 17 ] = 1;
 
 call initSprites;
 call createBlocks1;
 call reset;
+
+// Enable GPU
+[ 127 , 17 ] = 1;
 
 // Main loop
 while 1 {
@@ -52,23 +56,20 @@ while 1 {
         }
     }
 
-    if ballMoveRight {
-        ballX = ballX + ballMoveSpeed;
-    }
-    if ballMoveRight == 0 {
-        ballX = ballX - ballMoveSpeed;
-    }
-
+    // Check ball collision with screen edges
     if ballX > 255 - ballMoveSpeed + 2 {
         ballMoveRight = 0;
     }
     if ballX == 0 {
         ballMoveRight = 1;
     }
-    if ballMoveUp {
-        ballY = ballY - ballMoveSpeed;
+    if ballY > 192 - ballHeight {
+        ballMoveUp = 1;
     }
-    // Check paddle collision
+    if ballY == 0 {
+        ballMoveUp = 0;
+    }
+    // Check ball collision with paddle 
     if ballMoveUp == 0 {
         if ballY + ballHeight > paddleY - ballMoveSpeed {
             if ballY < paddleY + paddleHeight {
@@ -80,18 +81,52 @@ while 1 {
             }
         }
     }
+
+    //call blockCollision;
+
+    // Collisions done, move ball
+    if ballMoveRight {
+        ballX = ballX + ballMoveSpeed;
+    }
+    if ballMoveRight == 0 {
+        ballX = ballX - ballMoveSpeed;
+    }
+    if ballMoveUp {
+        ballY = ballY - ballMoveSpeed;
+    }
     if ballMoveUp == 0 {
         ballY = ballY + ballMoveSpeed;
     }
 
-    if ballY > 192 - ballHeight {
-        ballMoveUp = 1;
-    }
-    if ballY == 0 {
-        ballMoveUp = 0;
-    }
     call render;
     call waitScreen;
+}
+
+func blockCollision {
+    i = 0;
+    collideIndex = 255;
+    while i < nBlocks {
+        x = [ blockXSegment , i ];
+        y = [ blockYSegment , i ];
+        if ballX < x {
+            if ballX + ballWidth > x {
+                collideIndex = i;
+                ballMoveRight = 0;
+            }
+        }
+        i = i + 1;
+    }
+
+    if collideIndex < 255 {
+        // Move the last block into the index of the deleted one, and decrement nBlocks
+        x = [ blockXSegment , nBlocks - 1 ];
+        y = [ blockYSegment , nBlocks - 1 ];
+        c = [ blockColorSegment , nBlocks - 1 ];
+        [ blockXSegment , collideIndex ] = x;
+        [ blockYSegment , collideIndex ] = y;
+        [ blockColorSegment , collideIndex ] = c;
+        nBlocks = nBlocks - 1;
+    }
 }
 
 func render {
@@ -120,13 +155,29 @@ func render {
 }
 
 func createBlocks1 {
-    nBlocks = 4;
-    [ blockXSegment , 0 ] = 0;
+    nBlocks = 2;
+    i = 0;
+    y = 16;
+    while i < nBlocks {
+        i2 = 0;
+        x = 8;
+        while i2 < 4 {
+            [ blockXSegment , i ] = x;
+            [ blockYSegment , i ] = y;
+            i = i + 1;
+            i2 = i2 + 1;
+            x = x + 24;
+        }
+        if i2 == 3 {
+            // TODO why doesn't this get hit?
+            halt;
+        }
+        y = y + 16;
+    }
     [ blockXSegment , 1 ] = 24;
     [ blockXSegment , 2 ] = 48;
     [ blockXSegment , 3 ] = 72;
 
-    [ blockYSegment , 0 ] = 24;
     [ blockYSegment , 1 ] = 24;
     [ blockYSegment , 2 ] = 24;
     [ blockYSegment , 3 ] = 24;
