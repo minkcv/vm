@@ -23,13 +23,21 @@ struct VM
     GPU* gpu;
     IPU* ipu;
     Display* display;
+    // Debugging
+    int debugMode;
+    int breakState;
+    int step;
 };
 
-VM* createVM(uint16_t* code, uint8_t* rom, Display* display);
+VM* createVM(uint16_t* code, uint8_t* rom, Display* display, int debugMode);
 
 void run(VM* vm);
 
-Instruction* decode(uint16_t* instr);
+void handleDebugKey(VM* vm, SDL_Keycode key);
+
+void disassemble(Instruction* instr, char* assembly);
+
+Instruction* decode(uint16_t instr);
 
 void exec(VM* vm, Instruction* instr);
 
