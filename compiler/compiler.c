@@ -14,8 +14,8 @@
 #define MAX_BLOCK_LABEL_LENGTH 256
 #define SYMBOL_START_SEGMENT 59
 
-int logSourceCode = 1;
-int logInstrucionAddress = 1;
+int logSourceCode = 0;
+int logInstructionAddress = 0;
 
 enum BlockType
 {
@@ -56,7 +56,7 @@ void sprintfAsm(char** assemblyBuffer, uint32_t* currentAssemblyLine, int32_t in
         commentColumnStart = nWritten + 5;
     va_end(args);
 
-    if (logInstrucionAddress && instructionCount >= 0)
+    if (logInstructionAddress && instructionCount >= 0)
     {
         // Pad spaces after the instruction so comments are in a column
         int i;
@@ -390,6 +390,7 @@ void allocAssembly(uint32_t currentSize, uint32_t newSize, char*** assembly)
 int main (int argc, char** argv)
 {
     char* filename = NULL;
+    char* logOptions = NULL;
     int i;
     for (i = 1; i < argc; i++)
     {
@@ -398,11 +399,38 @@ int main (int argc, char** argv)
             if (i + 1 < argc)
                 filename = argv[i + 1];
         }
+        if (!strcmp(argv[i], "-l"))
+        {
+            if (i + 1 < argc)
+            {
+                logOptions = argv[i + 1];
+            }
+            else
+            {
+                printf("Logging options usage: -l [options]\n");
+                printf("Options:\n");
+                printf("\ts: source code\n");
+                printf("\ta: instruction addresses\n");
+                exit(1);
+            }
+        }
     }
     if (filename == NULL)
     {
         printf("Usage: compiler -f sourcefile.src\n");
         exit(1);
+    }
+    if (logOptions != NULL)
+    {
+        int nOptions = strlen(logOptions);
+        int i;
+        for (i = 0; i < nOptions; i++)
+        {
+            if (logOptions[i] == 's')
+                logSourceCode = 1;
+            if (logOptions[i] == 'a')
+                logInstructionAddress = 1;
+        }
     }
 
     FILE* src = fopen(filename, "r");

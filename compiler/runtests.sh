@@ -4,7 +4,7 @@ iformat=$(printf "%02d" $i)
 while [ -f "./tests/test$iformat.src" ]; do
     echo "========================="
     echo "Compiling test $iformat"
-    ./compiler -f tests/test$iformat.src
+    ./compiler -f tests/test$iformat.src -l sa
     echo "Test $iformat source:"
     cat ./tests/test$iformat.src
     echo "Test $iformat assembly:"
