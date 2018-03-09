@@ -204,10 +204,9 @@ void handleDebugKey(VM* vm, SDL_Keycode key)
                 printf(" ");
 
             // Print disassembly with segment.offset address
-            printf(" %03d.%03d 0x%02X.0x%02X: %s\n", 
+            printf(" %s ; %03d.%03d 0x%02X.0x%02X\n", assembly,
                     instructionSegment, instructionOffset,
-                    instructionSegment, instructionOffset,
-                    assembly);
+                    instructionSegment, instructionOffset);
             free(assembly);
         }
     }
