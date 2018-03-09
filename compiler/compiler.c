@@ -48,12 +48,28 @@ typedef struct
 
 void sprintfAsm(char** assemblyBuffer, uint32_t* currentAssemblyLine, int32_t instructionCount, char* format, ...)
 {
+    int commentColumnStart = 30;
     va_list args;
     va_start(args, format);
     int nWritten = vsnprintf(assemblyBuffer[*currentAssemblyLine], MAX_ASSEMBLY_LINE_LENGTH, format, args);
+    if (nWritten > commentColumnStart)
+        commentColumnStart = nWritten + 5;
     va_end(args);
+
     if (logInstrucionAddress && instructionCount >= 0)
-        sprintf(assemblyBuffer[*currentAssemblyLine] + nWritten - 1, " ; %d.%d\n", instructionCount / SEGMENT_SIZE, instructionCount % SEGMENT_SIZE);
+    {
+        // Pad spaces after the instruction so comments are in a column
+        int i;
+        for (i = nWritten; i <= commentColumnStart; i++)
+        {
+            *(assemblyBuffer[*currentAssemblyLine] + i - 1) = ' ';
+        }
+        // Write the instruction address in decimal and hex
+        sprintf(assemblyBuffer[*currentAssemblyLine] + commentColumnStart, 
+                " ; %003d.%003d  0x%02X.0x%02X\n", 
+                instructionCount / SEGMENT_SIZE, instructionCount % SEGMENT_SIZE,
+                instructionCount / SEGMENT_SIZE, instructionCount % SEGMENT_SIZE);
+    }
     
     (*currentAssemblyLine)++;
 }
