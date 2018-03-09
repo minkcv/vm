@@ -248,7 +248,7 @@ func clearRows {
     }
     if row1Tiles == nCols {
         clearY = tile1Y;
-        call clearRowY
+        call clearRowY;
         clearRender = 1;
     i = 0;
     while i < nTiles {
@@ -262,7 +262,7 @@ func clearRows {
     if row2Tiles == nCols {
         if tile2Y - tile1Y > 0 { // Not equal
             clearY = tile2Y;
-            call clearRowY
+            call clearRowY;
             clearRender = 1;
             i = 0;
             while i < nTiles {
@@ -278,7 +278,7 @@ func clearRows {
         if tile3Y - tile2Y > 0 {
             if tile3Y - tile1Y > 0 {
                 clearY = tile3Y;
-                call clearRowY
+                call clearRowY;
                 clearRender = 1;
                 i = 0;
                 while i < nTiles {
@@ -296,7 +296,7 @@ func clearRows {
             if tile4Y - tile2Y > 0 {
                 if tile4Y - tile1Y > 0 {
                     clearY = tile4Y;
-                    call clearRowY
+                    call clearRowY;
                     clearRender = 1;
                     i = 0;
                     while i < nTiles {
