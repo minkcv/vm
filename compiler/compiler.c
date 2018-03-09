@@ -66,7 +66,7 @@ void sprintfAsm(char** assemblyBuffer, uint32_t* currentAssemblyLine, int32_t in
         }
         // Write the instruction address in decimal and hex
         sprintf(assemblyBuffer[*currentAssemblyLine] + commentColumnStart, 
-                " ; %003d.%003d  0x%02X.0x%02X\n", 
+                " ; %03d.%03d  0x%02X.0x%02X\n", 
                 instructionCount / SEGMENT_SIZE, instructionCount % SEGMENT_SIZE,
                 instructionCount / SEGMENT_SIZE, instructionCount % SEGMENT_SIZE);
     }
