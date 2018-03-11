@@ -6,14 +6,13 @@
 #include <stdio.h>
 
 // Creates a vm with the supplied code
-// display is an optional pointer to a display struct
 VM* createVM(uint16_t* code, uint8_t* rom, Display* display, int debugMode)
 {
     VM* vm = (VM*)malloc(sizeof(VM));
     vm->code = code;
     vm->pc = code;
     vm->debugMode = debugMode;
-    vm->breakState = debugMode; // If debug, start in break state
+    vm->breakState = 0;
     vm->step = 0;
     vm->display = display;
     vm->gpu = createGPU();
@@ -115,17 +114,20 @@ void handleDebugKey(VM* vm, SDL_Keycode key)
         // Continue
         vm->breakState = 0;
         vm->step = 0;
+        printf("Resuming execution\n");
     }
     if (key == SDLK_F3)
     {
         // Break all
         vm->breakState = 1;
+        printf("Entering break state\n");
     }
     if (key == SDLK_F4)
     {
         // Step
         vm->breakState = 0;
         vm->step = 1;
+        printf("Stepping\n");
     }
     if (key == SDLK_F9)
     {
@@ -242,6 +244,9 @@ void disassemble(Instruction* instr, char* assembly)
                 case EXT_NOP:
                     sprintf(assembly, "NOP");
                     break;
+                case EXT_BRKP:
+                    sprintf(assembly, "BRKP");
+                    break;
             }
             break;
         case ADD:
@@ -329,6 +334,13 @@ void exec(VM* vm, Instruction* instr)
                     vm->pc = vm->code + (vm->regs[instr->arg1] * JUMP_SEGMENT_SIZE) + vm->regs[instr->arg2] - 1;
                     break;
                 case EXT_NOP:
+                    break;
+                case EXT_BRKP:
+                    if (vm->debugMode)
+                    {
+                        vm->breakState = 1;
+                        printf("Entering break state\n");
+                    }
                     break;
             }
             break;

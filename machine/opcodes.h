@@ -45,6 +45,10 @@
 // Used to waste time
 #define EXT_NOP 0x6
 
+// Break Point
+// Puts the vm in a break state. A no op in non debug mode.
+#define EXT_BRKP 0x7
+
 // Adds last two registers and stores the result in the first
 // ADD r1 r2 r3
 #define ADD 0x1 

@@ -43,10 +43,16 @@ Jumps to the address specified by the values in the registers where the first re
     BIN: 0000 0101 0011 0010
 
 ##### EXT NOP 0x6
-No operation. used to waste time.
+No operation. Used to waste time.
 
     ASM: NOP
     BIN: 0000 0110 0000 0000
+    
+##### EXT BRKP 0x7
+Break point. Puts the vm in a break state when running with the debug option. A no-op when not running with the debug option.
+
+    ASM: BRKP
+    BIN 0000 0111 0000 0000    
 
 #### ADD 0x1
 Adds the values in the last 2 registers and stores the value in the first register.

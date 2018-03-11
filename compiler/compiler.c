@@ -649,6 +649,10 @@ int main (int argc, char** argv)
                 {
                     sprintfAsm(assembly, &currentAssemblyLine, instructionCount++, "HALT\n");
                 }
+                else if (!strcmp(token, "break"))
+                {
+                    sprintfAsm(assembly, &currentAssemblyLine, instructionCount++, "BRKP\n");
+                }
                 else if (strcmp(token, ";") && strcmp(token, "\n"))
                 {
                     Symbol* sym = lookupSymbol(token, symbolMap);
