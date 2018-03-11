@@ -38,7 +38,7 @@ Run the binary with
 Optionally add:
 - `-s #`, where # is a number you want to scale the display by.
 - `-r myrom.rom` to load up to 32768 bytes into the ROM section of memory.
+- `-d` to debug the program. See debugging.md for more information.
 - `&> /dev/null` at the end to suppress print statements.
 
 Consider creating a shell script for your program that is similar to the included `games/mars.sh` script.
-

@@ -15,6 +15,7 @@ int main (int argc, char** argv)
     char* programName = NULL;
     char* romName = NULL;
     int scale = 1;
+    int debugMode = 0;
     int i;
     for (i = 1; i < argc; i++)
     {
@@ -33,6 +34,8 @@ int main (int argc, char** argv)
             if (i + 1 < argc)
                 scale = atoi(argv[i + 1]);
         }
+        else if (!strcmp(argv[i], "-d"))
+            debugMode = 1;
     }
     if (programName == NULL)
     {
@@ -46,7 +49,7 @@ int main (int argc, char** argv)
     if (romName != NULL) // ROM is optional
         rom = readRom(romName, 0);
 
-    VM* vm = createVM(code, rom, display);
+    VM* vm = createVM(code, rom, display, debugMode);
     run(vm);
     quitDisplay(display);
     free(code);

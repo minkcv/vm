@@ -140,6 +140,12 @@ int main (int argc, char** argv)
                             instr |= EXT_NOP << 8;
                             arg++;
                         }
+                        else if (!strcmp(token, "BRKP"))
+                        {
+                            instr = EXT << 12;
+                            instr |= EXT_BRKP << 8;
+                            arg++;
+                        }
                         else if (!strcmp(token, "ADD"))
                             instr = ADD << 12;
                         else if (!strcmp(token, "SUB"))
