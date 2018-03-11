@@ -9,12 +9,17 @@ A virtual machine with no physical hardware spec.
 - Support for 256 concurrent sprites
 - Support for sprites with 4 colors or 3 colors + alpha
 - A screen resolution of 256 x 192 and a refresh rate of 60 Hz (16 ms)
-- An included compiler and assembler to accompany it
 - A maximum of 65536 instructions per program
 - A speed of 500,000 instructions per second (0.5 MIPS)
 
+#### An Added Bonus:
+- An assembler
+- A compiler
+- Debugging functionality
+- Documentation (see `/docs`)
+
 ### Included Programs:
-Three programs are included to demonstrate the capabilities of the vm. "Mars" is a simple scene showing colored sprites that the player can move around in. "Pong" is a clone of the classic Atari game for 2 players. Pong2 is pong written in vaporlang, a language created specifically for this platform. Tetris is a much larger game written in vaporlang. Paint is a multi color character editor.
+Four programs are included to demonstrate the capabilities of the vm. "Mars" is a simple scene showing colored sprites that the player can move around in. "Pong" is a clone of the classic Atari game for 2 players. Pong2 is pong written in vaporlang, a language created specifically for this platform. Tetris is a much larger game written in vaporlang. Paint is a multi color character editor.
 
 ![demo](https://github.com/minkcv/vm/blob/master/etc/mars.png)
 ![pong](https://github.com/minkcv/vm/blob/master/etc/pong.png)

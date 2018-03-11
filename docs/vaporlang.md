@@ -6,6 +6,11 @@ Variable declarations and assignments must end in semicolons. Functions and cont
 The compiler is very whitespace sensitive, not in terms of logic (like python), but in terms of parsing.
 The compiler stores variables and the call stack in memory segments 59 through 63 (inclusive). The maximum number of variables is 1024 and the maximum call stack size is 127 calls.
 
+#### Logging
+The compiler can log source code and instruction addresses to the output assembly. This can be useful when debugging the vm by allowing you to cross reference assembly addresses with  Use `-l a` to log instruction addresses, `-l s` to log source code, or `-l sa` to log both.
+
+    ./compiler -f myprogram.vapor -l sa
+
 #### Comments
 Comments begin with two forward slashes. Anything on the same line as a comment that comes after the slashes will be ignored by the compiler.
 
