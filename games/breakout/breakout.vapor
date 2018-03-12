@@ -21,11 +21,15 @@ const blockXSegment 0;
 const blockYSegment 1;
 const blockColorSegment 2;
 const blockWidth 16;
-const blockHeight 4;
+const blockHeight 16;
+const blocksPerRow 10;
 var wavesCleared;
 var nBlocks;
 var spriteIndex;
 var spriteSegment;
+var clearRender; // True to reset block sprites to disabled
+var updateRender; // True when render is needed
+
 var i;
 var i2;
 var x;
@@ -82,7 +86,7 @@ while 1 {
         }
     }
 
-    //call blockCollision;
+    call blockCollision;
 
     // Collisions done, move ball
     if ballMoveRight {
@@ -104,20 +108,48 @@ while 1 {
 
 func blockCollision {
     i = 0;
-    collideIndex = 255;
+    collideIndex = nBlocks;
     while i < nBlocks {
         x = [ blockXSegment , i ];
         y = [ blockYSegment , i ];
-        if ballX < x {
-            if ballX + ballWidth > x {
-                collideIndex = i;
-                ballMoveRight = 0;
+
+        if ballX > x {
+            if ballX < x + blockWidth {
+                if ballY < y + blockHeight {
+                    if ballY + ballHeight > y + blockHeight {
+                        collideIndex = i;
+                        ballMoveUp = 0;
+                    }
+                }
+                if ballY + ballHeight > y {
+                    if ballY < y {
+                        collideIndex = i;
+                        ballMoveUp = 1;
+                    }
+                }
+            }
+        }
+        
+        if ballY > y {
+            if ballY < y + blockHeight {
+                if ballX < x {
+                    if ballX + ballWidth > x {
+                        collideIndex = i;
+                        ballMoveRight = 0;
+                    }
+                }
+                if ballX + ballWidth > x + blockWidth {
+                    if ballX < x + blockWidth {
+                        collideIndex = i;
+                        ballMoveRight = 1;
+                    }
+                }
             }
         }
         i = i + 1;
     }
 
-    if collideIndex < 255 {
+    if collideIndex < nBlocks {
         // Move the last block into the index of the deleted one, and decrement nBlocks
         x = [ blockXSegment , nBlocks - 1 ];
         y = [ blockYSegment , nBlocks - 1 ];
@@ -126,10 +158,26 @@ func blockCollision {
         [ blockYSegment , collideIndex ] = y;
         [ blockColorSegment , collideIndex ] = c;
         nBlocks = nBlocks - 1;
+        clearRender = 1;
+        updateRender = 1;
     }
 }
 
 func render {
+    if clearRender {
+        spriteIndex = 32;
+        spriteSegment = 64;
+        i = 0;
+        while i < 253 {
+            [ spriteSegment , spriteIndex ] = 0; // Disable
+            if spriteIndex == 240 {
+                spriteSegment = spriteSegment + 1;
+            }
+            spriteIndex = spriteIndex + 16;
+            i = i + 2;
+        }
+        clearRender = 0;
+    }
     spriteSegment = 64;
     // Paddle Sprite
     [ spriteSegment , 1 ] = paddleX;
@@ -138,49 +186,42 @@ func render {
     // Ball Sprite
     [ spriteSegment , 17 ] = ballX;
     [ spriteSegment , 18 ] = ballY;
-    spriteIndex = 32; // Blocks start at 32
-    i = 0;
-    while i < nBlocks {
-        [ 64 , spriteIndex ] = 128; // Enable
-        x = [ blockXSegment , i ];
-        y = [ blockYSegment , i ];
-        [ spriteSegment , spriteIndex + 1 ] = x;
-        [ spriteSegment , spriteIndex + 2 ] = y;
-        if spriteIndex == 240 {
-            spriteSegment = spriteSegment + 1;
+
+    if updateRender {
+        spriteIndex = 32; // Blocks start at 32
+        i = 0;
+        while i < nBlocks {
+            [ 64 , spriteIndex ] = 128; // Enable
+            x = [ blockXSegment , i ];
+            y = [ blockYSegment , i ];
+            [ spriteSegment , spriteIndex + 1 ] = x;
+            [ spriteSegment , spriteIndex + 2 ] = y;
+            if spriteIndex == 240 {
+                spriteSegment = spriteSegment + 1;
+            }
+            spriteIndex = spriteIndex + 16;
+            i = i + 1;
         }
-        spriteIndex = spriteIndex + 16;
-        i = i + 1;
     }
 }
 
 func createBlocks1 {
-    nBlocks = 2;
+    nBlocks = 10;
     i = 0;
     y = 16;
     while i < nBlocks {
         i2 = 0;
-        x = 8;
-        while i2 < 4 {
+        x = 12; // Left margin
+        while i2 < blocksPerRow {
             [ blockXSegment , i ] = x;
             [ blockYSegment , i ] = y;
             i = i + 1;
             i2 = i2 + 1;
             x = x + 24;
         }
-        if i2 == 3 {
-            // TODO why doesn't this get hit?
-            halt;
-        }
         y = y + 16;
     }
-    [ blockXSegment , 1 ] = 24;
-    [ blockXSegment , 2 ] = 48;
-    [ blockXSegment , 3 ] = 72;
-
-    [ blockYSegment , 1 ] = 24;
-    [ blockYSegment , 2 ] = 24;
-    [ blockYSegment , 3 ] = 24;
+    updateRender = 1;
 }
 
 func reset {
