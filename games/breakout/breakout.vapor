@@ -21,7 +21,7 @@ const blockXSegment 0;
 const blockYSegment 1;
 const blockColorSegment 2;
 const blockWidth 16;
-const blockHeight 16;
+const blockHeight 4;
 const blocksPerRow 10;
 var wavesCleared;
 var nBlocks;
@@ -165,6 +165,8 @@ func blockCollision {
 
 func render {
     if clearRender {
+        // Disable and re enable GPU to avoid flickering
+        [ 127 , 17 ] = 0;
         spriteIndex = 32;
         spriteSegment = 64;
         i = 0;
@@ -178,6 +180,27 @@ func render {
         }
         clearRender = 0;
     }
+    if updateRender {
+        spriteIndex = 32; // Blocks start at 32
+        spriteSegment = 64;
+        i = 0;
+        while i < nBlocks {
+            [ spriteSegment , spriteIndex ] = 128; // Enable
+            x = [ blockXSegment , i ];
+            y = [ blockYSegment , i ];
+            c = [ blockColorSegment, i ];
+            [ spriteSegment , spriteIndex + 1 ] = x;
+            [ spriteSegment , spriteIndex + 2 ] = y;
+            [ spriteSegment , spriteIndex + 7 ] = c;
+            if spriteIndex == 240 {
+                spriteSegment = spriteSegment + 1;
+            }
+            spriteIndex = spriteIndex + 16;
+            i = i + 1;
+        }
+        updateRender = 0;
+        [ 127 , 17 ] = 1;
+    }
     spriteSegment = 64;
     // Paddle Sprite
     [ spriteSegment , 1 ] = paddleX;
@@ -186,27 +209,10 @@ func render {
     // Ball Sprite
     [ spriteSegment , 17 ] = ballX;
     [ spriteSegment , 18 ] = ballY;
-
-    if updateRender {
-        spriteIndex = 32; // Blocks start at 32
-        i = 0;
-        while i < nBlocks {
-            [ 64 , spriteIndex ] = 128; // Enable
-            x = [ blockXSegment , i ];
-            y = [ blockYSegment , i ];
-            [ spriteSegment , spriteIndex + 1 ] = x;
-            [ spriteSegment , spriteIndex + 2 ] = y;
-            if spriteIndex == 240 {
-                spriteSegment = spriteSegment + 1;
-            }
-            spriteIndex = spriteIndex + 16;
-            i = i + 1;
-        }
-    }
 }
 
 func createBlocks1 {
-    nBlocks = 10;
+    nBlocks = 20;
     i = 0;
     y = 16;
     while i < nBlocks {
@@ -215,6 +221,7 @@ func createBlocks1 {
         while i2 < blocksPerRow {
             [ blockXSegment , i ] = x;
             [ blockYSegment , i ] = y;
+            [ blockColorSegment , i ] = 255;
             i = i + 1;
             i2 = i2 + 1;
             x = x + 24;
