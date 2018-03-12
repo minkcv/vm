@@ -14,14 +14,14 @@ const ballHeight 4;
 var paddleX;
 const paddleY 176;
 const paddleMoveSpeed 2;
-const paddleHeight 4;
+const paddleHeight 8;
 var paddleWidth;
 
 const blockXSegment 0;
 const blockYSegment 1;
 const blockColorSegment 2;
 const blockWidth 16;
-const blockHeight 4;
+const blockHeight 8;
 const blocksPerRow 10;
 var wavesCleared;
 var nBlocks;
@@ -68,7 +68,7 @@ while 1 {
         ballMoveRight = 1;
     }
     if ballY > 192 - ballHeight {
-        ballMoveUp = 1;
+        call reset;
     }
     if ballY == 0 {
         ballMoveUp = 0;
@@ -77,8 +77,19 @@ while 1 {
     if ballMoveUp == 0 {
         if ballY + ballHeight > paddleY - ballMoveSpeed {
             if ballY < paddleY + paddleHeight {
+                // Edge cases for paddle at screen edges
+                if paddleX == 0 {
+                    if ballX < paddleWidth{
+                        ballMoveUp = 1; // Bounce
+                    }
+                }
+                if paddleX == 192 {
+                    if ballX > paddleX {
+                        ballMoveUp = 1;
+                    }
+                }
                 if ballX > paddleX {
-                    if ballX < paddleX + paddleWidth {
+                    if ballX < paddleX + paddleWidth{
                         ballMoveUp = 1; // Bounce
                     }
                 }
@@ -212,7 +223,7 @@ func render {
 }
 
 func createBlocks1 {
-    nBlocks = 20;
+    nBlocks = 40;
     i = 0;
     y = 16;
     while i < nBlocks {
@@ -221,7 +232,7 @@ func createBlocks1 {
         while i2 < blocksPerRow {
             [ blockXSegment , i ] = x;
             [ blockYSegment , i ] = y;
-            [ blockColorSegment , i ] = 255;
+            [ blockColorSegment , i ] = i + y + 130;
             i = i + 1;
             i2 = i2 + 1;
             x = x + 24;
@@ -233,12 +244,13 @@ func createBlocks1 {
 
 func reset {
     ballX = 128;
-    ballY = 170;
+    ballY = 128;
     ballMoveUp = 1;
     ballMoveRight = 1;
     ballMoveSpeed = 1;
     paddleX = 100;
     paddleWidth = 64;
+    call createBlocks1;
 }
 
 func initSprites {
