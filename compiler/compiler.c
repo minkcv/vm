@@ -712,10 +712,16 @@ int main (int argc, char** argv)
         printf("Filename must have extension\n");
         exit(1);
     }
-    char* noExtension = malloc(sizeof(char) * index);
+    // Add space for 5 new chars ".asm\0"
+    char* noExtension = malloc(sizeof(char) * index + sizeof(char) * 5);
     strncpy(noExtension, filename, index);
     noExtension[index] = '\0';
     FILE* asmfile = fopen(strcat(noExtension, ".asm"), "wb");
+    if (asmfile == NULL)
+    {
+        printf("Couldn't open file %s for writing assembly to\n", noExtension);
+        exit(1);
+    }
     for (i = 0; i < currentAssemblyLine; i++)
     {
         fwrite(assembly[i], sizeof(char), strlen(assembly[i]), asmfile);

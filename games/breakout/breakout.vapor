@@ -1,0 +1,382 @@
+// Breakout
+// 2018 Will Smith (minkcv)
+
+var previousGPUState;
+var GPUState;
+
+var ballX;
+var ballY;
+var ballMoveRight;
+var ballMoveUp;
+var ballMoveSpeed;
+const ballWidth 4;
+const ballHeight 4;
+var paddleX;
+const paddleY 176;
+const paddleMoveSpeed 2;
+const paddleHeight 8;
+var paddleWidth;
+
+const blockXSegment 0;
+const blockYSegment 1;
+const blockColorSegment 2;
+const blockWidth 16;
+const blockHeight 8;
+const blocksPerRow 10;
+var level;
+var nBlocks;
+var spriteIndex;
+var spriteSegment;
+var clearRender; // True to reset block sprites to disabled
+var updateRender; // True when render is needed
+
+var i;
+var i2;
+var i3;
+var x;
+var y;
+var c;
+var collideIndex;
+var buttons;
+
+
+call initSprites;
+level = 0;
+call reset;
+
+// Enable GPU
+[ 127 , 17 ] = 1;
+
+// Main loop
+while 1 {
+    buttons = [ 127 , 0 ];
+    if buttons & 4 == 4 { // Left
+        if paddleX > 0 {
+            paddleX = paddleX - paddleMoveSpeed;
+        }
+    }
+    if buttons & 8 == 8 { // Right
+        if paddleX < 255 - paddleWidth + paddleMoveSpeed - 2 {
+            paddleX = paddleX + paddleMoveSpeed;
+        }
+    }
+
+    // Check ball collision with screen edges
+    if ballX > 255 - ballMoveSpeed + 2 {
+        ballMoveRight = 0;
+    }
+    if ballX == 0 {
+        ballMoveRight = 1;
+    }
+    if ballY > 192 - ballHeight {
+        // Bottom of the screen: game over
+        level = 0;
+        call reset;
+    }
+    if ballY == 0 {
+        ballMoveUp = 0;
+    }
+    // Check ball collision with paddle 
+    if ballMoveUp == 0 {
+        if ballY + ballHeight > paddleY - ballMoveSpeed {
+            if ballY < paddleY + paddleHeight {
+                // Edge cases for paddle at screen edges
+                if paddleX == 0 {
+                    if ballX < paddleWidth{
+                        ballMoveUp = 1; // Bounce
+                    }
+                }
+                // Check right screen edge
+                if paddleX == 1 + 255 - paddleWidth{
+                    if ballX > paddleX {
+                        ballMoveUp = 1;
+                    }
+                }
+                if ballX > paddleX {
+                    if ballX < paddleX + paddleWidth{
+                        ballMoveUp = 1; // Bounce
+                    }
+                }
+            }
+        }
+    }
+
+    call blockCollision;
+
+    // Collisions done, move ball
+    if ballMoveRight {
+        ballX = ballX + ballMoveSpeed;
+    }
+    if ballMoveRight == 0 {
+        ballX = ballX - ballMoveSpeed;
+    }
+    if ballMoveUp {
+        ballY = ballY - ballMoveSpeed;
+    }
+    if ballMoveUp == 0 {
+        ballY = ballY + ballMoveSpeed;
+    }
+
+    call render;
+    call waitScreen;
+}
+
+func blockCollision {
+    i = 0;
+    collideIndex = nBlocks;
+    while i < nBlocks {
+        x = [ blockXSegment , i ];
+        y = [ blockYSegment , i ];
+
+        if ballX > x - ballWidth {
+            if ballX < x + blockWidth {
+                if ballY < y + blockHeight {
+                    if ballY + ballHeight > y + blockHeight {
+                        collideIndex = i;
+                        ballMoveUp = 0;
+                    }
+                }
+                if ballY + ballHeight > y {
+                    if ballY < y {
+                        collideIndex = i;
+                        ballMoveUp = 1;
+                    }
+                }
+            }
+        }
+        
+        if ballY > y - ballHeight {
+            if ballY < y + blockHeight {
+                if ballX < x {
+                    if ballX + ballWidth > x {
+                        collideIndex = i;
+                        ballMoveRight = 0;
+                    }
+                }
+                if ballX + ballWidth > x + blockWidth {
+                    if ballX < x + blockWidth {
+                        collideIndex = i;
+                        ballMoveRight = 1;
+                    }
+                }
+            }
+        }
+        i = i + 1;
+    }
+
+    if collideIndex < nBlocks {
+        // Move the last block into the index of the deleted one, and decrement nBlocks
+        x = [ blockXSegment , nBlocks - 1 ];
+        y = [ blockYSegment , nBlocks - 1 ];
+        c = [ blockColorSegment , nBlocks - 1 ];
+        [ blockXSegment , collideIndex ] = x;
+        [ blockYSegment , collideIndex ] = y;
+        [ blockColorSegment , collideIndex ] = c;
+        nBlocks = nBlocks - 1;
+        clearRender = 1;
+        updateRender = 1;
+    }
+
+    if nBlocks == 0 {
+        level = level + 1;
+        // Create the next level
+        call reset;
+    }
+}
+
+func render {
+    if clearRender {
+        // Disable and re enable GPU to avoid flickering
+        [ 127 , 17 ] = 0;
+        spriteIndex = 32;
+        spriteSegment = 64;
+        i = 0;
+        while i < 253 {
+            [ spriteSegment , spriteIndex ] = 0; // Disable
+            if spriteIndex == 240 {
+                spriteSegment = spriteSegment + 1;
+            }
+            spriteIndex = spriteIndex + 16;
+            i = i + 2;
+        }
+        clearRender = 0;
+    }
+    if updateRender {
+        spriteIndex = 32; // Blocks start at 32
+        spriteSegment = 64;
+        i = 0;
+        while i < nBlocks {
+            [ spriteSegment , spriteIndex ] = 128; // Enable
+            x = [ blockXSegment , i ];
+            y = [ blockYSegment , i ];
+            c = [ blockColorSegment, i ];
+            [ spriteSegment , spriteIndex + 1 ] = x;
+            [ spriteSegment , spriteIndex + 2 ] = y;
+            [ spriteSegment , spriteIndex + 7 ] = c;
+            if spriteIndex == 240 {
+                spriteSegment = spriteSegment + 1;
+            }
+            spriteIndex = spriteIndex + 16;
+            i = i + 1;
+        }
+        updateRender = 0;
+        [ 127 , 17 ] = 1;
+    }
+    spriteSegment = 64;
+    // Paddle Sprite
+    [ spriteSegment , 1 ] = paddleX;
+    [ spriteSegment , 2 ] = paddleY;
+    [ spriteSegment , 3 ] = paddleWidth;
+    // Ball Sprite
+    [ spriteSegment , 17 ] = ballX;
+    [ spriteSegment , 18 ] = ballY;
+}
+
+func createBlocks3 {
+    nBlocks = 30;
+    i = 0;
+    y = 16;
+    while i < nBlocks {
+        i3 = 0;
+        i2 = 0;
+        x = 12; // Left margin
+        while i2 < blocksPerRow {
+            [ blockXSegment , i ] = x;
+            [ blockYSegment , i ] = y + i3;
+            [ blockColorSegment , i ] = i + y + 130;
+            i = i + 1;
+            i2 = i2 + 1;
+            x = x + 24;
+            if i2 & 1 == 0 {
+                i3 = i3 + 4;
+            }
+            if i3 > 11 {
+                i3 = 0;
+            }
+        }
+        y = y + 16;
+    }
+    updateRender = 1;
+}
+
+func createBlocks2 {
+    nBlocks = 30;
+    i = 0;
+    y = 16;
+    i3 = 16;
+    while i < nBlocks {
+        i2 = 0;
+        x = 12; // Left margin
+        while i2 < blocksPerRow {
+            [ blockXSegment , i ] = x;
+            [ blockYSegment , i ] = y + i3;
+            [ blockColorSegment , i ] = i + y + 80;
+            i = i + 1;
+            i2 = i2 + 1;
+            if i2 & 1 == 1 {
+                i3 = 0;
+            }
+            if i2 & 1 == 0 {
+                i3 = 16;
+            }
+            x = x + 24;
+        }
+        y = y + 16;
+    }
+    updateRender = 1;
+}
+
+func createBlocks1 {
+    nBlocks = 40;
+    i = 0;
+    y = 16;
+    i3 = 12;
+    while i < nBlocks {
+        i2 = 0;
+        x = 6; // Left margin
+        if i & 2 == 2 {
+            i3 = 0;
+        }
+        if i & 2 == 0 {
+            i3 = 12;
+        }
+        while i2 < blocksPerRow {
+            [ blockXSegment , i ] = x + i3;
+            [ blockYSegment , i ] = y
+            [ blockColorSegment , i ] = i + y + 80;
+            i = i + 1;
+            i2 = i2 + 1;
+            x = x + 24;
+        }
+        y = y + 16;
+    }
+    updateRender = 1;
+}
+
+func reset {
+    ballX = 128;
+    ballY = 128;
+    ballMoveUp = 1;
+    ballMoveRight = 1;
+    ballMoveSpeed = 1;
+    paddleX = 140;
+    if level == 0 {
+        paddleWidth = 64;
+        call createBlocks1;
+    }
+    if level == 1 {
+        paddleWidth = 32;
+        call createBlocks2;
+    }
+    if level == 2 {
+        paddleWidth = 16;
+        call createBlocks3;
+    }
+    if level == 3 {
+        paddleWidth = 8;
+        call createBlocks1;
+    }
+    if level == 4 {
+        paddleWidth = 4;
+        call createBlocks2;
+    }
+}
+
+func initSprites {
+    // Paddle Sprite
+    spriteSegment = 64;
+    [ spriteSegment , 0 ] = 128;
+    [ spriteSegment , 2 ] = paddleY;
+    [ spriteSegment , 4 ] = paddleHeight;
+    [ spriteSegment , 5 ] = 128;
+    [ spriteSegment , 7 ] = 255;
+    // Ball Sprite
+    [ spriteSegment , 16 ] = 128;
+    [ spriteSegment , 19 ] = ballWidth;
+    [ spriteSegment , 20 ] = ballHeight;
+    [ spriteSegment , 21 ] = 128;
+    [ spriteSegment , 23 ] = 255;
+    // Blocks start at 32
+    spriteIndex = 32;
+    i = 0;
+    while i < 255 {
+        [ spriteSegment , spriteIndex + 3 ] = blockWidth;
+        [ spriteSegment , spriteIndex + 4 ] = blockHeight;
+        [ spriteSegment , spriteIndex + 5 ] = 128; // Sprite data segment
+        [ spriteSegment , spriteIndex + 7 ] = 255; // White
+        if spriteIndex == 240 {
+            spriteSegment = spriteSegment + 1;
+        }
+        spriteIndex = spriteIndex + 16;
+        i = i + 1;
+    }
+}
+
+func waitScreen {
+    while GPUState == previousGPUState {
+        GPUState = [ 127 , 17 ];
+        GPUState = GPUState & 2;
+    }
+    previousGPUState = GPUState;
+}
+

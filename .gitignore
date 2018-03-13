@@ -17,4 +17,6 @@ compiler/tests/*.bin
 **/paint.asm
 **/paint.rom
 games/paint/*.spr
+**/breakout.asm
+**/breakout.bin
 
