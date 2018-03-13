@@ -23,7 +23,7 @@ const blockColorSegment 2;
 const blockWidth 16;
 const blockHeight 8;
 const blocksPerRow 10;
-var wavesCleared;
+var level;
 var nBlocks;
 var spriteIndex;
 var spriteSegment;
@@ -32,6 +32,7 @@ var updateRender; // True when render is needed
 
 var i;
 var i2;
+var i3;
 var x;
 var y;
 var c;
@@ -40,7 +41,7 @@ var buttons;
 
 
 call initSprites;
-call createBlocks1;
+level = 0;
 call reset;
 
 // Enable GPU
@@ -68,6 +69,8 @@ while 1 {
         ballMoveRight = 1;
     }
     if ballY > 192 - ballHeight {
+        // Bottom of the screen: game over
+        level = 0;
         call reset;
     }
     if ballY == 0 {
@@ -83,7 +86,8 @@ while 1 {
                         ballMoveUp = 1; // Bounce
                     }
                 }
-                if paddleX == 192 {
+                // Check right screen edge
+                if paddleX == 1 + 255 - paddleWidth{
                     if ballX > paddleX {
                         ballMoveUp = 1;
                     }
@@ -124,7 +128,7 @@ func blockCollision {
         x = [ blockXSegment , i ];
         y = [ blockYSegment , i ];
 
-        if ballX > x {
+        if ballX > x - ballWidth {
             if ballX < x + blockWidth {
                 if ballY < y + blockHeight {
                     if ballY + ballHeight > y + blockHeight {
@@ -141,7 +145,7 @@ func blockCollision {
             }
         }
         
-        if ballY > y {
+        if ballY > y - ballHeight {
             if ballY < y + blockHeight {
                 if ballX < x {
                     if ballX + ballWidth > x {
@@ -171,6 +175,12 @@ func blockCollision {
         nBlocks = nBlocks - 1;
         clearRender = 1;
         updateRender = 1;
+    }
+
+    if nBlocks == 0 {
+        level = level + 1;
+        // Create the next level
+        call reset;
     }
 }
 
@@ -222,17 +232,78 @@ func render {
     [ spriteSegment , 18 ] = ballY;
 }
 
-func createBlocks1 {
-    nBlocks = 40;
+func createBlocks3 {
+    nBlocks = 30;
     i = 0;
     y = 16;
+    while i < nBlocks {
+        i3 = 0;
+        i2 = 0;
+        x = 12; // Left margin
+        while i2 < blocksPerRow {
+            [ blockXSegment , i ] = x;
+            [ blockYSegment , i ] = y + i3;
+            [ blockColorSegment , i ] = i + y + 130;
+            i = i + 1;
+            i2 = i2 + 1;
+            x = x + 24;
+            if i2 & 1 == 0 {
+                i3 = i3 + 4;
+            }
+            if i3 > 11 {
+                i3 = 0;
+            }
+        }
+        y = y + 16;
+    }
+    updateRender = 1;
+}
+
+func createBlocks2 {
+    nBlocks = 30;
+    i = 0;
+    y = 16;
+    i3 = 16;
     while i < nBlocks {
         i2 = 0;
         x = 12; // Left margin
         while i2 < blocksPerRow {
             [ blockXSegment , i ] = x;
-            [ blockYSegment , i ] = y;
-            [ blockColorSegment , i ] = i + y + 130;
+            [ blockYSegment , i ] = y + i3;
+            [ blockColorSegment , i ] = i + y + 80;
+            i = i + 1;
+            i2 = i2 + 1;
+            if i2 & 1 == 1 {
+                i3 = 0;
+            }
+            if i2 & 1 == 0 {
+                i3 = 16;
+            }
+            x = x + 24;
+        }
+        y = y + 16;
+    }
+    updateRender = 1;
+}
+
+func createBlocks1 {
+    nBlocks = 40;
+    i = 0;
+    y = 16;
+    i3 = 12;
+    while i < nBlocks {
+        i2 = 0;
+        x = 6; // Left margin
+        if i & 2 == 2 {
+            i3 = 0;
+        }
+        if i & 2 == 0 {
+            i3 = 12;
+        }
+        while i2 < blocksPerRow {
+            [ blockXSegment , i ] = x + i3;
+            [ blockYSegment , i ] = y
+            [ blockColorSegment , i ] = i + y + 80;
             i = i + 1;
             i2 = i2 + 1;
             x = x + 24;
@@ -248,9 +319,27 @@ func reset {
     ballMoveUp = 1;
     ballMoveRight = 1;
     ballMoveSpeed = 1;
-    paddleX = 100;
-    paddleWidth = 64;
-    call createBlocks1;
+    paddleX = 140;
+    if level == 0 {
+        paddleWidth = 64;
+        call createBlocks1;
+    }
+    if level == 1 {
+        paddleWidth = 32;
+        call createBlocks2;
+    }
+    if level == 2 {
+        paddleWidth = 16;
+        call createBlocks3;
+    }
+    if level == 3 {
+        paddleWidth = 8;
+        call createBlocks1;
+    }
+    if level == 4 {
+        paddleWidth = 4;
+        call createBlocks2;
+    }
 }
 
 func initSprites {
