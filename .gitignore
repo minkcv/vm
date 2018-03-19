@@ -19,4 +19,7 @@ compiler/tests/*.bin
 games/paint/*.spr
 **/breakout.asm
 **/breakout.bin
-
+games/invaders/*.spr
+**/invaders.asm
+**/invaders.bin
+**/invaders.rom

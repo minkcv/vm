@@ -1,0 +1,156 @@
+// Invaders
+// 2018 Will Smith (minkcv)
+
+var previousGPUState;
+var GPUState;
+var buttons;
+var prevButtons;
+
+var spriteIndex;
+var spriteSegment;
+
+var playerX;
+var playerY;
+var playerMoveSpeed;
+const playerWidth 32;
+const playerHeight 16;
+const playerSpriteSegment 128;
+const playerSpriteOffset 0;
+const playerSpriteSize 128; // Bytes
+
+var nBullets;
+const maxBullets 4;
+const bulletSpriteSegment 128;
+const bulletSpriteOffset 128;
+const bulletSpriteSize 4; // Bytes
+const bulletXSegment 0;
+const bulletYSegment 1;
+const bulletWidth 4;
+const bulletHeight 4;
+const bulletMoveSpeed 4;
+var clearBullets;
+
+var i;
+var x;
+var y;
+call reset;
+call initSprites;
+
+// Enable GPU
+[ 127 , 17 ] = 1;
+
+// Main loop
+while 1 {
+    buttons = [ 127 , 0 ];
+    if buttons & 1 == 1 { // Up
+        if playerY > 0 {
+            playerY = playerY - playerMoveSpeed;
+        }
+    }
+    if buttons & 2 == 2 { // Down
+        if playerY < 192 - playerMoveSpeed + playerHeight - 2 {
+            playerY = playerY + playerMoveSpeed;
+        }
+    }
+    if buttons & 4 == 4 { // Left
+        if playerX > 0 {
+            playerX = playerX - playerMoveSpeed
+        }
+    }
+    if buttons & 8 == 8 { // Right
+        if playerX < 255 - playerWidth + playerMoveSpeed - 2 {
+            playerX = playerX + playerMoveSpeed;
+        }
+    }
+    if buttons & 16 == 16 { // Right control
+        if prevButtons & 16 == 0 {
+            call shoot;
+        }
+    }
+
+    call updateBullets;
+
+    prevButtons = buttons;
+        call render;
+        call waitScreen;
+}
+
+func updateBullets {
+    i = 0;
+    while i < maxBullets {
+        x = [ bulletXSegment , i ];
+        x = x + bulletMoveSpeed;
+        [ bulletXSegment , i ] = x;
+        i = i + 1;
+    }
+}
+
+func shoot {
+    if nBullets < maxBullets {
+        [ bulletXSegment , nBullets ] = playerX + playerWidth;
+        [ bulletYSegment , nBullets ] = playerY + 8; // Middle of player height
+        nBullets = nBullets + 1;
+    }
+}
+
+func reset {
+    playerX = 16;
+    playerY = 64;
+    playerMoveSpeed = 2;
+    nBullets = 0;
+    clearBullets = 0;
+}
+
+func render {
+    // Update player sprite location
+    spriteSegment = 74;
+    [ spriteSegment , 1 ] = playerX;
+    [ spriteSegment , 2 ] = playerY;
+
+    // Bullets
+    spriteIndex = 16;
+    i = 0;
+    while i < nBullets {
+        x = [ bulletXSegment , i ];
+        y = [ bulletYSegment , i ];
+        [ spriteSegment , spriteIndex ] = 144; // Enable and transparency
+        [ spriteSegment , spriteIndex + 1 ] = x;
+        [ spriteSegment , spriteIndex + 2 ] = y;
+        spriteIndex = spriteIndex + 16;
+        i = i + 1;
+    }
+}
+
+func initSprites {
+    // Player
+    spriteSegment = 74; // Top segment
+    [ spriteSegment , 0 ] = 144; // Enable and transparency
+    [ spriteSegment , 1 ] = playerX;
+    [ spriteSegment , 2 ] = playerY;
+    [ spriteSegment , 3 ] = playerWidth
+    [ spriteSegment , 4 ] = playerHeight;
+    [ spriteSegment , 5 ] = playerSpriteSegment;
+    [ spriteSegment , 6 ] = playerSpriteOffset;
+    [ spriteSegment , 7 ] = 255;
+
+    // Bullets
+    spriteIndex = 16;
+    i = 0;
+    while i < maxBullets {
+        [ spriteSegment , spriteIndex + 3 ] = bulletWidth;
+        [ spriteSegment , spriteIndex + 4 ] = bulletHeight;
+        [ spriteSegment , spriteIndex + 5 ] = bulletSpriteSegment;
+        [ spriteSegment , spriteIndex + 6 ] = bulletSpriteOffset;
+        [ spriteSegment , spriteIndex + 7 ] = 255;
+        spriteIndex = spriteIndex + 16;
+        i = i + 1;
+    }
+}
+
+func waitScreen {
+    while GPUState == previousGPUState {
+        GPUState = [ 127 , 17 ];
+        GPUState = GPUState & 2;
+    }
+    previousGPUState = GPUState;
+}
