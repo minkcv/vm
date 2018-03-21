@@ -76,12 +76,29 @@ while 1 {
 }
 
 func updateBullets {
+    // Clear bullets at the right edge of the screen
     i = 0;
-    while i < maxBullets {
+    while i < nBullets {
+        x = [ bulletXSegment , i ];
+        if x > 250 {
+            x = [ bulletXSegment , nBullets - 1 ];
+            y = [ bulletYSegment , nBullets - 1 ];
+            [ bulletXSegment , i ] = x;
+            [ bulletYSegment , i ] = y;
+            nBullets = nBullets - 1;
+            i = i - 1;
+            clearBullets = 1;
+        }
+        i = i + 1;
+    }
+    // Move bullets right
+    i = 0;
+    while i < nBullets {
         x = [ bulletXSegment , i ];
         x = x + bulletMoveSpeed;
         [ bulletXSegment , i ] = x;
         i = i + 1;
+        
     }
 }
 
@@ -107,6 +124,17 @@ func render {
     [ spriteSegment , 1 ] = playerX;
     [ spriteSegment , 2 ] = playerY;
 
+
+    if clearBullets {
+        spriteIndex = 16;
+        i = 0;
+        while i < maxBullets {
+            [ spriteSegment , spriteIndex ] = 0; // Disable
+            spriteIndex = spriteIndex + 16;
+            i = i + 1;
+        }
+        clearBullets = 0;
+    }
     // Bullets
     spriteIndex = 16;
     i = 0;
