@@ -5,6 +5,8 @@ var previousGPUState;
 var GPUState;
 var buttons;
 var prevButtons;
+var ticks;
+var ticks2;
 
 var spriteIndex;
 var spriteSegment;
@@ -30,9 +32,30 @@ const bulletHeight 4;
 const bulletMoveSpeed 4;
 var clearBullets;
 
+var nEnemies;
+const maxEnemies 4;
+const enemySpriteSegment 128;
+const enemySpriteOffset 132;
+const enemySpriteSize 64; // Bytes
+const enemyXSegment 2;
+const enemyYSegment 3;
+const enemyModeSegment 4;
+const modeMoveUp 0;
+const modeMoveDown 1;
+const enemyWidth 16;
+const enemyHeight 16;
+const enemyMoveSpeed 2;
+var clearEnemies;
+var collideIndex;
+
 var i;
+var i2;
 var x;
 var y;
+var x2;
+var y2;
+var m;
+
 call reset;
 call initSprites;
 
@@ -68,6 +91,7 @@ while 1 {
         }
     }
 
+    call updateEnemies;
     call updateBullets;
 
     prevButtons = buttons;
@@ -102,9 +126,57 @@ func updateBullets {
     }
 }
 
+func updateEnemies {
+    i = 0;
+    while i < nEnemies {
+        collideIndex = nEnemies;
+        x = [ enemyXSegment , i ];
+        y = [ enemyYSegment , i ];
+        m = [ enemyModeSegment , i ];
+        x = x - enemyMoveSpeed;
+        [ enemyXSegment , i ] = x;
+        if m == modeMoveDown {
+            y = y - enemyMoveSpeed;
+        }
+        if m == modeMoveUp {
+            y = y + enemyMoveSpeed;
+        }
+        [ enemyYSegment , i ] = y;
+
+        i2 = 0;
+        while i2 < nBullets {
+            x2 = [ bulletXSegment , i2 ];
+            y2 = [ bulletYSegment , i2 ];
+            if x2 + bulletWidth > x {
+                if x2 < x + enemyWidth {
+                    if y2 + bulletHeight > y {
+                        if y2 < y + enemyHeight {
+                            collideIndex = i2;
+                        }
+                    }
+                }
+            }
+            i2 = i2 + 1;
+        }
+
+        if collideIndex < nEnemies {
+            x = [ enemyXSegment , nEnemies - 1 ];
+            y = [ enemyYSegment , nEnemies - 1 ];
+            m = [ enemyModeSegment , nEnemies - 1 ];
+            [ enemyXSegment , collideIndex ] = x;
+            [ enemyYSegment , collideIndex ] = y;
+            [ enemyModeSegment , collideIndex ] = m;
+            nEnemies = nEnemies - 1;
+            clearEnemies = 1;
+        }
+
+        i = i + 1;
+    }
+}
+
 func shoot {
     if nBullets < maxBullets {
-        [ bulletXSegment , nBullets ] = playerX + playerWidth;
+        [ bulletXSegment , nBullets ] = playerX + 16;
         [ bulletYSegment , nBullets ] = playerY + 8; // Middle of player height
         nBullets = nBullets + 1;
     }
@@ -116,6 +188,12 @@ func reset {
     playerMoveSpeed = 2;
     nBullets = 0;
     clearBullets = 0;
+    nEnemies = 0;
+    clearEnemies = 0;
+
+    nEnemies = 1;
+    [ enemyXSegment , 0 ] = 100;
+    [ enemyYSegment , 0 ] = 100;
 }
 
 func render {
@@ -123,7 +201,6 @@ func render {
     spriteSegment = 74;
     [ spriteSegment , 1 ] = playerX;
     [ spriteSegment , 2 ] = playerY;
-
 
     if clearBullets {
         spriteIndex = 16;
@@ -135,12 +212,33 @@ func render {
         }
         clearBullets = 0;
     }
+    if clearEnemies {
+        spriteIndex = 80;
+        i = 0;
+        while i < maxEnemies {
+            [ spriteSegment , spriteIndex ] = 0; // Disable
+            spriteIndex = spriteIndex + 16;
+            i = i + 1;
+        }
+        clearEnemies = 0;
+    }
     // Bullets
     spriteIndex = 16;
     i = 0;
     while i < nBullets {
         x = [ bulletXSegment , i ];
         y = [ bulletYSegment , i ];
+        [ spriteSegment , spriteIndex ] = 144; // Enable and transparency
+        [ spriteSegment , spriteIndex + 1 ] = x;
+        [ spriteSegment , spriteIndex + 2 ] = y;
+        spriteIndex = spriteIndex + 16;
+        i = i + 1;
+    }
+    spriteIndex = 80;
+    i = 0;
+    while i < nEnemies {
+        x = [ enemyXSegment , i ];
+        y = [ enemyYSegment , i ];
         [ spriteSegment , spriteIndex ] = 144; // Enable and transparency
         [ spriteSegment , spriteIndex + 1 ] = x;
         [ spriteSegment , spriteIndex + 2 ] = y;
@@ -173,6 +271,18 @@ func initSprites {
         spriteIndex = spriteIndex + 16;
         i = i + 1;
     }
+    // Enemies
+    spriteIndex = 80;
+    i = 0;
+    while i < maxEnemies {
+        [ spriteSegment , spriteIndex + 3 ] = enemyWidth;
+        [ spriteSegment , spriteIndex + 4 ] = enemyHeight;
+        [ spriteSegment , spriteIndex + 5 ] = enemySpriteSegment;
+        [ spriteSegment , spriteIndex + 6 ] = enemySpriteOffset;
+        [ spriteSegment , spriteIndex + 7 ] = 255;
+        spriteIndex = spriteIndex + 16;
+        i = i + 1;
+    }
 }
 
 func waitScreen {
@@ -181,4 +291,8 @@ func waitScreen {
         GPUState = GPUState & 2;
     }
     previousGPUState = GPUState;
+    ticks = ticks + 1;
+    if ticks == 255 {
+        ticks2 = ticks2 + 1;
+    }
 }
