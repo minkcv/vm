@@ -7,6 +7,7 @@ var buttons;
 var prevButtons;
 var ticks;
 var ticks2;
+var gameOver;
 
 var spriteIndex;
 var spriteSegment;
@@ -45,8 +46,10 @@ const modeMoveDown 1;
 const enemyWidth 16;
 const enemyHeight 16;
 const enemyMoveSpeed 2;
+const enemyStartX 240;
 var clearEnemies;
-var collideIndex;
+var removeEnemyIndex;
+var removeBulletIndex;
 
 var i;
 var i2;
@@ -129,19 +132,27 @@ func updateBullets {
 func updateEnemies {
     i = 0;
     while i < nEnemies {
-        collideIndex = nEnemies;
+        removeEnemyIndex = nEnemies;
+        removeBulletIndex = nBullets;
         x = [ enemyXSegment , i ];
         y = [ enemyYSegment , i ];
         m = [ enemyModeSegment , i ];
         x = x - enemyMoveSpeed;
         [ enemyXSegment , i ] = x;
         if m == modeMoveDown {
-            y = y - enemyMoveSpeed;
+            y = y + enemyMoveSpeed;
+            if y > 175 {
+                m = modeMoveUp;
+            }
         }
         if m == modeMoveUp {
-            y = y + enemyMoveSpeed;
+            y = y - enemyMoveSpeed;
+            if y < enemyMoveSpeed + 1 {
+                m = modeMoveDown;
+            }
         }
         [ enemyYSegment , i ] = y;
+        [ enemyModeSegment , i ] = m;
 
         i2 = 0;
         while i2 < nBullets {
@@ -151,7 +162,8 @@ func updateEnemies {
                 if x2 < x + enemyWidth {
                     if y2 + bulletHeight > y {
                         if y2 < y + enemyHeight {
-                            collideIndex = i2;
+                            removeEnemyIndex = i;
+                            removeBulletIndex = i2;
                         }
                     }
                 }
@@ -159,18 +171,43 @@ func updateEnemies {
             i2 = i2 + 1;
         }
 
-        if collideIndex < nEnemies {
+        if removeEnemyIndex == nEnemies {
+            // This enemy doesn't collide with a bullet.
+            // Check if it has moved across the screen
+            if x < enemyMoveSpeed + 1 {
+                removeEnemyIndex = i;
+            }
+        }
+
+        if removeEnemyIndex < nEnemies {
             x = [ enemyXSegment , nEnemies - 1 ];
             y = [ enemyYSegment , nEnemies - 1 ];
             m = [ enemyModeSegment , nEnemies - 1 ];
-            [ enemyXSegment , collideIndex ] = x;
-            [ enemyYSegment , collideIndex ] = y;
-            [ enemyModeSegment , collideIndex ] = m;
+            [ enemyXSegment , removeEnemyIndex ] = x;
+            [ enemyYSegment , removeEnemyIndex ] = y;
+            [ enemyModeSegment , removeEnemyIndex ] = m;
             nEnemies = nEnemies - 1;
             clearEnemies = 1;
         }
 
+        if removeBulletIndex < nBullets {
+            x = [ bulletXSegment , nBullets - 1 ];
+            y = [ bulletYSegment , nBullets - 1 ];
+            [ removeBulletIndex , i ] = x;
+            [ removeBulletIndex , i ] = y;
+            nBullets = nBullets - 1;
+            clearBullets = 1;
+        }
+
         i = i + 1;
+    }
+
+    if nEnemies < maxEnemies {
+        if ticks2 & 1 == 1 {
+            if ticks & 4 == 4 {
+                call createEnemy;
+            }
+        }
     }
 }
 
@@ -182,7 +219,15 @@ func shoot {
     }
 }
 
+func createEnemy {
+    [ enemyXSegment , nEnemies ] = enemyStartX;
+    [ enemyYSegment , nEnemies ] = ticks;
+    [ enemyModeSegment , nEnemies ] = ticks & 1;
+    nEnemies = nEnemies + 1;
+}
+
 func reset {
+    gameOver = 0;
     playerX = 16;
     playerY = 64;
     playerMoveSpeed = 2;
@@ -190,10 +235,6 @@ func reset {
     clearBullets = 0;
     nEnemies = 0;
     clearEnemies = 0;
-
-    nEnemies = 1;
-    [ enemyXSegment , 0 ] = 100;
-    [ enemyYSegment , 0 ] = 100;
 }
 
 func render {
