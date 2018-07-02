@@ -163,6 +163,7 @@ JMP r9 r10
 LRC r12 #127
 LRC r13 #17
 LDR r15 r12 r13 ; remember the current gpu flags
+STR r15 r0 r0
 LRL r9 r10 @forever; back up
 JMP r9 r10
 ;
@@ -232,6 +233,7 @@ LRC r13 #17
 LDR r14 r12 r13
 LRC r12 $2 ; 0000 0010
 AND r14 r12 r14 ; mask r14 to 0000 0010
+LDR r15 r0 r0
 AND r15 r12 r15 ; mask r15 to 0000 0010
 XOR r14 r14 r15 ; see if r14 and r15 differ
 CMP r12 r14 r12
