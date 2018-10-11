@@ -1,5 +1,5 @@
 # Memory
-The vm addresses memory by segment and offset. There are 256 segments each with 256 bytes. Addresses in this documentation are denoted as `segment.offset` ex: `64.2`. The bytes in memory are unsigned and store a value between 0 and 255.
+The vm addresses memory by segment and offset. There are 256 segments each with 256 bytes. Addresses in this documentation are denoted as `segment.offset`. For example, `64.2` refers to the third byte of the 65th segment. `0.0` refers to the first byte of the first segment. The bytes in memory are unsigned and store a value between 0 and 255 (inclusive).
 
 ## Memory Map
 - Segments 0 through 63 (inclusive) are general purpose RAM for your program.
