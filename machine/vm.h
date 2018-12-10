@@ -31,13 +31,15 @@ struct VM
 
 VM* createVM(uint16_t* code, uint8_t* rom, Display* display, int debugMode);
 
+void destroyVM(VM* vm);
+
 void run(VM* vm);
 
 void handleDebugKey(VM* vm, SDL_Keycode key);
 
 void disassemble(Instruction* instr, char* assembly);
 
-Instruction* decode(uint16_t instr);
+void decode(uint16_t instr, Instruction* decoded);
 
 void exec(VM* vm, Instruction* instr);
 

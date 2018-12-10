@@ -51,12 +51,13 @@ int main (int argc, char** argv)
 
     VM* vm = createVM(code, rom, display, debugMode);
     run(vm);
-    quitDisplay(display);
+    destroyVM(vm);
     free(code);
     if (rom != NULL)
         free(rom);
     code = NULL;
     rom = NULL;
+    quitDisplay(display);
     return 0;
 }
 

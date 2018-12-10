@@ -24,6 +24,16 @@ VM* createVM(uint16_t* code, uint8_t* rom, Display* display, int debugMode)
     return vm;
 }
 
+void destroyVM(VM* vm)
+{
+    destroyGPU(vm->gpu);
+    vm->gpu = NULL;
+    destroyIPU(vm->ipu);
+    vm->ipu = NULL;
+    free(vm);
+    vm = NULL;
+}
+
 // Starts the fetch, decode, execute cycle
 // of a vm from the start of its code
 void run(VM* vm)
@@ -34,12 +44,15 @@ void run(VM* vm)
     uint32_t cpuInstructionCount = 0;
 
     // Enforce the instructions per second limit in sync with the display refreshes
-    // 500,000 instructions per second is almost the same as 8064 instructions per 16 milliseconds
+    // 500,000 instructions per second is almost the same as 8064 instructions per 16 milliseconds.
+    // 500,000 IPS == 8064 instructions / 0.0016 seconds
+    // 500,000 / 8064 = 62
     uint32_t instructionsPerSecondFactor = 62;
 
     int wait = 0;
     SDL_Event event;
     SDL_PollEvent(&event);
+    Instruction* decoded = malloc(sizeof(Instruction));
     while (event.type != SDL_QUIT)
     {
         while (SDL_PollEvent(&event))
@@ -69,13 +82,13 @@ void run(VM* vm)
         if (!wait)
         {
             uint16_t instr = *(vm->pc);
-            Instruction* decoded = decode(instr);
+            decode(instr, decoded);
             exec(vm, decoded);
             vm->pc++;
             cpuInstructionCount++;
-            free(decoded);
 
             if (cpuInstructionCount > INSTRUCTIONS_PER_SECOND / instructionsPerSecondFactor)
+                // We have done 8064 instructions in this segment of 16 milliseconds. Don't do any more until the 16ms have passed.
                 wait = 1;
         }
         if ((SDL_GetTicks() - cpuStartTime) > 1000 / instructionsPerSecondFactor)
@@ -105,6 +118,7 @@ void run(VM* vm)
         if (vm->step)
             vm->breakState = 1;
     }
+    free(decoded);
 }
 
 void handleDebugKey(VM* vm, SDL_Keycode key)
@@ -140,9 +154,10 @@ void handleDebugKey(VM* vm, SDL_Keycode key)
                 instructionSegment, instructionOffset);
         char* assembly = malloc(sizeof(char) * 256);
         memset(assembly, 0, sizeof(char) * 256);
-        Instruction* instr = decode(*(vm->pc));
-        disassemble(instr, assembly);
-        free(instr);
+        Instruction* decoded = malloc(sizeof(Instruction));
+        decode(*(vm->pc), decoded);
+        disassemble(decoded, assembly);
+        free(decoded);
         printf("ASM: %s\n", assembly);
         free(assembly);
         int i;
@@ -196,9 +211,10 @@ void handleDebugKey(VM* vm, SDL_Keycode key)
             int instructionOffset = instructionCount % JUMP_SEGMENT_SIZE;
             char* assembly = malloc(sizeof(char) * 256);
             memset(assembly, 0, sizeof(char) * 256);
-            Instruction* instr = decode(*(vm->pc + i));
-            disassemble(instr, assembly);
-            free(instr);
+            Instruction* decoded = malloc(sizeof(Instruction));
+            decode(*(vm->pc + i), decoded);
+            disassemble(decoded, assembly);
+            free(decoded);
             // Print star for current instruction
             if (i == 0)
                 printf("*");
@@ -295,15 +311,13 @@ void disassemble(Instruction* instr, char* assembly)
 }
 
 // Decodes a uint16_t instruction into a 16 bit instruction struct
-Instruction* decode(uint16_t instr)
+void decode(uint16_t instr, Instruction* decoded)
 {
-    Instruction* decoded = malloc(sizeof(Instruction));
     uint16_t clean = 0x000F;
     decoded->opcode = instr >> 12 & clean;
     decoded->arg0 = instr >> 8 & clean;
     decoded->arg1 = instr >> 4 & clean;
     decoded->arg2 = instr & clean;
-    return decoded;
 }
 
 // Executes an instruction
