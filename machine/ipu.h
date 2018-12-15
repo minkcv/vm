@@ -16,6 +16,8 @@ struct IPU
 
 IPU* createIPU();
 
+void destroyIPU(IPU* ipu);
+
 void updateIPU(IPU* ipu, SDL_KeyboardEvent kEvent,
         uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_SIZE]);
 

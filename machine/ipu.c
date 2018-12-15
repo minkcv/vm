@@ -30,6 +30,14 @@ IPU* createIPU()
     return ipu;
 }
 
+void destroyIPU(IPU* ipu)
+{
+    free(ipu->js1);
+    ipu->js1 = NULL;
+    free(ipu->js2);
+    ipu->js2 = NULL;
+}
+
 void updateIPU(IPU* ipu, SDL_KeyboardEvent kEvent, 
         uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_SIZE])
 {
