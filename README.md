@@ -17,7 +17,9 @@ A Nintendo Switch Homebrew implementation exists [HERE](https://github.com/minkc
 
 #### An Added Bonus:
 - An assembler
-- A compiler and language (with vim syntax highlighting file in `/etc`)
+- A compiler and language
+    - with vim syntax highlighting file in `/etc`
+    - and a vscode extension, search the marketplace for `vaporlang`
 - Debugging functionality
 - Documentation (see [/docs](https://github.com/minkcv/vm/tree/master/docs))
 
