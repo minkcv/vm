@@ -82,6 +82,8 @@ var sprite_segment;
 [ 127 , 17 ] = 1; // Enable GPU
 
 func renderRoomBorder {
+    // Set up sprite attributes to render the room.
+    // These should only be done once at the start.
     sprite_segment = 64;
     sprite_index = 0;
     // -- Top left corner
@@ -97,7 +99,7 @@ func renderRoomBorder {
     // [ sprite_segment , sprite_index + 8] = 0; // Unused color
     // [ sprite_segment , sprite_index + 9] = 0; // Unused color
     // [ sprite_segment , sprite_index + 10] = 0; // Unused color
-    sprite_index = sprite_index + 16; // Move to next sprite attribute
+    sprite_index = 32; // Move to next sprite attribute
 
     // -- Top right corner
     [ sprite_segment , sprite_index ] = 208; // Enable, transparent, and flip horizontally
@@ -107,7 +109,7 @@ func renderRoomBorder {
     [ sprite_segment , sprite_index + 4] = 32; // Height
     [ sprite_segment , sprite_index + 5] = 128; // Sprite segment
     [ sprite_segment , sprite_index + 7] = 3; // Blue in 256 color palette
-    sprite_index = sprite_index + 16; // Move to next sprite attribute
+    sprite_index = 48; // Move to next sprite attribute
 
     // -- Bottom right corner
     [ sprite_segment , sprite_index ] = 240; // Enable, transparent and flip horizontally and vertically
@@ -117,7 +119,7 @@ func renderRoomBorder {
     [ sprite_segment , sprite_index + 4] = 32; // Height
     [ sprite_segment , sprite_index + 5] = 128; // Sprite segment
     [ sprite_segment , sprite_index + 7] = 3; // Blue in 256 color palette
-    sprite_index = sprite_index + 16; // Move to next sprite attribute
+    sprite_index = 64; // Move to next sprite attribute
 
     // -- Bottom left corner
     [ sprite_segment , sprite_index ] = 176; // Enable, transparent, and flip vertically
@@ -127,5 +129,171 @@ func renderRoomBorder {
     [ sprite_segment , sprite_index + 4] = 32; // Height
     [ sprite_segment , sprite_index + 5] = 128; // Sprite segment
     [ sprite_segment , sprite_index + 7] = 3; // Blue in 256 color palette
+    sprite_index = 80; // Move to next sprite attribute
     
+    // -- Top walls (but not door area)
+    [ sprite_segment , sprite_index ] = 144; // Enable and use transparency
+    [ sprite_segment , sprite_index + 1] = 32; // X: 2 tiles over, each 16 pixels wide
+    [ sprite_segment , sprite_index + 3] = 32; // Width
+    [ sprite_segment , sprite_index + 4] = 16; // Height
+    // Horizontal wall sprite is at at [ 129 , 0 ]
+    [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
+    [ sprite_segment , sprite_index + 7] = 3; // Blue in 256 color palette
+    sprite_index = 96; // Move to next sprite attribute
+
+    [ sprite_segment , sprite_index ] = 144; // Enable and use transparency
+    [ sprite_segment , sprite_index + 1] = 64; // X: 4 tiles over, each 16 pixels wide
+    [ sprite_segment , sprite_index + 3] = 32; // Width
+    [ sprite_segment , sprite_index + 4] = 16; // Height
+    // Horizontal wall sprite is at at [ 129 , 0 ]
+    [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
+    [ sprite_segment , sprite_index + 7] = 3; // Blue in 256 color palette
+    sprite_index = 112; // Move to next sprite attribute
+
+    [ sprite_segment , sprite_index ] = 144; // Enable and use transparency
+    [ sprite_segment , sprite_index + 1] = 128; // X: 8 tiles over, each 16 pixels wide
+    [ sprite_segment , sprite_index + 3] = 32; // Width
+    [ sprite_segment , sprite_index + 4] = 16; // Height
+    // Horizontal wall sprite is at at [ 129 , 0 ]
+    [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
+    [ sprite_segment , sprite_index + 7] = 3; // Blue in 256 color palette
+    sprite_index = 128; // Move to next sprite attribute
+
+    [ sprite_segment , sprite_index ] = 144; // Enable and use transparency
+    [ sprite_segment , sprite_index + 1] = 160; // X: 10 tiles over, each 16 pixels wide
+    [ sprite_segment , sprite_index + 3] = 32; // Width
+    [ sprite_segment , sprite_index + 4] = 16; // Height
+    // Horizontal wall sprite is at at [ 129 , 0 ]
+    [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
+    [ sprite_segment , sprite_index + 7] = 3; // Blue in 256 color palette
+    sprite_index = 144; // Move to next sprite attribute
+
+    // -- Bottom Walls (but not door area)
+    [ sprite_segment , sprite_index ] = 176; // Enable, transparency, and flip vertically
+    [ sprite_segment , sprite_index + 1] = 32; // X: 2 tiles over, each 16 pixels wide
+    [ sprite_segment , sprite_index + 2] = 176; // Y: 11 tiles down, each 16 pixels wide
+    [ sprite_segment , sprite_index + 3] = 32; // Width
+    [ sprite_segment , sprite_index + 4] = 16; // Height
+    // Horizontal wall sprite is at at [ 129 , 0 ]
+    [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
+    [ sprite_segment , sprite_index + 7] = 3; // Blue in 256 color palette
+    sprite_index = 160; // Move to next sprite attribute
+
+    [ sprite_segment , sprite_index ] = 176; // Enable, transparency, and flip vertically
+    [ sprite_segment , sprite_index + 1] = 64; // X: 4 tiles over, each 16 pixels wide
+    [ sprite_segment , sprite_index + 2] = 176; // Y: 11 tiles down, each 16 pixels wide
+    [ sprite_segment , sprite_index + 3] = 32; // Width
+    [ sprite_segment , sprite_index + 4] = 16; // Height
+    // Horizontal wall sprite is at at [ 129 , 0 ]
+    [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
+    [ sprite_segment , sprite_index + 7] = 3; // Blue in 256 color palette
+    sprite_index = 176; // Move to next sprite attribute
+
+    [ sprite_segment , sprite_index ] = 176; // Enable, transparency, and flip vertically
+    [ sprite_segment , sprite_index + 1] = 128; // X: 8 tiles over, each 16 pixels wide
+    [ sprite_segment , sprite_index + 2] = 176; // Y: 11 tiles down, each 16 pixels wide
+    [ sprite_segment , sprite_index + 3] = 32; // Width
+    [ sprite_segment , sprite_index + 4] = 16; // Height
+    // Horizontal wall sprite is at at [ 129 , 0 ]
+    [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
+    [ sprite_segment , sprite_index + 7] = 3; // Blue in 256 color palette
+    sprite_index = 192; // Move to next sprite attribute
+
+    [ sprite_segment , sprite_index ] = 176; // Enable, transparency, and flip vertically
+    [ sprite_segment , sprite_index + 1] = 160; // X: 10 tiles over, each 16 pixels wide
+    [ sprite_segment , sprite_index + 2] = 176; // Y: 11 tiles down, each 16 pixels wide
+    [ sprite_segment , sprite_index + 3] = 32; // Width
+    [ sprite_segment , sprite_index + 4] = 16; // Height
+    // Horizontal wall sprite is at at [ 129 , 0 ]
+    [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
+    [ sprite_segment , sprite_index + 7] = 3; // Blue in 256 color palette
+    sprite_index = 208; // Move to next sprite attribute
+
+    // -- Left Walls (but not door area)
+    [ sprite_segment , sprite_index ] = 144; // Enable and use transparency
+    [ sprite_segment , sprite_index + 2] = 32; // Y: 2 tiles down, each 16 pixels tall
+    [ sprite_segment , sprite_index + 3] = 16; // Width
+    [ sprite_segment , sprite_index + 4] = 32; // Height
+    // Vertical wall sprite is at at [ 129 , 128 ]
+    [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
+    [ sprite_segment , sprite_index + 6] = 128; // Sprite offset
+    [ sprite_segment , sprite_index + 7] = 3; // Blue in 256 color palette
+    sprite_index = 224; // Move to next sprite attribute
+
+    [ sprite_segment , sprite_index ] = 144; // Enable and use transparency
+    [ sprite_segment , sprite_index + 2] = 64; // Y: 4 tiles down, each 16 pixels tall
+    [ sprite_segment , sprite_index + 3] = 16; // Width
+    [ sprite_segment , sprite_index + 4] = 16; // Height (short wall tile)
+    // Horizontal wall sprite is at at [ 129 , 0 ]
+    [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
+    [ sprite_segment , sprite_index + 6] = 128; // Sprite offset
+    [ sprite_segment , sprite_index + 7] = 3; // Blue in 256 color palette
+    sprite_index = 240; // Move to next sprite attribute
+
+    [ sprite_segment , sprite_index ] = 144; // Enable and use transparency
+    [ sprite_segment , sprite_index + 2] = 112; // Y: 7 tiles down, each 16 pixels tall
+    [ sprite_segment , sprite_index + 3] = 16; // Width
+    [ sprite_segment , sprite_index + 4] = 16; // Height (short wall tile)
+    // Horizontal wall sprite is at at [ 129 , 0 ]
+    [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
+    [ sprite_segment , sprite_index + 6] = 128; // Sprite offset
+    [ sprite_segment , sprite_index + 7] = 3; // Blue in 256 color palette
+    sprite_segment = 65; // Use next segment of sprite attributes
+    sprite_index = 0; // Move to next sprite attribute
+
+    [ sprite_segment , sprite_index ] = 144; // Enable and use transparency
+    [ sprite_segment , sprite_index + 2] = 128; // Y: 8 tiles down, each 16 pixels tall
+    [ sprite_segment , sprite_index + 3] = 16; // Width
+    [ sprite_segment , sprite_index + 4] = 32; // Height
+    // Horizontal wall sprite is at at [ 129 , 0 ]
+    [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
+    [ sprite_segment , sprite_index + 6] = 128; // Sprite offset
+    [ sprite_segment , sprite_index + 7] = 3; // Blue in 256 color palette
+    sprite_index = 16; // Move to next sprite attribute
+
+    // -- Right Walls (but not door area)
+    [ sprite_segment , sprite_index ] = 208; // Enable, transparency, and flip horizontally
+    [ sprite_segment , sprite_index + 1] = 208; // X: 13 tiles over, each 16 pixels wide
+    [ sprite_segment , sprite_index + 2] = 32; // Y: 2 tiles down, each 16 pixels tall
+    [ sprite_segment , sprite_index + 3] = 16; // Width
+    [ sprite_segment , sprite_index + 4] = 32; // Height
+    // Vertical wall sprite is at at [ 129 , 128 ]
+    [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
+    [ sprite_segment , sprite_index + 6] = 128; // Sprite offset
+    [ sprite_segment , sprite_index + 7] = 3; // Blue in 256 color palette
+    sprite_index = 224; // Move to next sprite attribute
+
+    [ sprite_segment , sprite_index ] = 208; // Enable, transparency, and flip horizontally
+    [ sprite_segment , sprite_index + 1] = 208; // X: 13 tiles over, each 16 pixels wide
+    [ sprite_segment , sprite_index + 2] = 64; // Y: 4 tiles down, each 16 pixels tall
+    [ sprite_segment , sprite_index + 3] = 16; // Width
+    [ sprite_segment , sprite_index + 4] = 16; // Height (short wall tile)
+    // Horizontal wall sprite is at at [ 129 , 0 ]
+    [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
+    [ sprite_segment , sprite_index + 6] = 128; // Sprite offset
+    [ sprite_segment , sprite_index + 7] = 3; // Blue in 256 color palette
+    sprite_index = 240; // Move to next sprite attribute
+
+    [ sprite_segment , sprite_index ] = 208; // Enable, transparency, and flip horizontally
+    [ sprite_segment , sprite_index + 1] = 208; // X: 13 tiles over, each 16 pixels wide
+    [ sprite_segment , sprite_index + 2] = 112; // Y: 7 tiles down, each 16 pixels tall
+    [ sprite_segment , sprite_index + 3] = 16; // Width
+    [ sprite_segment , sprite_index + 4] = 16; // Height (short wall tile)
+    // Horizontal wall sprite is at at [ 129 , 0 ]
+    [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
+    [ sprite_segment , sprite_index + 6] = 128; // Sprite offset
+    [ sprite_segment , sprite_index + 7] = 3; // Blue in 256 color palette
+    sprite_segment = 66; // Use next segment of sprite attributes
+    sprite_index = 0; // Move to next sprite attribute
+
+    [ sprite_segment , sprite_index ] = 208; // Enable, transparency, and flip horizontally
+    [ sprite_segment , sprite_index + 1] = 208; // X: 13 tiles over, each 16 pixels wide
+    [ sprite_segment , sprite_index + 2] = 128; // Y: 8 tiles down, each 16 pixels tall
+    [ sprite_segment , sprite_index + 3] = 16; // Width
+    [ sprite_segment , sprite_index + 4] = 32; // Height
+    // Horizontal wall sprite is at at [ 129 , 0 ]
+    [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
+    [ sprite_segment , sprite_index + 6] = 128; // Sprite offset
+    [ sprite_segment , sprite_index + 7] = 3; // Blue in 256 color palette
+    sprite_index = 16; // Move to next sprite attribute
 }
