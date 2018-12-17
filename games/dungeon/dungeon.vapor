@@ -1,0 +1,69 @@
+// Dungeon
+// 2018 Will Smith (minkcv)
+
+// The entire segment 128.* is used for 
+// storing the dungeon layout
+// Dungoen map is 16x16
+// TODO: make the map in ROM with some tool
+// Lower 4 bits of a byte indicate door configuration
+// Upper 4 bits of a byte are an offset into room layout segment
+const MAP_SEGMENT 128;
+const MAP_WIDTH 16;
+const MAP_HEIGHT 16;
+const DOOR_LAYOUT_COUNT 16;
+
+// Door layout types
+const DOOR_NO_ROOM 0;
+const DOOR_CROSS 1;
+const DOOR_HORIZONTAL 2;
+const DOOR_VERTICAL 3;
+const DOOR_TEE_DOWN 4;
+const DOOR_TEE_UP 5;
+const DOOR_TEE_LEFT 6;
+const DOOR_TEE_RIGHT 7;
+const DOOR_ELBOW_UP_RIGHT 8;
+const DOOR_ELBOW_DOWN_RIGHT 9;
+const DOOR_ELBOW_DOWN_LEFT 10;
+const DOOR_ELBOW_UP_LEFT 11;
+const DOOR_DEAD_LEFT 12;
+const DOOR_DEAD_RIGHT 13;
+const DOOR_DEAD_UP 14;
+const DOOR_DEAD_DOWN 15;
+
+const ROOM_WIDTH 14;
+const ROOM_HEIGHT 12;
+
+// Room layouts are stored in this segment in ROM
+const ROOM_LAYOUT_SEGMENT 129;
+const ROOM_LAYOUT_COUNT 16;
+// Room layouts omit outer walls
+// and are a 12x10 area
+const ROOM_LAYOUT_WIDTH 12;
+const ROOM_LAYOUT_HEIGHT 10;
+
+// Room layout types
+const ROOM_EMPTY 0;
+// TODO make room types with some tool and store in rom
+// Careful not to put too many sprites in a room
+// there is a max of 256 on the screen
+// and we have used 20-23 on room bounds already
+// We need some left for the player, enemies, and UI
+const ROOM_CORNER_SPIKES 1;
+const ROOM_CORNER_WALLS 2;
+
+// Lower 4 bits of byte indicate tile type.
+// Upper 4 bits of byte indicate tile sprite.
+const TILE_TYPE_COUNT 16;
+const TILE_SPRITE_COUNT 16;
+
+// Tile types
+const TILE_T_EMPTY 0;
+const TILE_T_WALL 1;
+const TILE_T_SPIKES 2;
+
+// Tile sprites
+const TILE_S_BOX 0;
+const TILE_S_BRICK 1;
+const TILE_S_SPIKES 2;
+const TILE_S_TORCH 3;
+
