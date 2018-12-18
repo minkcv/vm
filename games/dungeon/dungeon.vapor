@@ -4,7 +4,7 @@
 // The entire segment TODO.* is used for 
 // storing the dungeon layout
 // Dungoen map is 16x16
-// TODO: make the map in ROM with some tool
+// The map layout is created with map.py
 // Lower 4 bits of a byte indicate door configuration
 // Upper 4 bits of a byte are an offset into room layout segment
 const MAP_SEGMENT 131;
@@ -36,9 +36,11 @@ const DOOR_DEAD_DOWN 15;
 const ROOM_WIDTH 14;
 const ROOM_HEIGHT 12;
 
-// Room layouts are stored in this segment in ROM
+// Room layouts are stored starting at this segment in ROM
+// Room layouts are 128 bytes each so 2 fit in a segment.
 const ROOM_LAYOUT_SEGMENT 132;
 const ROOM_LAYOUT_COUNT 16;
+const ROOM_LAYOUT_SIZE 128;
 // Room layouts omit outer walls
 // and are a 12x10 area
 // with tile types and tile sprites
@@ -46,15 +48,16 @@ const ROOM_LAYOUT_COUNT 16;
 const ROOM_LAYOUT_WIDTH 12;
 const ROOM_LAYOUT_HEIGHT 10;
 
+
 // Room layout types
 const ROOM_EMPTY 0;
-// TODO make room types with some tool and store in rom
+// The room layouts are created in map.py
 // Careful not to put too many sprites in a room
 // there is a max of 256 on the screen
 // and we have used 24 on room bounds already
 // We need some left for the player, enemies, and UI
-const ROOM_CORNER_SPIKES 1;
-const ROOM_CORNER_WALLS 2;
+const ROOM_CORNER_WALLS 1;
+const ROOM_CORNER_SPIKES 2;
 
 // Lower 4 bits of byte indicate tile type
 // Upper 4 bits of byte indicate tile sprite
@@ -84,6 +87,8 @@ var has_top_door;
 var has_bottom_door;
 var has_left_door;
 var has_right_door;
+var room_index;
+var room_segment;
 
 // Common locals
 var i;
@@ -121,6 +126,17 @@ func loadRoom {
     room_layout = [ MAP_SEGMENT , map_index ];
     door_layout = room_layout & 15; // 0000 1111 mask
     room_layout = room_layout & 240; // 1111 0000 mask
+    room_layout = room_layout >> 4;
+    room_segment = ROOM_LAYOUT_SEGMENT;
+    room_index = 0;
+    i = 0;
+    while i < room_layout - 1 {
+        if room_index == 128 {
+            room_segment = room_segment + 1;
+        }
+        room_index = room_index + ROOM_LAYOUT_SIZE;
+        i = i + 1;
+    }
 }
 
 // Uses sprite attributes 66.16 through 66.64 (inclusive)
