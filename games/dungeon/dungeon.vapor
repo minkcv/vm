@@ -8,15 +8,18 @@
 // Lower 4 bits of a byte indicate door configuration
 // Upper 4 bits of a byte are an offset into room layout segment
 const MAP_SEGMENT 131;
+
+// Map width and height in units of rooms
 const MAP_WIDTH 16;
 const MAP_HEIGHT 16;
 const DOOR_LAYOUT_COUNT 16;
 
-// Door layout types
+// Door layout types for a room
 const DOOR_NO_ROOM 0;
 const DOOR_CROSS 1;
 const DOOR_HORIZONTAL 2;
 const DOOR_VERTICAL 3;
+// Tee down indicates that the the open doors are left, down, and right. Up is closed
 const DOOR_TEE_DOWN 4;
 const DOOR_TEE_UP 5;
 const DOOR_TEE_LEFT 6;
@@ -53,8 +56,8 @@ const ROOM_EMPTY 0;
 const ROOM_CORNER_SPIKES 1;
 const ROOM_CORNER_WALLS 2;
 
-// Lower 4 bits of byte indicate tile type.
-// Upper 4 bits of byte indicate tile sprite.
+// Lower 4 bits of byte indicate tile type
+// Upper 4 bits of byte indicate tile sprite
 const TILE_TYPE_COUNT 16;
 const TILE_SPRITE_COUNT 16;
 
@@ -69,15 +72,22 @@ const TILE_S_BRICK 1;
 const TILE_S_SPIKES 2;
 const TILE_S_TORCH 3;
 
+const MAP_START_X 7;
+const MAP_START_Y 7;
+
 var map_x;
 var map_y;
 var map_index; // x + (y * MAP_HEIGHT)
 var room_layout;
 var door_layout;
 var has_top_door;
+var has_bottom_door;
+var has_left_door;
+var has_right_door;
 
 // Common locals
 var i;
+var tmp;
 var x;
 var y;
 
@@ -86,6 +96,9 @@ var sprite_index;
 var sprite_segment;
 
 [ 127 , 17 ] = 1; // Enable GPU
+
+map_x = MAP_START_X;
+map_y = MAP_START_Y;
 
 // Main loop
 while 1 {
@@ -110,16 +123,29 @@ func loadRoom {
     room_layout = room_layout & 240; // 1111 0000 mask
 }
 
+// Uses sprite attributes 66.16 through 66.64 (inclusive)
+// Sets has_top_door, has_bottom_door, has_left_door, has_right_door
+// Based on door_layout
 func renderRoomDoors {
     sprite_segment = 66;
     sprite_index = 16;
 
     // Top door
     has_top_door = door_layout == DOOR_CROSS;
-    has_top_door = has_top_door | door_layout == DOOR_DEAD_UP;
-    has_top_door = has_top_door | door_layout == DOOR_ELBOW_UP_LEFT;
-    has_top_door = has_top_door | door_layout == DOOR_ELBOW_UP_RIGHT;
-    has_top_door = has_top_door | door_layout == DOOR_VERTICAL;
+    tmp = door_layout == DOOR_DEAD_UP;
+    has_top_door = tmp | has_top_door;
+    tmp = door_layout == DOOR_ELBOW_UP_LEFT;
+    has_top_door = tmp | has_top_door;
+    tmp = door_layout == DOOR_ELBOW_UP_RIGHT;
+    has_top_door = tmp | has_top_door;
+    tmp = door_layout == DOOR_VERTICAL;
+    has_top_door = tmp | has_top_door;
+    tmp = door_layout == DOOR_TEE_LEFT;
+    has_top_door = tmp | has_top_door;
+    tmp = door_layout == DOOR_TEE_UP;
+    has_top_door = tmp | has_top_door;
+    tmp = door_layout == DOOR_TEE_RIGHT;
+    has_top_door = tmp | has_top_door;
     [ sprite_segment , sprite_index ] = 144; // Enable and use transparency
     [ sprite_segment , sprite_index + 1] = 96; // X: 6 tiles over, each 16 pixels wide
     [ sprite_segment , sprite_index + 3] = 32; // Width
@@ -127,14 +153,126 @@ func renderRoomDoors {
     if has_top_door {
         // Door horizontal sprite is at [ 130 , 0 ]
         [ sprite_segment , sprite_index + 5] = 130; // Sprite segment
-        [ sprite_segment , sprite_index + 7] = 4; // Color from output of `convertsprite`
-        [ sprite_segment , sprite_index + 8] = 73; // Color from output of `convertsprite`
+        [ sprite_segment , sprite_index + 7] = 73; // Color from output of `convertsprite`
+        [ sprite_segment , sprite_index + 8] = 0; // Color from output of `convertsprite`
     }
     if has_top_door == 0 {
         // Horizontal wall sprite is at [ 129 , 0 ]
         [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
-        [ sprite_segment , sprite_index + 7] = 4; // Color from output of `convertsprite`
-        [ sprite_segment , sprite_index + 8] = 73; // Color from output of `convertsprite`
+        [ sprite_segment , sprite_index + 7] = 73; // Color from output of `convertsprite`
+        [ sprite_segment , sprite_index + 8] = 4; // Color from output of `convertsprite`
+        [ sprite_segment , sprite_index + 9] = 52; // Color from output of `convertsprite`
+    }
+    sprite_index = 32;
+
+    // Bottom door
+    has_bottom_door = door_layout == DOOR_CROSS;
+    tmp = door_layout == DOOR_DEAD_DOWN;
+    has_bottom_door = tmp | has_bottom_door;
+    tmp = door_layout == DOOR_ELBOW_DOWN_LEFT;
+    has_bottom_door = tmp | has_bottom_door;
+    tmp = door_layout == DOOR_ELBOW_DOWN_RIGHT;
+    has_bottom_door = tmp | has_bottom_door;
+    tmp = door_layout == DOOR_VERTICAL;
+    has_bottom_door = tmp | has_bottom_door;
+    tmp = door_layout == DOOR_TEE_LEFT;
+    has_bottom_door = tmp | has_bottom_door;
+    tmp = door_layout == DOOR_TEE_DOWN;
+    has_bottom_door = tmp | has_bottom_door;
+    tmp = door_layout == DOOR_TEE_RIGHT;
+    has_bottom_door = tmp | has_bottom_door;
+    [ sprite_segment , sprite_index ] = 176; // Enable, transparency, and flip vertically
+    [ sprite_segment , sprite_index + 1] = 96; // X: 6 tiles over, each 16 pixels wide
+    [ sprite_segment , sprite_index + 2] = 176; // Y: 11 tiles down, each 16 pixels wide
+    [ sprite_segment , sprite_index + 3] = 32; // Width
+    [ sprite_segment , sprite_index + 4] = 16; // Height
+    if has_bottom_door {
+        // Door horizontal sprite is at [ 130 , 0 ]
+        [ sprite_segment , sprite_index + 5] = 130; // Sprite segment
+        [ sprite_segment , sprite_index + 7] = 73; // Color from output of `convertsprite`
+        [ sprite_segment , sprite_index + 8] = 0; // Color from output of `convertsprite`
+    }
+    if has_bottom_door == 0 {
+        // Horizontal wall sprite is at [ 129 , 0 ]
+        [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
+        [ sprite_segment , sprite_index + 7] = 73; // Color from output of `convertsprite`
+        [ sprite_segment , sprite_index + 8] = 4; // Color from output of `convertsprite`
+        [ sprite_segment , sprite_index + 9] = 52; // Color from output of `convertsprite`
+    }
+    sprite_index = 48;
+
+    // Left door
+    has_left_door = door_layout == DOOR_CROSS;
+    tmp = door_layout == DOOR_DEAD_LEFT;
+    has_left_door = tmp | has_left_door;
+    tmp = door_layout == DOOR_ELBOW_DOWN_LEFT;
+    has_left_door = tmp | has_left_door;
+    tmp = door_layout == DOOR_ELBOW_UP_LEFT;
+    has_left_door = tmp | has_left_door;
+    tmp = door_layout == DOOR_HORIZONTAL;
+    has_left_door = tmp | has_left_door;
+    tmp = door_layout == DOOR_TEE_LEFT;
+    has_left_door = tmp | has_left_door;
+    tmp = door_layout == DOOR_TEE_DOWN;
+    has_left_door = tmp | has_left_door;
+    tmp = door_layout == DOOR_TEE_UP;
+    has_left_door = tmp | has_left_door;
+    [ sprite_segment , sprite_index ] = 144; // Enable and use transparency
+    [ sprite_segment , sprite_index + 2] = 80; // Y: 5 tiles down, each 16 pixels wide
+    [ sprite_segment , sprite_index + 3] = 16; // Width
+    [ sprite_segment , sprite_index + 4] = 32; // Height
+    if has_left_door {
+        // Door vertical sprite is at [ 130 , 128 ]
+        [ sprite_segment , sprite_index + 5] = 130; // Sprite segment
+        [ sprite_segment , sprite_index + 6] = 128; // Sprite offset
+        [ sprite_segment , sprite_index + 7] = 73; // Color from output of `convertsprite`
+        [ sprite_segment , sprite_index + 8] = 0; // Color from output of `convertsprite`
+    }
+    if has_left_door == 0 {
+        // Vertical wall sprite is at [ 129 , 128 ]
+        [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
+        [ sprite_segment , sprite_index + 6] = 128; // Sprite offset
+        [ sprite_segment , sprite_index + 7] = 73; // Color from output of `convertsprite`
+        [ sprite_segment , sprite_index + 8] = 4; // Color from output of `convertsprite`
+        [ sprite_segment , sprite_index + 9] = 52; // Color from output of `convertsprite`
+    }
+    sprite_index = 64;
+
+    // Right door
+    has_right_door = door_layout == DOOR_CROSS;
+    tmp = door_layout == DOOR_DEAD_RIGHT;
+    has_right_door = tmp | has_right_door;
+    tmp = door_layout == DOOR_ELBOW_DOWN_RIGHT;
+    has_right_door = tmp | has_right_door;
+    tmp = door_layout == DOOR_ELBOW_UP_RIGHT;
+    has_right_door = tmp | has_right_door;
+    tmp = door_layout == DOOR_HORIZONTAL;
+    has_right_door = tmp | has_right_door;
+    tmp = door_layout == DOOR_TEE_RIGHT;
+    has_right_door = tmp | has_right_door;
+    tmp = door_layout == DOOR_TEE_DOWN;
+    has_right_door = tmp | has_right_door;
+    tmp = door_layout == DOOR_TEE_UP;
+    has_right_door = tmp | has_right_door;
+    [ sprite_segment , sprite_index ] = 208; // Enable, transparency, and flip horizontally
+    [ sprite_segment , sprite_index + 1] = 208; // X: 13 tiles over, each 16 pixels wide
+    [ sprite_segment , sprite_index + 2] = 80; // Y: 5 tiles down, each 16 pixels wide
+    [ sprite_segment , sprite_index + 3] = 16; // Width
+    [ sprite_segment , sprite_index + 4] = 32; // Height
+    if has_right_door {
+        // Door vertical sprite is at [ 130 , 128 ]
+        [ sprite_segment , sprite_index + 5] = 130; // Sprite segment
+        [ sprite_segment , sprite_index + 6] = 128; // Sprite offset
+        [ sprite_segment , sprite_index + 7] = 73; // Color from output of `convertsprite`
+        [ sprite_segment , sprite_index + 8] = 0; // Color from output of `convertsprite`
+    }
+    if has_right_door == 0 {
+        // Vertical wall sprite is at [ 129 , 128 ]
+        [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
+        [ sprite_segment , sprite_index + 6] = 128; // Sprite offset
+        [ sprite_segment , sprite_index + 7] = 73; // Color from output of `convertsprite`
+        [ sprite_segment , sprite_index + 8] = 4; // Color from output of `convertsprite`
+        [ sprite_segment , sprite_index + 9] = 52; // Color from output of `convertsprite`
     }
 }
 
