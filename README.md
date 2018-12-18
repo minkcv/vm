@@ -1,7 +1,10 @@
 # Vapor Spec
-A virtual machine with no physical hardware spec.
+A virtual game platform with capabilities similar to 90s game consoles. 
+This repo is contains the Windows/Linux implementation, some games, the compiler and assembler, and documentation.
 
-#### The vm has:
+A Nintendo Switch Homebrew implementation exists [HERE](https://github.com/minkcv/vm-switch).
+
+#### The platform has:
 - A 16 bit instruction size
 - 16 different general purpose registers
 - 65536 bytes (64K) of addressable memory
@@ -14,12 +17,14 @@ A virtual machine with no physical hardware spec.
 
 #### An Added Bonus:
 - An assembler
-- A compiler
+- A compiler and language
+    - with vim syntax highlighting file in `/etc`
+    - and a vscode extension, search the marketplace for `vaporlang`
 - Debugging functionality
-- Documentation (see `/docs`)
+- Documentation (see [/docs](https://github.com/minkcv/vm/tree/master/docs))
 
 ### Included Programs:
-Five programs are included to demonstrate the capabilities of the vm. "Mars" is a simple scene showing colored sprites that the player can move around in. "Pong" is a clone of the classic Atari game for 2 players. Pong2 is pong written in vaporlang, a language created specifically for this platform. Tetris is a much larger game written in vaporlang. Paint is a multi color character editor. Breakout is another classic clone.
+Five programs are included to demonstrate the capabilities of the platform. Mars is a simple scene showing colored sprites that the player can move around. Pong is a clone of the classic Atari game for 2 players. Pong2 is pong written in vaporlang, a language created specifically for this platform. Tetris is a much larger game written in vaporlang. Paint is a multi color character editor. Breakout is another classic clone.
 
 ![demo](https://github.com/minkcv/vm/blob/master/etc/mars.png)
 ![pong](https://github.com/minkcv/vm/blob/master/etc/pong.png)
@@ -38,7 +43,7 @@ Install SDL2 and libpng if you don't already have them. Systems with apt should 
 
     sudo apt install libsdl2-dev libpng-dev
 
-To build and test the vm on linux, run one of the included programs:
+To build and test the platform on linux, run one of the included programs:
 
     cd games
     ./mars.sh
@@ -47,11 +52,11 @@ To build and test the vm on linux, run one of the included programs:
     ./tetris.sh
 
 #### Windows (x86):
-See the releases section on github for a pre-built exe and pre-assembled games.
+See the [Releases Section](https://github.com/minkcv/vm/releases) for a pre-built exe and pre-assembled games.
 I haven't built the assembler, sprite converter, or compiler for windows.
 If you want to build for Windows then you will need the SDL2 dev files and the Platform Toolset v120 (from Visual Studio 2013).
 
 ### How do I make a program/game?
 1. Have some low level programming knowledge.
-2. Check out the `/docs` folder.
-
+2. Check out the [/docs](https://github.com/minkcv/vm/tree/master/docs) folder.
+3. Feel free to open an issue on github or ask me for help.
