@@ -1,7 +1,7 @@
-# Vapor Lang
+# Vaporlang
 This file describes the syntax of the provided compiler. The language is slightly higher level than assembly.
 
-Vapor lang supports named global variables, constants, functions, conditional flow, loops, memory access, and some operators.
+Vaporlang supports named global variables, constants, functions, conditional flow, loops, memory access, and some operators.
 Variable declarations and assignments must end in semicolons. Functions and control flow blocks must be bounded by open and close curly braces `{`,`}`.
 The compiler is very whitespace sensitive, not in terms of logic (like python), but in terms of parsing.
 The compiler stores variables and the call stack in memory segments 59 through 63 (inclusive). The maximum number of variables is 1024 and the maximum call stack size is 127 calls.
@@ -35,7 +35,7 @@ Variables can have values stored in them using the assignment operator `=`. The 
     xposition = xposition + 1;
 
 #### Comparison
-Variables can be compared for equality `==`, less than `<`, and greater than `>`. 0 indicates false and 1 indicates true. Comparisons can be done in loop and if conditions.
+Variables can be compared for equality `==`, less than `<`, and greater than `>`. 0 indicates false and 1 indicates true. Comparisons can be done in loop and if conditions. Comparisons will be evaluated after both sides of the comparison have evaluated.
 
     isZero = xposition == 0;
     aboveOne = xposition > 1;
@@ -47,7 +47,7 @@ Variables can be compared for equality `==`, less than `<`, and greater than `>`
     }
 
 #### Other Operators
-Other operators include addition `+`, subtraction `-`, bitwise and `&`, bitwise or `|`, bitwise xor `^`, and bitwise not `~`. Compound use of operators is supported except for not `~` and the order of operations is right to left.
+Other operators include addition `+`, subtraction `-`, bitwise and `&`, bitwise or `|`, bitwise xor `^`, and bitwise not `~`. Compound use of operators is supported except for not `~` and the order of operations is right to left. Keep in mind that comparisons will be done after these operators.
 
     xposition = xposition - 1;
     xposition = xposition & yposition;
@@ -55,6 +55,9 @@ Other operators include addition `+`, subtraction `-`, bitwise and `&`, bitwise 
 
     // xposition = (xposition - (1 + (1 -3)));
     xposition = xposition - 1 + 1 - 3;
+
+    // xposition = (xposition & yposition) == (1 + (2 - 3));
+    xposition = xposition & yposition == 1 + 2 - 3;
 
 #### Functions
 Functions are declared with `func <name> {` and must have a closing `}`. Functions implicitly return at `}` and can explicitly return at `return`. Functions can be called before declared. 
