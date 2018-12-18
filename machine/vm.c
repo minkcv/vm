@@ -45,7 +45,7 @@ void run(VM* vm)
 
     // Enforce the instructions per second limit in sync with the display refreshes
     // 500,000 instructions per second is almost the same as 8064 instructions per 16 milliseconds.
-    // 500,000 IPS == 8064 instructions / 0.0016 seconds
+    // 500,000 IPS == 8000 instructions / 0.016 seconds
     // 500,000 / 8064 = 62
     uint32_t instructionsPerSecondFactor = 62;
 
