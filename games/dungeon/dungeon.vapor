@@ -1,13 +1,13 @@
 // Dungeon
 // 2018 Will Smith (minkcv)
 
-// The entire segment 128.* is used for 
+// The entire segment TODO.* is used for 
 // storing the dungeon layout
 // Dungoen map is 16x16
 // TODO: make the map in ROM with some tool
 // Lower 4 bits of a byte indicate door configuration
 // Upper 4 bits of a byte are an offset into room layout segment
-const MAP_SEGMENT 128;
+const MAP_SEGMENT 131;
 const MAP_WIDTH 16;
 const MAP_HEIGHT 16;
 const DOOR_LAYOUT_COUNT 16;
@@ -34,10 +34,12 @@ const ROOM_WIDTH 14;
 const ROOM_HEIGHT 12;
 
 // Room layouts are stored in this segment in ROM
-const ROOM_LAYOUT_SEGMENT 129;
+const ROOM_LAYOUT_SEGMENT 132;
 const ROOM_LAYOUT_COUNT 16;
 // Room layouts omit outer walls
 // and are a 12x10 area
+// with tile types and tile sprites
+// see TILE_T_* and TILE_S_*
 const ROOM_LAYOUT_WIDTH 12;
 const ROOM_LAYOUT_HEIGHT 10;
 
@@ -69,6 +71,10 @@ const TILE_S_TORCH 3;
 
 var map_x;
 var map_y;
+var map_index; // x + (y * MAP_HEIGHT)
+var room_layout;
+var door_layout;
+var has_top_door;
 
 // Common locals
 var i;
@@ -81,6 +87,62 @@ var sprite_segment;
 
 [ 127 , 17 ] = 1; // Enable GPU
 
+// Main loop
+while 1 {
+    call loadRoom;
+    call renderRoomDoors;
+    call renderRoomTiles;
+    call renderRoomBorder;
+}
+
+// Sets room_layout and door_layout
+// Based on map_x and map_y
+func loadRoom {
+    i = 0;
+    map_index = 0;
+    while i < map_y {
+        map_index = map_index + MAP_HEIGHT;
+        i = i + 1;
+    }
+    map_index = map_index + map_x;
+    room_layout = [ MAP_SEGMENT , map_index ];
+    door_layout = room_layout & 15; // 0000 1111 mask
+    room_layout = room_layout & 240; // 1111 0000 mask
+}
+
+func renderRoomDoors {
+    sprite_segment = 66;
+    sprite_index = 16;
+
+    // Top door
+    has_top_door = door_layout == DOOR_CROSS;
+    has_top_door = has_top_door | door_layout == DOOR_DEAD_UP;
+    has_top_door = has_top_door | door_layout == DOOR_ELBOW_UP_LEFT;
+    has_top_door = has_top_door | door_layout == DOOR_ELBOW_UP_RIGHT;
+    has_top_door = has_top_door | door_layout == DOOR_VERTICAL;
+    [ sprite_segment , sprite_index ] = 144; // Enable and use transparency
+    [ sprite_segment , sprite_index + 1] = 96; // X: 6 tiles over, each 16 pixels wide
+    [ sprite_segment , sprite_index + 3] = 32; // Width
+    [ sprite_segment , sprite_index + 4] = 16; // Height
+    if has_top_door {
+        // Door horizontal sprite is at [ 130 , 0 ]
+        [ sprite_segment , sprite_index + 5] = 130; // Sprite segment
+        [ sprite_segment , sprite_index + 7] = 4; // Color from output of `convertsprite`
+        [ sprite_segment , sprite_index + 8] = 73; // Color from output of `convertsprite`
+    }
+    if has_top_door == 0 {
+        // Horizontal wall sprite is at [ 129 , 0 ]
+        [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
+        [ sprite_segment , sprite_index + 7] = 4; // Color from output of `convertsprite`
+        [ sprite_segment , sprite_index + 8] = 73; // Color from output of `convertsprite`
+    }
+}
+
+func renderRoomTiles {
+
+}
+
+// Uses sprite attributes at addresses 64.0 through 66.0 (inclusive)
 func renderRoomBorder {
     // Set up sprite attributes to render the room.
     // These should only be done once at the start.
@@ -333,5 +395,4 @@ func renderRoomBorder {
     [ sprite_segment , sprite_index + 7] = 73; // Color from output of `convertsprite`
     [ sprite_segment , sprite_index + 8] = 4; // Color from output of `convertsprite`
     [ sprite_segment , sprite_index + 9] = 52; // Color from output of `convertsprite`
-    sprite_index = 16; // Move to next sprite attribute
 }
