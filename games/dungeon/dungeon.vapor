@@ -1,6 +1,9 @@
 // Dungeon
 // 2018 Will Smith (minkcv)
 
+var previous_GPU_state;
+var GPU_state;
+
 // The entire segment TODO.* is used for 
 // storing the dungeon layout
 // Dungoen map is 16x16
@@ -84,6 +87,23 @@ var has_right_door;
 var room_index;
 var room_segment;
 
+const BUTTON_RIGHT 8;
+const BUTTON_LEFT 4;
+const BUTTON_DOWN 2;
+const BUTTON_UP 1;
+
+const PLAYER_SPRITE_SEGMENT 128;
+const PLAYER_SPRITE_OFFSET 0;
+
+// For collision detection
+const DOOR_TOP_Y 80;
+const DOOR_BOTTOM_Y 112;
+const DOOR_LEFT_X 96;
+const DOOR_RIGHT_X 128;
+const MOVE_SPEED 2;
+var player_x;
+var player_y;
+
 // Common locals
 var i;
 var tmp;
@@ -93,6 +113,7 @@ var x2;
 var y2;
 var tile_type;
 var tile_sprite;
+var buttons;
 
 // Locals for sprite rendering
 var sprite_index;
@@ -103,12 +124,92 @@ var sprite_segment;
 map_x = MAP_START_X;
 map_y = MAP_START_Y;
 
+// Must be a multiple of MOVE_SPEED
+player_x = 112;
+player_y = 88;
+
+call loadRoom;
+call renderRoomDoors;
+call renderRoomTiles;
+call renderRoomBorder;
+
 // Main loop
 while 1 {
-    call loadRoom;
-    call renderRoomDoors;
-    call renderRoomTiles;
-    call renderRoomBorder;
+    call playerMovement;
+    call renderPlayer;
+    call waitScreen;
+}
+
+func playerMovement {
+    buttons = [ 127 , 1 ];
+    if buttons & BUTTON_LEFT == BUTTON_LEFT {
+        call playerMoveLeft;
+    }
+    if buttons & BUTTON_RIGHT == BUTTON_RIGHT {
+        call playerMoveRight;
+    }
+    if buttons & BUTTON_UP == BUTTON_UP {
+        call playerMoveUp;
+    }
+    if buttons & BUTTON_DOWN == BUTTON_DOWN {
+        call playerMoveDown;
+    }
+}
+
+func playerMoveLeft {
+    if player_y > DOOR_TOP_Y {
+        if player_y < DOOR_BOTTOM_Y - TILE_HEIGHT {
+            if has_left_door {
+                player_x = player_x - MOVE_SPEED;
+                return;
+            }
+        }
+    }
+    if player_x > TILE_WIDTH {
+        player_x = player_x - MOVE_SPEED;
+    }
+}
+
+func playerMoveRight {
+    if player_y > DOOR_TOP_Y {
+        if player_y < DOOR_BOTTOM_Y - TILE_HEIGHT {
+            if has_right_door {
+                player_x = player_x + MOVE_SPEED;
+                return;
+            }
+        }
+    }
+    if player_x < 192 { // 13 tiles, each 16 pixels wide minus player width
+        player_x = player_x + MOVE_SPEED;
+    }
+}
+
+func playerMoveUp {
+    if player_x > DOOR_LEFT_X {
+        if player_x < DOOR_RIGHT_X - TILE_WIDTH {
+            if has_top_door {
+                player_y = player_y - MOVE_SPEED;
+                return;
+            }
+        }
+    }
+    if player_y > TILE_HEIGHT {
+        player_y = player_y - MOVE_SPEED;
+    }
+}
+
+func playerMoveDown {
+    if player_x > DOOR_LEFT_X {
+        if player_x < DOOR_RIGHT_X - TILE_WIDTH {
+            if has_bottom_door {
+                player_y = player_y + MOVE_SPEED;
+                return;
+            }
+        }
+    }
+    if player_y < 160 { // 11 tiles, each 16 pixels tall minus player width
+        player_y = player_y + MOVE_SPEED;
+    }
 }
 
 // Sets room_layout and door_layout
@@ -137,6 +238,22 @@ func loadRoom {
             i = i + 1;
         }
     }
+}
+
+func renderPlayer {
+    // TODO: actual segment and index
+    sprite_segment = 79;
+    sprite_index = 0;
+    [ sprite_segment , sprite_index ] = 144; // Enable and use transparency
+    [ sprite_segment , sprite_index + 1] = player_x; // X
+    [ sprite_segment , sprite_index + 2] = player_y; // Y
+    [ sprite_segment , sprite_index + 3] = TILE_WIDTH; // Width
+    [ sprite_segment , sprite_index + 4] = TILE_HEIGHT; // Height
+    [ sprite_segment , sprite_index + 5] = PLAYER_SPRITE_SEGMENT; // Sprite segment
+    [ sprite_segment , sprite_index + 6] = PLAYER_SPRITE_OFFSET; // Sprite offset
+    [ sprite_segment , sprite_index + 7] = 0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = 255; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = 0; // Color from output of `convertsprite`
 }
 
 // Uses sprite attributes 66.16 through 66.64 (inclusive)
@@ -585,4 +702,12 @@ func renderRoomBorder {
     [ sprite_segment , sprite_index + 7] = 73; // Color from output of `convertsprite`
     [ sprite_segment , sprite_index + 8] = 4; // Color from output of `convertsprite`
     [ sprite_segment , sprite_index + 9] = 52; // Color from output of `convertsprite`
+}
+
+func waitScreen {
+    while GPU_state == previous_GPU_state {
+        GPU_state = [ 127 , 17 ];
+        GPU_state = GPU_state & 2;
+    }
+    previous_GPU_state = GPU_state;
 }
