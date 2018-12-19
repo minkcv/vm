@@ -154,6 +154,35 @@ func playerMovement {
     if buttons & BUTTON_DOWN == BUTTON_DOWN {
         call playerMoveDown;
     }
+
+    if player_x == 0 {
+        player_x = 200; // 13 tiles, each 16 pixels wide minus half player width
+        map_x = map_x - 1;
+        call loadRoom;
+        call renderRoomDoors;
+        call renderRoomTiles;
+    }
+    if player_x == 208 { // Right edge
+        player_x = 8; // Half player width
+        map_x = map_x + 1;
+        call loadRoom;
+        call renderRoomDoors;
+        call renderRoomTiles;
+    }
+    if player_y == 0 {
+        player_y = 184;
+        map_y = map_y - 1;
+        call loadRoom;
+        call renderRoomDoors;
+        call renderRoomTiles;
+    }
+    if player_y == 192 {
+        player_y = 8;
+        map_y = map_y + 1;
+        call loadRoom;
+        call renderRoomDoors;
+        call renderRoomTiles;
+    }
 }
 
 func playerMoveLeft {
