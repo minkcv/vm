@@ -7,7 +7,7 @@
 // The map layout is created with map.py
 // Lower 4 bits of a byte indicate door configuration
 // Upper 4 bits of a byte are an offset into room layout segment
-const MAP_SEGMENT 131;
+const MAP_SEGMENT 135;
 
 // Map width and height in units of rooms
 const MAP_WIDTH 16;
@@ -38,7 +38,7 @@ const ROOM_HEIGHT 12;
 
 // Room layouts are stored starting at this segment in ROM
 // Room layouts are 128 bytes each so 2 fit in a segment.
-const ROOM_LAYOUT_SEGMENT 132;
+const ROOM_LAYOUT_SEGMENT 136;
 const ROOM_LAYOUT_COUNT 16;
 const ROOM_LAYOUT_SIZE 128;
 // Room layouts omit outer walls
@@ -48,7 +48,6 @@ const ROOM_LAYOUT_SIZE 128;
 const ROOM_LAYOUT_WIDTH 12;
 const ROOM_LAYOUT_HEIGHT 10;
 
-
 // Room layout types
 const ROOM_EMPTY 0;
 // The room layouts are created in map.py
@@ -56,24 +55,19 @@ const ROOM_EMPTY 0;
 // there is a max of 256 on the screen
 // and we have used 24 on room bounds already
 // We need some left for the player, enemies, and UI
-const ROOM_CORNER_WALLS 1;
-const ROOM_CORNER_SPIKES 2;
 
 // Lower 4 bits of byte indicate tile type
 // Upper 4 bits of byte indicate tile sprite
 const TILE_TYPE_COUNT 16;
 const TILE_SPRITE_COUNT 16;
+const TILE_WIDTH 16;
+const TILE_HEIGHT 16;
+
+const TILE_SPRITE_SEGMENT 131
 
 // Tile types
 const TILE_T_EMPTY 0;
 const TILE_T_WALL 1;
-const TILE_T_SPIKES 2;
-
-// Tile sprites
-const TILE_S_BOX 0;
-const TILE_S_BRICK 1;
-const TILE_S_SPIKES 2;
-const TILE_S_TORCH 3;
 
 const MAP_START_X 7;
 const MAP_START_Y 7;
@@ -95,6 +89,10 @@ var i;
 var tmp;
 var x;
 var y;
+var x2;
+var y2;
+var tile_type;
+var tile_sprite;
 
 // Locals for sprite rendering
 var sprite_index;
@@ -129,13 +127,15 @@ func loadRoom {
     room_layout = room_layout >> 4;
     room_segment = ROOM_LAYOUT_SEGMENT;
     room_index = 0;
-    i = 0;
-    while i < room_layout - 1 {
-        if room_index == 128 {
-            room_segment = room_segment + 1;
+    if room_layout > 0 {
+        i = 0;
+        while i < room_layout - 1 {
+            if room_index == 240 {
+                room_segment = room_segment + 1;
+            }
+            room_index = room_index + ROOM_LAYOUT_SIZE;
+            i = i + 1;
         }
-        room_index = room_index + ROOM_LAYOUT_SIZE;
-        i = i + 1;
     }
 }
 
@@ -292,8 +292,44 @@ func renderRoomDoors {
     }
 }
 
+// Uses sprite attributes at addresses 66.80 through ??? because # of room tiles varies per room
 func renderRoomTiles {
-
+    sprite_segment = 66;
+    sprite_index = 80;
+    y = 0;
+    y2 = TILE_HEIGHT;
+    i = 0; // x + (y * ROOM_LAYOUT_WIDTH)
+    while y < ROOM_LAYOUT_HEIGHT {
+        x = 0;
+        x2 = TILE_WIDTH;
+        while x < ROOM_LAYOUT_WIDTH {
+            tile_sprite = [ room_segment , room_index + i ];
+            tile_type = tile_sprite & 15; // 0000 1111 mask
+            tile_sprite = tile_sprite & 240; // 1111 0000 mask
+            tile_sprite = tile_sprite >> 4;
+            if tile_type > 0 {
+                [ sprite_segment , sprite_index ] = 144; // Enable and use transparency
+                [ sprite_segment , sprite_index + 1] = x2; // X
+                [ sprite_segment , sprite_index + 2] = y2; // Y
+                [ sprite_segment , sprite_index + 3] = TILE_WIDTH; // Width
+                [ sprite_segment , sprite_index + 4] = TILE_HEIGHT; // Height
+                [ sprite_segment , sprite_index + 5] = TILE_SPRITE_SEGMENT; // Sprite segment
+                [ sprite_segment , sprite_index + 6] = tile_sprite; // Sprite offset
+                [ sprite_segment , sprite_index + 7] = 0; // Color from output of `convertsprite`
+                [ sprite_segment , sprite_index + 8] = 255; // Color from output of `convertsprite`
+                [ sprite_segment , sprite_index + 9] = 0; // Color from output of `convertsprite`
+                if sprite_index == 240 {
+                    sprite_segment = sprite_segment + 1;
+                }
+                sprite_index = sprite_index + 16;
+            }
+            x = x + 1;
+            x2 = x2 + TILE_WIDTH;
+            i = i + 1;
+        }
+        y = y + 1;
+        y2 = y2 + TILE_HEIGHT;
+    }
 }
 
 // Uses sprite attributes at addresses 64.0 through 66.0 (inclusive)

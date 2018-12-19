@@ -27,7 +27,7 @@ data = """
 
 # 10x12 room layouts
 # room layout size: 128 bytes
-# 10x12 = 120 bytes plus 8 at the end
+# 10x12 = 120 bytes plus 8 at the end for padding
 # 24 columns is here   v
 data = data + """
 000000000000000000000000
