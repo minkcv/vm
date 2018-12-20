@@ -194,6 +194,16 @@ func playerMoveLeft {
             }
         }
     }
+    if player_y < TILE_HEIGHT { // In top doorway
+        if player_x == DOOR_LEFT_X + MOVE_SPEED {
+            return;
+        }
+    }
+    if player_y > 160 { // In bottom doorway
+        if player_x == DOOR_LEFT_X + MOVE_SPEED {
+            return;
+        }
+    }
     if player_x > TILE_WIDTH {
         player_x = player_x - MOVE_SPEED;
     }
@@ -206,6 +216,16 @@ func playerMoveRight {
                 player_x = player_x + MOVE_SPEED;
                 return;
             }
+        }
+    }
+    if player_y < TILE_HEIGHT { // In top doorway
+        if player_x == DOOR_RIGHT_X - TILE_WIDTH + MOVE_SPEED {
+            return;
+        }
+    }
+    if player_y > 160 { // In bottom doorway
+        if player_x == DOOR_RIGHT_X - TILE_WIDTH + MOVE_SPEED {
+            return;
         }
     }
     if player_x < 192 { // 13 tiles, each 16 pixels wide minus player width
@@ -222,6 +242,16 @@ func playerMoveUp {
             }
         }
     }
+    if player_x < TILE_WIDTH { // In left doorway
+        if player_y == DOOR_TOP_Y + MOVE_SPEED {
+            return;
+        }
+    }
+    if player_x > 192 { // In right doorway
+        if player_y == DOOR_TOP_Y + MOVE_SPEED {
+            return;
+        }
+    }
     if player_y > TILE_HEIGHT {
         player_y = player_y - MOVE_SPEED;
     }
@@ -234,6 +264,16 @@ func playerMoveDown {
                 player_y = player_y + MOVE_SPEED;
                 return;
             }
+        }
+    }
+    if player_x < TILE_WIDTH { // In left doorway
+        if player_y == DOOR_BOTTOM_Y - TILE_HEIGHT + MOVE_SPEED {
+            return;
+        }
+    }
+    if player_x > 192 { // In right doorway
+        if player_y == DOOR_BOTTOM_Y - TILE_HEIGHT + MOVE_SPEED {
+            return;
         }
     }
     if player_y < 160 { // 11 tiles, each 16 pixels tall minus player width
