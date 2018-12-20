@@ -170,13 +170,13 @@ func playerMovement {
         call renderRoomTiles;
     }
     if player_y == 0 {
-        player_y = 184;
+        player_y = 168;
         map_y = map_y - 1;
         call loadRoom;
         call renderRoomDoors;
         call renderRoomTiles;
     }
-    if player_y == 192 {
+    if player_y == 176 { // Screen height minus tile height
         player_y = 8;
         map_y = map_y + 1;
         call loadRoom;
