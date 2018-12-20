@@ -16,12 +16,15 @@ make &> /dev/null
 # 768 bytes of rom used
 ./convertsprite games/dungeon/tiles.png
 # 1792 bytes of rom used
+./convertsprite games/dungeon/maptiles.png
+# 2048 bytes of rom used
 cat games/dungeon/wall_corner.spr >> games/dungeon/dungeon.rom
 cat games/dungeon/wall_horizontal.spr >> games/dungeon/dungeon.rom
 cat games/dungeon/wall_vertical.spr >> games/dungeon/dungeon.rom
 cat games/dungeon/door_horizontal.spr >> games/dungeon/dungeon.rom
 cat games/dungeon/door_vertical.spr >> games/dungeon/dungeon.rom
 cat games/dungeon/tiles.spr >> games/dungeon/dungeon.rom
+cat games/dungeon/maptiles.spr >> games/dungeon/dungeon.rom
 cd games/dungeon
 python map.py
 cd ../..

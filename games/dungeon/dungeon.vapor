@@ -10,7 +10,7 @@ var GPU_state;
 // The map layout is created with map.py
 // Lower 4 bits of a byte indicate door configuration
 // Upper 4 bits of a byte are an offset into room layout segment
-const MAP_SEGMENT 135;
+const MAP_SEGMENT 136;
 
 // Map width and height in units of rooms
 const MAP_WIDTH 16;
@@ -41,7 +41,7 @@ const ROOM_HEIGHT 12;
 
 // Room layouts are stored starting at this segment in ROM
 // Room layouts are 128 bytes each so 2 fit in a segment.
-const ROOM_LAYOUT_SEGMENT 136;
+const ROOM_LAYOUT_SEGMENT 137;
 const ROOM_LAYOUT_COUNT 16;
 const ROOM_LAYOUT_SIZE 128;
 // Room layouts omit outer walls
@@ -74,6 +74,16 @@ const TILE_T_WALL 1;
 
 const MAP_START_X 7;
 const MAP_START_Y 7;
+
+const MINIMAP_TILE_WIDTH 8;
+const MINIMAP_TILE_HEIGHT 8;
+const MINIMAP_TILE_MARGIN 2;
+const MINIMAP_LEFT_X 226; // 14 tiles * 16 pixels wide + minimap tile margin
+const MINIMAP_TOP_Y 162; // Near the bottom, but with enough space for the map
+const MINIMAP_SPRITE_SEGMENT 135;
+const MINIMAP_TILE_SIZE 16; // Size in bytes of each sprite
+var room_layout_minimap; // Local for rendering minimap
+var minimap_sprite_offset;
 
 var map_x;
 var map_y;
@@ -132,6 +142,7 @@ call loadRoom;
 call renderRoomDoors;
 call renderRoomTiles;
 call renderRoomBorder;
+call renderMiniMap;
 
 // Main loop
 while 1 {
@@ -161,6 +172,7 @@ func playerMovement {
         call loadRoom;
         call renderRoomDoors;
         call renderRoomTiles;
+        call renderMiniMap;
     }
     if player_x == 208 { // Right edge
         player_x = 8; // Half player width
@@ -168,6 +180,7 @@ func playerMovement {
         call loadRoom;
         call renderRoomDoors;
         call renderRoomTiles;
+        call renderMiniMap;
     }
     if player_y == 0 {
         player_y = 168;
@@ -175,6 +188,7 @@ func playerMovement {
         call loadRoom;
         call renderRoomDoors;
         call renderRoomTiles;
+        call renderMiniMap;
     }
     if player_y == 176 { // Screen height minus tile height
         player_y = 8;
@@ -182,6 +196,7 @@ func playerMovement {
         call loadRoom;
         call renderRoomDoors;
         call renderRoomTiles;
+        call renderMiniMap;
     }
 }
 
@@ -310,7 +325,6 @@ func loadRoom {
 }
 
 func renderPlayer {
-    // TODO: actual segment and index
     sprite_segment = 79;
     sprite_index = 0;
     [ sprite_segment , sprite_index ] = 144; // Enable and use transparency
@@ -322,6 +336,113 @@ func renderPlayer {
     [ sprite_segment , sprite_index + 6] = PLAYER_SPRITE_OFFSET; // Sprite offset
     [ sprite_segment , sprite_index + 7] = 0; // Color from output of `convertsprite`
     [ sprite_segment , sprite_index + 8] = 255; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = 0; // Color from output of `convertsprite`
+}
+
+func renderMiniMap {
+    sprite_segment = 79;
+    sprite_index = 16;
+    if map_x > 0 {
+        // Draw layout of room to left
+        room_layout_minimap = 15 & [ MAP_SEGMENT , map_index - 1 ];
+        i = 0;
+        minimap_sprite_offset = 0;
+        while i < room_layout_minimap {
+            minimap_sprite_offset = minimap_sprite_offset + MINIMAP_TILE_SIZE;
+            i = i + 1;
+        }
+        [ sprite_segment , sprite_index ] = 144; // Enable and use transparency
+        [ sprite_segment , sprite_index + 1] = MINIMAP_LEFT_X; // X
+        [ sprite_segment , sprite_index + 2] = MINIMAP_TOP_Y + MINIMAP_TILE_HEIGHT + MINIMAP_TILE_MARGIN; // Y
+        [ sprite_segment , sprite_index + 3] = MINIMAP_TILE_WIDTH; // Width
+        [ sprite_segment , sprite_index + 4] = MINIMAP_TILE_HEIGHT; // Height
+        [ sprite_segment , sprite_index + 5] = MINIMAP_SPRITE_SEGMENT; // Sprite segment
+        [ sprite_segment , sprite_index + 6] = minimap_sprite_offset; // Sprite offset
+        [ sprite_segment , sprite_index + 7] = 255; // Color from output of `convertsprite`
+        [ sprite_segment , sprite_index + 8] = 0; // Color from output of `convertsprite`
+        [ sprite_segment , sprite_index + 9] = 0; // Color from output of `convertsprite`
+    }
+    sprite_index = sprite_index + 16;
+    if map_x < MAP_WIDTH {
+        // Draw layout of room to right
+        room_layout_minimap = 15 & [ MAP_SEGMENT , map_index + 1 ];
+        i = 0;
+        minimap_sprite_offset = 0;
+        while i < room_layout_minimap {
+            minimap_sprite_offset = minimap_sprite_offset + MINIMAP_TILE_SIZE;
+            i = i + 1;
+        }
+        [ sprite_segment , sprite_index ] = 144; // Enable and use transparency
+        [ sprite_segment , sprite_index + 1] = MINIMAP_LEFT_X + MINIMAP_TILE_WIDTH + MINIMAP_TILE_WIDTH + MINIMAP_TILE_MARGIN + MINIMAP_TILE_MARGIN; // X
+        [ sprite_segment , sprite_index + 2] = MINIMAP_TOP_Y + MINIMAP_TILE_HEIGHT + MINIMAP_TILE_MARGIN; // Y
+        [ sprite_segment , sprite_index + 3] = MINIMAP_TILE_WIDTH; // Width
+        [ sprite_segment , sprite_index + 4] = MINIMAP_TILE_HEIGHT; // Height
+        [ sprite_segment , sprite_index + 5] = MINIMAP_SPRITE_SEGMENT; // Sprite segment
+        [ sprite_segment , sprite_index + 6] = minimap_sprite_offset; // Sprite offset
+        [ sprite_segment , sprite_index + 7] = 255; // Color from output of `convertsprite`
+        [ sprite_segment , sprite_index + 8] = 0; // Color from output of `convertsprite`
+        [ sprite_segment , sprite_index + 9] = 0; // Color from output of `convertsprite`
+    }
+    sprite_index = sprite_index + 16;
+    if map_y > 0 {
+        // Draw layout of room above
+        room_layout_minimap = 15 & [ MAP_SEGMENT , map_index - MAP_WIDTH ];
+        i = 0;
+        minimap_sprite_offset = 0;
+        while i < room_layout_minimap {
+            minimap_sprite_offset = minimap_sprite_offset + MINIMAP_TILE_SIZE;
+            i = i + 1;
+        }
+        [ sprite_segment , sprite_index ] = 144; // Enable and use transparency
+        [ sprite_segment , sprite_index + 1] = MINIMAP_LEFT_X + MINIMAP_TILE_WIDTH + MINIMAP_TILE_MARGIN; // X
+        [ sprite_segment , sprite_index + 2] = MINIMAP_TOP_Y; // Y
+        [ sprite_segment , sprite_index + 3] = MINIMAP_TILE_WIDTH; // Width
+        [ sprite_segment , sprite_index + 4] = MINIMAP_TILE_HEIGHT; // Height
+        [ sprite_segment , sprite_index + 5] = MINIMAP_SPRITE_SEGMENT; // Sprite segment
+        [ sprite_segment , sprite_index + 6] = minimap_sprite_offset; // Sprite offset
+        [ sprite_segment , sprite_index + 7] = 255; // Color from output of `convertsprite`
+        [ sprite_segment , sprite_index + 8] = 0; // Color from output of `convertsprite`
+        [ sprite_segment , sprite_index + 9] = 0; // Color from output of `convertsprite`
+    }
+    sprite_index = sprite_index + 16;
+    if map_y < MAP_HEIGHT {
+        // Draw layout of room below
+        room_layout_minimap = 15 & [ MAP_SEGMENT , map_index + MAP_WIDTH ];
+        i = 0;
+        minimap_sprite_offset = 0;
+        while i < room_layout_minimap {
+            minimap_sprite_offset = minimap_sprite_offset + MINIMAP_TILE_SIZE;
+            i = i + 1;
+        }
+        [ sprite_segment , sprite_index ] = 144; // Enable and use transparency
+        [ sprite_segment , sprite_index + 1] = MINIMAP_LEFT_X + MINIMAP_TILE_WIDTH + MINIMAP_TILE_MARGIN; // X
+        [ sprite_segment , sprite_index + 2] = MINIMAP_TOP_Y + MINIMAP_TILE_HEIGHT + MINIMAP_TILE_HEIGHT + MINIMAP_TILE_MARGIN + MINIMAP_TILE_MARGIN; // Y
+        [ sprite_segment , sprite_index + 3] = MINIMAP_TILE_WIDTH; // Width
+        [ sprite_segment , sprite_index + 4] = MINIMAP_TILE_HEIGHT; // Height
+        [ sprite_segment , sprite_index + 5] = MINIMAP_SPRITE_SEGMENT; // Sprite segment
+        [ sprite_segment , sprite_index + 6] = minimap_sprite_offset; // Sprite offset
+        [ sprite_segment , sprite_index + 7] = 255; // Color from output of `convertsprite`
+        [ sprite_segment , sprite_index + 8] = 0; // Color from output of `convertsprite`
+        [ sprite_segment , sprite_index + 9] = 0; // Color from output of `convertsprite`
+    }
+    sprite_index = sprite_index + 16;
+    // Draw layout of current room
+    room_layout_minimap = 15 & [ MAP_SEGMENT , map_index ];
+        i = 0;
+        minimap_sprite_offset = 0;
+        while i < room_layout_minimap {
+            minimap_sprite_offset = minimap_sprite_offset + MINIMAP_TILE_SIZE;
+            i = i + 1;
+        }
+    [ sprite_segment , sprite_index ] = 144; // Enable and use transparency
+    [ sprite_segment , sprite_index + 1] = MINIMAP_LEFT_X + MINIMAP_TILE_WIDTH + MINIMAP_TILE_MARGIN; // X
+    [ sprite_segment , sprite_index + 2] = MINIMAP_TOP_Y + MINIMAP_TILE_HEIGHT + MINIMAP_TILE_MARGIN; // Y
+    [ sprite_segment , sprite_index + 3] = MINIMAP_TILE_WIDTH; // Width
+    [ sprite_segment , sprite_index + 4] = MINIMAP_TILE_HEIGHT; // Height
+    [ sprite_segment , sprite_index + 5] = MINIMAP_SPRITE_SEGMENT; // Sprite segment
+    [ sprite_segment , sprite_index + 6] = minimap_sprite_offset; // Sprite offset
+    [ sprite_segment , sprite_index + 7] = 255; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = 0; // Color from output of `convertsprite`
     [ sprite_segment , sprite_index + 9] = 0; // Color from output of `convertsprite`
 }
 
