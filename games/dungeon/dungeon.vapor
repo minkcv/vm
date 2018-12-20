@@ -10,7 +10,7 @@ var GPU_state;
 // The map layout is created with map.py
 // Lower 4 bits of a byte indicate door configuration
 // Upper 4 bits of a byte are an offset into room layout segment
-const MAP_SEGMENT 136;
+const MAP_SEGMENT 140;
 
 // Map width and height in units of rooms
 const MAP_WIDTH 16;
@@ -41,7 +41,7 @@ const ROOM_HEIGHT 12;
 
 // Room layouts are stored starting at this segment in ROM
 // Room layouts are 128 bytes each so 2 fit in a segment.
-const ROOM_LAYOUT_SEGMENT 137;
+const ROOM_LAYOUT_SEGMENT 141;
 const ROOM_LAYOUT_COUNT 16;
 const ROOM_LAYOUT_SIZE 128;
 // Room layouts omit outer walls
@@ -80,7 +80,7 @@ const MINIMAP_TILE_HEIGHT 8;
 const MINIMAP_TILE_MARGIN 2;
 const MINIMAP_LEFT_X 226; // 14 tiles * 16 pixels wide + minimap tile margin
 const MINIMAP_TOP_Y 162; // Near the bottom, but with enough space for the map
-const MINIMAP_SPRITE_SEGMENT 135;
+const MINIMAP_SPRITE_SEGMENT 139;
 const MINIMAP_TILE_SIZE 16; // Size in bytes of each sprite
 var room_layout_minimap; // Local for rendering minimap
 var minimap_sprite_offset;
