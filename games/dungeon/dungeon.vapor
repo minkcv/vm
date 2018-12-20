@@ -4,13 +4,13 @@
 var previous_GPU_state;
 var GPU_state;
 
-// The entire segment TODO.* is used for 
+// The entire segment 194 is used for 
 // storing the dungeon layout
-// Dungoen map is 16x16
-// The map layout is created with map.py
+// Dungoen map is 16 rooms x 16 rooms
+// The map layout and room layouts are created with map.py
 // Lower 4 bits of a byte indicate door configuration
 // Upper 4 bits of a byte are an offset into room layout segment
-const MAP_SEGMENT 140;
+const MAP_SEGMENT 196;
 
 // Map width and height in units of rooms
 const MAP_WIDTH 16;
@@ -41,7 +41,7 @@ const ROOM_HEIGHT 12;
 
 // Room layouts are stored starting at this segment in ROM
 // Room layouts are 128 bytes each so 2 fit in a segment.
-const ROOM_LAYOUT_SEGMENT 141;
+const ROOM_LAYOUT_SEGMENT 197; // MAP_SEGMENT + 1
 const ROOM_LAYOUT_COUNT 16;
 const ROOM_LAYOUT_SIZE 128;
 // Room layouts omit outer walls
@@ -62,11 +62,13 @@ const ROOM_EMPTY 0;
 // Lower 4 bits of byte indicate tile type
 // Upper 4 bits of byte indicate tile sprite
 const TILE_TYPE_COUNT 16;
+const TILE_SPRITE_SIZE 64; // Sprite size in bytes
 const TILE_SPRITE_COUNT 16;
 const TILE_WIDTH 16;
 const TILE_HEIGHT 16;
-
 const TILE_SPRITE_SEGMENT 131
+var tile_sprite_offset;
+var tile_sprite_segment_offset;
 
 // Tile types
 const TILE_T_EMPTY 0;
@@ -80,7 +82,7 @@ const MINIMAP_TILE_HEIGHT 8;
 const MINIMAP_TILE_MARGIN 2;
 const MINIMAP_LEFT_X 226; // 14 tiles * 16 pixels wide + minimap tile margin
 const MINIMAP_TOP_Y 162; // Near the bottom, but with enough space for the map
-const MINIMAP_SPRITE_SEGMENT 139;
+const MINIMAP_SPRITE_SEGMENT 195;
 const MINIMAP_TILE_SIZE 16; // Size in bytes of each sprite
 var room_layout_minimap; // Local for rendering minimap
 var minimap_sprite_offset;
@@ -102,6 +104,7 @@ const BUTTON_LEFT 4;
 const BUTTON_DOWN 2;
 const BUTTON_UP 1;
 
+// TODO: these are dummy values
 const PLAYER_SPRITE_SEGMENT 128;
 const PLAYER_SPRITE_OFFSET 0;
 
@@ -116,6 +119,7 @@ var player_y;
 
 // Common locals
 var i;
+var i2;
 var tmp;
 var x;
 var y;
@@ -610,18 +614,33 @@ func renderRoomTiles {
         x = 0;
         x2 = TILE_WIDTH;
         while x < ROOM_LAYOUT_WIDTH {
-            tile_sprite = [ room_segment , room_index + i ];
-            tile_type = tile_sprite & 15; // 0000 1111 mask
-            tile_sprite = tile_sprite & 240; // 1111 0000 mask
-            tile_sprite = tile_sprite >> 4;
+            tile_type = [ room_segment , room_index + i ];
+            tile_sprite = tile_type & 15; // 0000 1111 mask
+            tile_type = tile_type & 240; // 1111 0000 mask
+            tile_type = tile_type >> 4;
+            i2 = 0;
+            tile_sprite_offset = 0;
+            tile_sprite_segment_offset = 0;
+            while i2 < tile_sprite {
+                i2 = i2 + 1;
+                if tile_sprite_offset == 192 { // About to overflow tile_sprite_offset back to 0
+                    tile_sprite_segment_offset = tile_sprite_segment_offset + 1;
+                }
+                tile_sprite_offset = tile_sprite_offset + TILE_SPRITE_SIZE;
+            }
             if tile_type > 0 {
+                i2 = 0;
+                while i2 < tile_type - 1 {
+                    i2 = i2 + 1;
+                    tile_sprite_segment_offset = tile_sprite_segment_offset + 4; // 4 16x16 sprites per segment
+                }
                 [ sprite_segment , sprite_index ] = 144; // Enable and use transparency
                 [ sprite_segment , sprite_index + 1] = x2; // X
                 [ sprite_segment , sprite_index + 2] = y2; // Y
                 [ sprite_segment , sprite_index + 3] = TILE_WIDTH; // Width
                 [ sprite_segment , sprite_index + 4] = TILE_HEIGHT; // Height
-                [ sprite_segment , sprite_index + 5] = TILE_SPRITE_SEGMENT; // Sprite segment
-                [ sprite_segment , sprite_index + 6] = tile_sprite; // Sprite offset
+                [ sprite_segment , sprite_index + 5] = TILE_SPRITE_SEGMENT + tile_sprite_segment_offset; // Sprite segment
+                [ sprite_segment , sprite_index + 6] = tile_sprite_offset; // Sprite offset
                 [ sprite_segment , sprite_index + 7] = 0; // Color from output of `convertsprite`
                 [ sprite_segment , sprite_index + 8] = 255; // Color from output of `convertsprite`
                 [ sprite_segment , sprite_index + 9] = 0; // Color from output of `convertsprite`
