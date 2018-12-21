@@ -61,18 +61,15 @@ const ROOM_EMPTY 0;
 
 // Lower 4 bits of byte indicate tile type
 // Upper 4 bits of byte indicate tile sprite
-const TILE_TYPE_COUNT 16;
 const TILE_SPRITE_SIZE 64; // Sprite size in bytes
-const TILE_SPRITE_COUNT 16;
 const TILE_WIDTH 16;
 const TILE_HEIGHT 16;
 const TILE_SPRITE_SEGMENT 131
 var tile_sprite_offset;
 var tile_sprite_segment_offset;
 
-// Tile types
-const TILE_T_EMPTY 0;
-const TILE_T_WALL 1;
+// Tiles with type greater than 7 will be walls
+const TILE_TYPE_WALL 7;
 
 const MAP_START_X 7;
 const MAP_START_Y 7;
@@ -116,6 +113,9 @@ const DOOR_RIGHT_X 128;
 const MOVE_SPEED 2;
 var player_x;
 var player_y;
+var num_tiles_in_room; // Length of the following arrays.
+const WALL_X_SEGMENT 0; // Array of x positions of walls in current room
+const WALL_Y_SEGMENT 1; // Array of y positions of walls in current room
 
 // Common locals
 var i;
@@ -223,6 +223,19 @@ func playerMoveLeft {
             return;
         }
     }
+    i = 0;
+    while i < num_tiles_in_room {
+        x = [ WALL_X_SEGMENT , i ];
+        y = [ WALL_Y_SEGMENT , i ];
+        if player_y + TILE_HEIGHT > y {
+            if player_y < y + TILE_HEIGHT {
+                if player_x == x + TILE_WIDTH {
+                    return;
+                }
+            }
+        }
+        i = i + 1;
+    }
     if player_x > TILE_WIDTH {
         player_x = player_x - MOVE_SPEED;
     }
@@ -246,6 +259,19 @@ func playerMoveRight {
         if player_x == DOOR_RIGHT_X - TILE_WIDTH + MOVE_SPEED {
             return;
         }
+    }
+    i = 0;
+    while i < num_tiles_in_room {
+        x = [ WALL_X_SEGMENT , i ];
+        y = [ WALL_Y_SEGMENT , i ];
+        if player_y + TILE_HEIGHT > y {
+            if player_y < y + TILE_HEIGHT {
+                if player_x + TILE_WIDTH == x {
+                    return;
+                }
+            }
+        }
+        i = i + 1;
     }
     if player_x < 192 { // 13 tiles, each 16 pixels wide minus player width
         player_x = player_x + MOVE_SPEED;
@@ -271,6 +297,19 @@ func playerMoveUp {
             return;
         }
     }
+    i = 0;
+    while i < num_tiles_in_room {
+        x = [ WALL_X_SEGMENT , i ];
+        y = [ WALL_Y_SEGMENT , i ];
+        if player_x + TILE_WIDTH > x {
+            if player_x < x + TILE_WIDTH {
+                if player_y == y + TILE_HEIGHT {
+                    return;
+                }
+            }
+        }
+        i = i + 1;
+    }
     if player_y > TILE_HEIGHT {
         player_y = player_y - MOVE_SPEED;
     }
@@ -294,6 +333,19 @@ func playerMoveDown {
         if player_y == DOOR_BOTTOM_Y - TILE_HEIGHT + MOVE_SPEED {
             return;
         }
+    }
+    i = 0;
+    while i < num_tiles_in_room {
+        x = [ WALL_X_SEGMENT , i ];
+        y = [ WALL_Y_SEGMENT , i ];
+        if player_x + TILE_WIDTH > x {
+            if player_x < x + TILE_WIDTH {
+                if player_y + TILE_HEIGHT == y {
+                    return;
+                }
+            }
+        }
+        i = i + 1;
     }
     if player_y < 160 { // 11 tiles, each 16 pixels tall minus player width
         player_y = player_y + MOVE_SPEED;
@@ -605,6 +657,7 @@ func renderRoomDoors {
 
 // Uses sprite attributes at addresses 66.80 through ??? because # of room tiles varies per room
 func renderRoomTiles {
+    num_tiles_in_room = 0;
     sprite_segment = 66;
     sprite_index = 80;
     y = 0;
@@ -648,6 +701,11 @@ func renderRoomTiles {
                     sprite_segment = sprite_segment + 1;
                 }
                 sprite_index = sprite_index + 16;
+            }
+            if tile_type > TILE_TYPE_WALL {
+                [ WALL_X_SEGMENT , num_tiles_in_room ] = x2;
+                [ WALL_Y_SEGMENT , num_tiles_in_room ] = y2;
+                num_tiles_in_room = num_tiles_in_room + 1;
             }
             x = x + 1;
             x2 = x2 + TILE_WIDTH;
