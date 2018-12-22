@@ -181,36 +181,36 @@ func playerMovement {
         player_x = 200; // 13 tiles, each 16 pixels wide minus half player width
         map_x = map_x - 1;
         call loadRoom;
+        call updateRoomBorderColors;
         call renderRoomDoors;
         call renderRoomTiles;
-        call renderRoomBorder;
         call renderMiniMap;
     }
     if player_x == 208 { // Right edge
         player_x = 8; // Half player width
         map_x = map_x + 1;
         call loadRoom;
+        call updateRoomBorderColors;
         call renderRoomDoors;
         call renderRoomTiles;
-        call renderRoomBorder;
         call renderMiniMap;
     }
     if player_y == 0 {
         player_y = 168;
         map_y = map_y - 1;
         call loadRoom;
+        call updateRoomBorderColors;
         call renderRoomDoors;
         call renderRoomTiles;
-        call renderRoomBorder;
         call renderMiniMap;
     }
     if player_y == 176 { // Screen height minus tile height
         player_y = 8;
         map_y = map_y + 1;
         call loadRoom;
+        call updateRoomBorderColors;
         call renderRoomDoors;
         call renderRoomTiles;
-        call renderRoomBorder;
         call renderMiniMap;
     }
 }
@@ -974,6 +974,122 @@ func renderRoomBorder {
     // Horizontal wall sprite is at at [ 129 , 0 ]
     [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
     [ sprite_segment , sprite_index + 6] = 128; // Sprite offset
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
+}
+
+func updateRoomBorderColors {
+    // Set up sprite attributes to render the room.
+    // These should only be done once at the start.
+    sprite_segment = 64;
+    sprite_index = 0;
+    // -- Top left corner
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
+    // [ sprite_segment , sprite_index + 10] = 0; // Unused color (we're using transparency)
+    sprite_index = 32; // Move to next sprite attribute
+
+    // -- Top right corner
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
+    sprite_index = 48; // Move to next sprite attribute
+
+    // -- Bottom right corner
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
+    sprite_index = 64; // Move to next sprite attribute
+
+    // -- Bottom left corner
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
+    sprite_index = 80; // Move to next sprite attribute
+    
+    // -- Top walls (but not door area)
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
+    sprite_index = 96; // Move to next sprite attribute
+
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
+    sprite_index = 112; // Move to next sprite attribute
+
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
+    sprite_index = 128; // Move to next sprite attribute
+
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
+    sprite_index = 144; // Move to next sprite attribute
+
+    // -- Bottom Walls (but not door area)
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
+    sprite_index = 160; // Move to next sprite attribute
+
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
+    sprite_index = 176; // Move to next sprite attribute
+
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
+    sprite_index = 192; // Move to next sprite attribute
+
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
+    sprite_index = 208; // Move to next sprite attribute
+
+    // -- Left Walls (but not door area)
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
+    sprite_index = 224; // Move to next sprite attribute
+
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
+    sprite_index = 240; // Move to next sprite attribute
+
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
+    sprite_segment = 65; // Use next segment of sprite attributes
+    sprite_index = 0; // Move to next sprite attribute
+
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
+    sprite_index = 16; // Move to next sprite attribute
+
+    // -- Right Walls (but not door area)
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
+    sprite_index = 224; // Move to next sprite attribute
+
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
+    sprite_index = 240; // Move to next sprite attribute
+
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
+    sprite_segment = 66; // Use next segment of sprite attributes
+    sprite_index = 0; // Move to next sprite attribute
+
     [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
     [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
     [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
