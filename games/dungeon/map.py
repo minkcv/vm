@@ -15,7 +15,7 @@ data = """
 0D010A0802010B080A000F080B03090B
 000303000008020A080A0802020B0300
 090B07020A0000030007020202020B00
-03090B090504020103060009020A0000
+03090B090504020102060009020A0000
 03030906000E00030007020B00080000
 030706080A0009050A0300090C00080A
 080B070C03000300030300080A090A03
@@ -28,7 +28,7 @@ data = """
 
 # 10x12 room layouts
 # room layout size: 128 bytes
-# 10x12 = 120 bytes plus 8 at the end for padding
+# 10x12 = 120 bytes plus 8 bytes at the end for 4 colors for walls and 4 colors for tiles
 # first byte: tile type: offset of 16 sprites for second byte
 # second byte: tile sprite: offset of 1 sprite in each group of 16 sprites
 # tile is empty if tile type is 0
@@ -45,8 +45,9 @@ data = data + """
 008000000000000000006000
 00808100000000000070F000
 000000000000000000000000
-0000000000000000
+8060C000FF000000
 """
+#^ colors are 128, 96, 128 for walls and 255, 00, 00 for tiles
 
 data = data + """
 000000000000000000000000

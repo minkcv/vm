@@ -44,6 +44,14 @@ const ROOM_HEIGHT 12;
 const ROOM_LAYOUT_SEGMENT 197; // MAP_SEGMENT + 1
 const ROOM_LAYOUT_COUNT 16;
 const ROOM_LAYOUT_SIZE 128;
+const ROOM_LAYOUT_WALL_COLOR_OFFSET 120;
+const ROOM_LAYOUT_TILE_COLOR_OFFSET 124;
+var wall_color_0;
+var wall_color_1;
+var wall_color_2;
+var tile_color_0;
+var tile_color_1;
+var tile_color_2;
 // Room layouts omit outer walls
 // and are a 12x10 area
 // with tile types and tile sprites
@@ -175,6 +183,7 @@ func playerMovement {
         call loadRoom;
         call renderRoomDoors;
         call renderRoomTiles;
+        call renderRoomBorder;
         call renderMiniMap;
     }
     if player_x == 208 { // Right edge
@@ -183,6 +192,7 @@ func playerMovement {
         call loadRoom;
         call renderRoomDoors;
         call renderRoomTiles;
+        call renderRoomBorder;
         call renderMiniMap;
     }
     if player_y == 0 {
@@ -191,6 +201,7 @@ func playerMovement {
         call loadRoom;
         call renderRoomDoors;
         call renderRoomTiles;
+        call renderRoomBorder;
         call renderMiniMap;
     }
     if player_y == 176 { // Screen height minus tile height
@@ -199,6 +210,7 @@ func playerMovement {
         call loadRoom;
         call renderRoomDoors;
         call renderRoomTiles;
+        call renderRoomBorder;
         call renderMiniMap;
     }
 }
@@ -377,6 +389,13 @@ func loadRoom {
             i = i + 1;
         }
     }
+    wall_color_0 = [ room_segment , room_index + ROOM_LAYOUT_WALL_COLOR_OFFSET ];
+    wall_color_1 = [ room_segment , room_index + ROOM_LAYOUT_WALL_COLOR_OFFSET + 1 ];
+    wall_color_2 = [ room_segment , room_index + ROOM_LAYOUT_WALL_COLOR_OFFSET + 2 ];
+
+    tile_color_0 = [ room_segment , room_index + ROOM_LAYOUT_TILE_COLOR_OFFSET ];
+    tile_color_1 = [ room_segment , room_index + ROOM_LAYOUT_TILE_COLOR_OFFSET + 1 ];
+    tile_color_2 = [ room_segment , room_index + ROOM_LAYOUT_TILE_COLOR_OFFSET + 2 ];
 }
 
 func renderPlayer {
@@ -536,9 +555,9 @@ func renderRoomDoors {
         // Horizontal wall sprite is at [ 129 , 0 ]
         [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
     }
-    [ sprite_segment , sprite_index + 7] = 128; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 8] = 96; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 9] = 192; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
     sprite_index = 32;
 
     // Bottom door
@@ -570,9 +589,9 @@ func renderRoomDoors {
         // Horizontal wall sprite is at [ 129 , 0 ]
         [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
     }
-    [ sprite_segment , sprite_index + 7] = 128; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 8] = 96; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 9] = 192; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
     sprite_index = 48;
 
     // Left door
@@ -605,9 +624,9 @@ func renderRoomDoors {
         [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
         [ sprite_segment , sprite_index + 6] = 128; // Sprite offset
     }
-    [ sprite_segment , sprite_index + 7] = 128; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 8] = 96; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 9] = 192; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
     sprite_index = 64;
 
     // Right door
@@ -641,9 +660,9 @@ func renderRoomDoors {
         [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
         [ sprite_segment , sprite_index + 6] = 128; // Sprite offset
     }
-    [ sprite_segment , sprite_index + 7] = 128; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 8] = 96; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 9] = 192; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
 }
 
 // Uses sprite attributes at addresses 66.80 through ??? because # of room tiles varies per room
@@ -685,9 +704,9 @@ func renderRoomTiles {
                 [ sprite_segment , sprite_index + 4] = TILE_HEIGHT; // Height
                 [ sprite_segment , sprite_index + 5] = TILE_SPRITE_SEGMENT + tile_sprite_segment_offset; // Sprite segment
                 [ sprite_segment , sprite_index + 6] = tile_sprite_offset; // Sprite offset
-                [ sprite_segment , sprite_index + 7] = 128; // Color from output of `convertsprite`
-                [ sprite_segment , sprite_index + 8] = 192; // Color from output of `convertsprite`
-                [ sprite_segment , sprite_index + 9] = 96; // Color from output of `convertsprite`
+                [ sprite_segment , sprite_index + 7] = tile_color_0; // Color from output of `convertsprite`
+                [ sprite_segment , sprite_index + 8] = tile_color_1; // Color from output of `convertsprite`
+                [ sprite_segment , sprite_index + 9] = tile_color_2; // Color from output of `convertsprite`
                 if sprite_index == 240 {
                     sprite_segment = sprite_segment + 1;
                 }
@@ -722,9 +741,9 @@ func renderRoomBorder {
     // Corner wall sprite is at the start of ROM so the address is [ 128 , 0 ]
     [ sprite_segment , sprite_index + 5] = 128; // Sprite segment
     // [ sprite_segment , sprite_index + 6] = 0; // Sprite offset
-    [ sprite_segment , sprite_index + 7] = 128; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 8] = 96; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 9] = 192; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
     // [ sprite_segment , sprite_index + 10] = 0; // Unused color (we're using transparency)
     sprite_index = 32; // Move to next sprite attribute
 
@@ -735,9 +754,9 @@ func renderRoomBorder {
     [ sprite_segment , sprite_index + 3] = 32; // Width
     [ sprite_segment , sprite_index + 4] = 32; // Height
     [ sprite_segment , sprite_index + 5] = 128; // Sprite segment
-    [ sprite_segment , sprite_index + 7] = 128; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 8] = 96; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 9] = 192; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
     sprite_index = 48; // Move to next sprite attribute
 
     // -- Bottom right corner
@@ -747,9 +766,9 @@ func renderRoomBorder {
     [ sprite_segment , sprite_index + 3] = 32; // Width
     [ sprite_segment , sprite_index + 4] = 32; // Height
     [ sprite_segment , sprite_index + 5] = 128; // Sprite segment
-    [ sprite_segment , sprite_index + 7] = 128; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 8] = 96; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 9] = 192; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
     sprite_index = 64; // Move to next sprite attribute
 
     // -- Bottom left corner
@@ -759,9 +778,9 @@ func renderRoomBorder {
     [ sprite_segment , sprite_index + 3] = 32; // Width
     [ sprite_segment , sprite_index + 4] = 32; // Height
     [ sprite_segment , sprite_index + 5] = 128; // Sprite segment
-    [ sprite_segment , sprite_index + 7] = 128; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 8] = 96; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 9] = 192; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
     sprite_index = 80; // Move to next sprite attribute
     
     // -- Top walls (but not door area)
@@ -771,9 +790,9 @@ func renderRoomBorder {
     [ sprite_segment , sprite_index + 4] = 16; // Height
     // Horizontal wall sprite is at at [ 129 , 0 ]
     [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
-    [ sprite_segment , sprite_index + 7] = 128; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 8] = 96; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 9] = 192; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
     sprite_index = 96; // Move to next sprite attribute
 
     [ sprite_segment , sprite_index ] = 144; // Enable and use transparency
@@ -782,9 +801,9 @@ func renderRoomBorder {
     [ sprite_segment , sprite_index + 4] = 16; // Height
     // Horizontal wall sprite is at at [ 129 , 0 ]
     [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
-    [ sprite_segment , sprite_index + 7] = 128; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 8] = 96; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 9] = 192; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
     sprite_index = 112; // Move to next sprite attribute
 
     [ sprite_segment , sprite_index ] = 144; // Enable and use transparency
@@ -793,9 +812,9 @@ func renderRoomBorder {
     [ sprite_segment , sprite_index + 4] = 16; // Height
     // Horizontal wall sprite is at at [ 129 , 0 ]
     [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
-    [ sprite_segment , sprite_index + 7] = 128; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 8] = 96; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 9] = 192; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
     sprite_index = 128; // Move to next sprite attribute
 
     [ sprite_segment , sprite_index ] = 144; // Enable and use transparency
@@ -804,9 +823,9 @@ func renderRoomBorder {
     [ sprite_segment , sprite_index + 4] = 16; // Height
     // Horizontal wall sprite is at at [ 129 , 0 ]
     [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
-    [ sprite_segment , sprite_index + 7] = 128; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 8] = 96; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 9] = 192; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
     sprite_index = 144; // Move to next sprite attribute
 
     // -- Bottom Walls (but not door area)
@@ -817,9 +836,9 @@ func renderRoomBorder {
     [ sprite_segment , sprite_index + 4] = 16; // Height
     // Horizontal wall sprite is at at [ 129 , 0 ]
     [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
-    [ sprite_segment , sprite_index + 7] = 128; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 8] = 96; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 9] = 192; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
     sprite_index = 160; // Move to next sprite attribute
 
     [ sprite_segment , sprite_index ] = 176; // Enable, transparency, and flip vertically
@@ -829,9 +848,9 @@ func renderRoomBorder {
     [ sprite_segment , sprite_index + 4] = 16; // Height
     // Horizontal wall sprite is at at [ 129 , 0 ]
     [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
-    [ sprite_segment , sprite_index + 7] = 128; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 8] = 96; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 9] = 192; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
     sprite_index = 176; // Move to next sprite attribute
 
     [ sprite_segment , sprite_index ] = 176; // Enable, transparency, and flip vertically
@@ -841,9 +860,9 @@ func renderRoomBorder {
     [ sprite_segment , sprite_index + 4] = 16; // Height
     // Horizontal wall sprite is at at [ 129 , 0 ]
     [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
-    [ sprite_segment , sprite_index + 7] = 128; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 8] = 96; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 9] = 192; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
     sprite_index = 192; // Move to next sprite attribute
 
     [ sprite_segment , sprite_index ] = 176; // Enable, transparency, and flip vertically
@@ -853,9 +872,9 @@ func renderRoomBorder {
     [ sprite_segment , sprite_index + 4] = 16; // Height
     // Horizontal wall sprite is at at [ 129 , 0 ]
     [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
-    [ sprite_segment , sprite_index + 7] = 128; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 8] = 96; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 9] = 192; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
     sprite_index = 208; // Move to next sprite attribute
 
     // -- Left Walls (but not door area)
@@ -866,9 +885,9 @@ func renderRoomBorder {
     // Vertical wall sprite is at at [ 129 , 128 ]
     [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
     [ sprite_segment , sprite_index + 6] = 128; // Sprite offset
-    [ sprite_segment , sprite_index + 7] = 128; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 8] = 96; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 9] = 192; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
     sprite_index = 224; // Move to next sprite attribute
 
     [ sprite_segment , sprite_index ] = 144; // Enable and use transparency
@@ -878,9 +897,9 @@ func renderRoomBorder {
     // Horizontal wall sprite is at at [ 129 , 0 ]
     [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
     [ sprite_segment , sprite_index + 6] = 128; // Sprite offset
-    [ sprite_segment , sprite_index + 7] = 128; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 8] = 96; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 9] = 192; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
     sprite_index = 240; // Move to next sprite attribute
 
     [ sprite_segment , sprite_index ] = 144; // Enable and use transparency
@@ -890,9 +909,9 @@ func renderRoomBorder {
     // Horizontal wall sprite is at at [ 129 , 0 ]
     [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
     [ sprite_segment , sprite_index + 6] = 128; // Sprite offset
-    [ sprite_segment , sprite_index + 7] = 128; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 8] = 96; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 9] = 192; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
     sprite_segment = 65; // Use next segment of sprite attributes
     sprite_index = 0; // Move to next sprite attribute
 
@@ -903,9 +922,9 @@ func renderRoomBorder {
     // Horizontal wall sprite is at at [ 129 , 0 ]
     [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
     [ sprite_segment , sprite_index + 6] = 128; // Sprite offset
-    [ sprite_segment , sprite_index + 7] = 128; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 8] = 96; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 9] = 192; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
     sprite_index = 16; // Move to next sprite attribute
 
     // -- Right Walls (but not door area)
@@ -917,9 +936,9 @@ func renderRoomBorder {
     // Vertical wall sprite is at at [ 129 , 128 ]
     [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
     [ sprite_segment , sprite_index + 6] = 128; // Sprite offset
-    [ sprite_segment , sprite_index + 7] = 128; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 8] = 96; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 9] = 192; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
     sprite_index = 224; // Move to next sprite attribute
 
     [ sprite_segment , sprite_index ] = 208; // Enable, transparency, and flip horizontally
@@ -930,9 +949,9 @@ func renderRoomBorder {
     // Horizontal wall sprite is at at [ 129 , 0 ]
     [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
     [ sprite_segment , sprite_index + 6] = 128; // Sprite offset
-    [ sprite_segment , sprite_index + 7] = 128; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 8] = 96; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 9] = 192; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
     sprite_index = 240; // Move to next sprite attribute
 
     [ sprite_segment , sprite_index ] = 208; // Enable, transparency, and flip horizontally
@@ -943,9 +962,9 @@ func renderRoomBorder {
     // Horizontal wall sprite is at at [ 129 , 0 ]
     [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
     [ sprite_segment , sprite_index + 6] = 128; // Sprite offset
-    [ sprite_segment , sprite_index + 7] = 128; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 8] = 96; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 9] = 192; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
     sprite_segment = 66; // Use next segment of sprite attributes
     sprite_index = 0; // Move to next sprite attribute
 
@@ -957,9 +976,9 @@ func renderRoomBorder {
     // Horizontal wall sprite is at at [ 129 , 0 ]
     [ sprite_segment , sprite_index + 5] = 129; // Sprite segment
     [ sprite_segment , sprite_index + 6] = 128; // Sprite offset
-    [ sprite_segment , sprite_index + 7] = 128; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 8] = 96; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 9] = 192; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 7] = wall_color_0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = wall_color_1; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = wall_color_2; // Color from output of `convertsprite`
 }
 
 func waitScreen {
