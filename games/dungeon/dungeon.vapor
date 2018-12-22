@@ -41,7 +41,7 @@ const ROOM_HEIGHT 12;
 
 // Room layouts are stored starting at this segment in ROM
 // Room layouts are 128 bytes each so 2 fit in a segment.
-const ROOM_LAYOUT_SEGMENT 197; // MAP_SEGMENT + 1
+const ROOM_LAYOUT_START_SEGMENT 197; // MAP_SEGMENT + 1
 const ROOM_LAYOUT_COUNT 16;
 const ROOM_LAYOUT_SIZE 128;
 const ROOM_LAYOUT_WALL_COLOR_OFFSET 120;
@@ -102,7 +102,7 @@ var has_bottom_door;
 var has_left_door;
 var has_right_door;
 var room_index;
-var room_segment;
+var room_layout_segment;
 
 const BUTTON_RIGHT 8;
 const BUTTON_LEFT 4;
@@ -377,25 +377,23 @@ func loadRoom {
     door_layout = room_layout & 15; // 0000 1111 mask
     room_layout = room_layout & 240; // 1111 0000 mask
     room_layout = room_layout >> 4;
-    room_segment = ROOM_LAYOUT_SEGMENT;
+    room_layout_segment = ROOM_LAYOUT_START_SEGMENT;
     room_index = 0;
-    if room_layout > 0 {
-        i = 0;
-        while i < room_layout - 1 {
-            if room_index == 240 {
-                room_segment = room_segment + 1;
-            }
-            room_index = room_index + ROOM_LAYOUT_SIZE;
-            i = i + 1;
+    i = 0;
+    while i < room_layout {
+        if room_index == 128 { // About to overflow room_index, increment the segment
+            room_layout_segment = room_layout_segment + 1;
         }
+        room_index = room_index + ROOM_LAYOUT_SIZE;
+        i = i + 1;
     }
-    wall_color_0 = [ room_segment , room_index + ROOM_LAYOUT_WALL_COLOR_OFFSET ];
-    wall_color_1 = [ room_segment , room_index + ROOM_LAYOUT_WALL_COLOR_OFFSET + 1 ];
-    wall_color_2 = [ room_segment , room_index + ROOM_LAYOUT_WALL_COLOR_OFFSET + 2 ];
+    wall_color_0 = [ room_layout_segment , room_index + ROOM_LAYOUT_WALL_COLOR_OFFSET ];
+    wall_color_1 = [ room_layout_segment , room_index + ROOM_LAYOUT_WALL_COLOR_OFFSET + 1 ];
+    wall_color_2 = [ room_layout_segment , room_index + ROOM_LAYOUT_WALL_COLOR_OFFSET + 2 ];
 
-    tile_color_0 = [ room_segment , room_index + ROOM_LAYOUT_TILE_COLOR_OFFSET ];
-    tile_color_1 = [ room_segment , room_index + ROOM_LAYOUT_TILE_COLOR_OFFSET + 1 ];
-    tile_color_2 = [ room_segment , room_index + ROOM_LAYOUT_TILE_COLOR_OFFSET + 2 ];
+    tile_color_0 = [ room_layout_segment , room_index + ROOM_LAYOUT_TILE_COLOR_OFFSET ];
+    tile_color_1 = [ room_layout_segment , room_index + ROOM_LAYOUT_TILE_COLOR_OFFSET + 1 ];
+    tile_color_2 = [ room_layout_segment , room_index + ROOM_LAYOUT_TILE_COLOR_OFFSET + 2 ];
 }
 
 func renderPlayer {
@@ -677,7 +675,7 @@ func renderRoomTiles {
         x = 0;
         x2 = TILE_WIDTH;
         while x < ROOM_LAYOUT_WIDTH {
-            tile_type = [ room_segment , room_index + i ];
+            tile_type = [ room_layout_segment , room_index + i ];
             tile_sprite = tile_type & 15; // 0000 1111 mask
             tile_type = tile_type & 240; // 1111 0000 mask
             tile_type = tile_type >> 4;
