@@ -27,8 +27,11 @@ cat games/dungeon/tiles.spr >> games/dungeon/dungeon.rom
 cat games/dungeon/maptiles.spr >> games/dungeon/dungeon.rom
 cd games/dungeon
 python map.py # 2304 bytes
-# 19712 bytes of rom used
 cd ../..
 cat games/dungeon/mapdata >> games/dungeon/dungeon.rom
+# 19712 bytes of rom used, start of segment 77 from rom start . (segment 205 from 0)
+./convertsprite games/dungeon/player.png # 64 bytes
+cat games/dungeon/player.spr >> games/dungeon/dungeon.rom
+# 19778 bytes used
 ./compiler/compiler -f games/dungeon/dungeon.vapor -l sa
 ./assembler -f games/dungeon/dungeon.asm

@@ -101,8 +101,7 @@ const BUTTON_LEFT 4;
 const BUTTON_DOWN 2;
 const BUTTON_UP 1;
 
-// TODO: these are dummy values
-const PLAYER_SPRITE_SEGMENT 128;
+const PLAYER_SPRITE_SEGMENT 205;
 const PLAYER_SPRITE_OFFSET 0;
 
 // For collision detection
@@ -390,9 +389,9 @@ func renderPlayer {
     [ sprite_segment , sprite_index + 4] = TILE_HEIGHT; // Height
     [ sprite_segment , sprite_index + 5] = PLAYER_SPRITE_SEGMENT; // Sprite segment
     [ sprite_segment , sprite_index + 6] = PLAYER_SPRITE_OFFSET; // Sprite offset
-    [ sprite_segment , sprite_index + 7] = 0; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 8] = 255; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 9] = 0; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 7] = 11; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 8] = 244; // Color from output of `convertsprite`
+    [ sprite_segment , sprite_index + 9] = 255; // Color from output of `convertsprite`
 }
 
 func renderMiniMap {
@@ -686,9 +685,9 @@ func renderRoomTiles {
                 [ sprite_segment , sprite_index + 4] = TILE_HEIGHT; // Height
                 [ sprite_segment , sprite_index + 5] = TILE_SPRITE_SEGMENT + tile_sprite_segment_offset; // Sprite segment
                 [ sprite_segment , sprite_index + 6] = tile_sprite_offset; // Sprite offset
-                [ sprite_segment , sprite_index + 7] = 0; // Color from output of `convertsprite`
-                [ sprite_segment , sprite_index + 8] = 255; // Color from output of `convertsprite`
-                [ sprite_segment , sprite_index + 9] = 0; // Color from output of `convertsprite`
+                [ sprite_segment , sprite_index + 7] = 128; // Color from output of `convertsprite`
+                [ sprite_segment , sprite_index + 8] = 192; // Color from output of `convertsprite`
+                [ sprite_segment , sprite_index + 9] = 96; // Color from output of `convertsprite`
                 if sprite_index == 240 {
                     sprite_segment = sprite_segment + 1;
                 }
