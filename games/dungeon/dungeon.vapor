@@ -135,6 +135,7 @@ var y2;
 var tile_type;
 var tile_sprite;
 var buttons;
+var buttons2;
 
 // Locals for sprite rendering
 var sprite_index;
@@ -150,8 +151,22 @@ player_x = 112;
 player_y = 88;
 
 call loadRoom;
-call renderRoomDoors;
+room_layout_segment = ROOM_LAYOUT_START_SEGMENT + 7; // Start screen is the last room layout
+room_index = 128;
 call renderRoomTiles;
+
+var title_screen;
+title_screen = 1;
+while title_screen {
+    buttons = [ 127 , 0 ];
+    buttons2 = [ 127 , 1 ];
+    if buttons | buttons2 { // Any button to start
+        title_screen = 0;
+    }
+}
+
+call loadRoom;
+call renderRoomDoors;
 call renderRoomBorder;
 call renderMiniMap;
 
