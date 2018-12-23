@@ -166,6 +166,7 @@ while title_screen {
 }
 
 call loadRoom;
+call renderRoomTiles;
 call renderRoomDoors;
 call renderRoomBorder;
 call renderMiniMap;
