@@ -56,6 +56,7 @@ print(encodeStringAsSprites("fallen"))
 print(encodeStringAsSprites("colony"))
 # tile is empty if tile type is 0
 # segment 1
+# this is layout 0
 # 24 columns is here   v
 data = data + """
 000000000000000000000000
@@ -68,7 +69,7 @@ data = data + """
 000000000000000000000000
 000000000000000000000000
 000000000000000000000000
-8060C000FF000000
+FF004900FF000000
 """
 #^ colors are 128, 96, 128 for walls and 255, 00, 00 for tiles
 
