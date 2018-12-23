@@ -29,21 +29,45 @@ data = """
 # 10x12 room layouts
 # room layout size: 128 bytes
 # 10x12 = 120 bytes plus 8 bytes at the end for 4 colors for walls and 4 colors for tiles
-# first byte: tile type: offset of 16 sprites for second byte
-# second byte: tile sprite: offset of 1 sprite in each group of 16 sprites
+# formula for letter/character:
+# 
+# x: index in alphabet of letter 0 - 25
+# y: segment of memory
+# z: offset in segment
+# 
+# y = floor(x / 16)
+# z = x mod 16
+# 
+# for encoding in map.py as hexadecimal digits
+# first digit = y + 1 
+# because first digit 0 indicates an empty tile
+# second digit = z
+def encodeStringAsSprites(text):
+    encoded = ""
+    text = text.lower()
+    for c in text:
+        x = (ord(c) - ord('a'))
+        y = x // 16
+        z = x % 16
+        encoded = encoded + format(y + 1, '1x') + format(z, '1x')
+    return encoded
+
+print(encodeStringAsSprites("caves"))
+print(encodeStringAsSprites("of"))
+print(encodeStringAsSprites("mars"))
 # tile is empty if tile type is 0
 # segment 1
 # 24 columns is here   v
 data = data + """
 000000000000000000000000
-001011000000000000121300
-001400000000000000001500
-000000000000000000000000
+001210251422000000000000
+001e15000000000000000000
+001c10212200000000000000
 000000000000000000000000
 000000000000000000000000
 000000000000000000000000
 008000000000000000006000
-00808100000000000070F000
+000000000000000000000000
 000000000000000000000000
 8060C000FF000000
 """
