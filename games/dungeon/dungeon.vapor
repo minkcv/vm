@@ -705,6 +705,9 @@ func renderRoomTiles {
                 }
                 tile_sprite_offset = tile_sprite_offset + TILE_SPRITE_SIZE;
             }
+            if tile_type == 0 {
+                [ sprite_segment , sprite_index ] = 0; // Disable
+            }
             if tile_type > 0 {
                 i2 = 0;
                 while i2 < tile_type - 1 {
@@ -721,11 +724,11 @@ func renderRoomTiles {
                 [ sprite_segment , sprite_index + 7] = tile_color_0; // Color from output of `convertsprite`
                 [ sprite_segment , sprite_index + 8] = tile_color_1; // Color from output of `convertsprite`
                 [ sprite_segment , sprite_index + 9] = tile_color_2; // Color from output of `convertsprite`
-                if sprite_index == 240 {
-                    sprite_segment = sprite_segment + 1;
-                }
-                sprite_index = sprite_index + 16;
             }
+            if sprite_index == 240 {
+                sprite_segment = sprite_segment + 1;
+            }
+            sprite_index = sprite_index + 16;
             if tile_type > TILE_TYPE_WALL {
                 [ WALL_X_SEGMENT , num_tiles_in_room ] = x2;
                 [ WALL_Y_SEGMENT , num_tiles_in_room ] = y2;
