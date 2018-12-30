@@ -19,4 +19,8 @@ compiler/tests/*.bin
 games/paint/*.spr
 **/breakout.asm
 **/breakout.bin
-
+**/fallen.bin
+**/fallen.asm
+**/fallen.rom
+games/fallen/*.spr
+games/fallen/mapdata
