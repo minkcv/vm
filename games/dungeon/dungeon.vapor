@@ -474,7 +474,7 @@ func renderMiniMap {
         [ sprite_segment , sprite_index + 8] = 0; // Color from output of `convertsprite`
         [ sprite_segment , sprite_index + 9] = 0; // Color from output of `convertsprite`
     }
-    if map_x == MAP_WIDTH {
+    if map_x == MAP_WIDTH - 1 {
         [ sprite_segment , sprite_index ] = 0; // Disable
     }
     sprite_index = sprite_index + 16;
@@ -522,7 +522,7 @@ func renderMiniMap {
         [ sprite_segment , sprite_index + 8] = 0; // Color from output of `convertsprite`
         [ sprite_segment , sprite_index + 9] = 0; // Color from output of `convertsprite`
     }
-    if map_y == MAP_HEIGHT {
+    if map_y == MAP_HEIGHT - 1 {
         [ sprite_segment , sprite_index ] = 0; // Disable
     }
     sprite_index = sprite_index + 16;
