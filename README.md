@@ -27,7 +27,7 @@ A Nintendo Switch Homebrew implementation exists [HERE](https://github.com/minkc
 Example programs in assembly and vaporlang are included. 
 
 #### Fallen Colony 
-This demo includes many sprites, multiple rooms, and a mini map. It does have combat or win/loss states.
+This demo includes many sprites, multiple rooms, and a mini map. It does not have combat or win/loss states.
 
 ![fallencolony3](./etc/fallen3.png)
 ![fallencolony](./etc/fallen.png)
