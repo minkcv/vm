@@ -1,6 +1,6 @@
 # Vapor Spec
-A virtual game platform with capabilities similar to 90s game consoles. 
-This repo is contains the Windows/Linux implementation, some games, the compiler and assembler, and documentation.
+A virtual game platform with capabilities similar to 80s game consoles. 
+This repo is contains the Windows/Linux implementation, some games, the compiler, assembler, and documentation.
 
 A Nintendo Switch Homebrew implementation exists [HERE](https://github.com/minkcv/vm-switch).
 
@@ -24,13 +24,23 @@ A Nintendo Switch Homebrew implementation exists [HERE](https://github.com/minkc
 - Documentation (see [/docs](https://github.com/minkcv/vm/tree/master/docs))
 
 ### Included Programs:
-Five programs are included to demonstrate the capabilities of the platform. Mars is a simple scene showing colored sprites that the player can move around. Pong is a clone of the classic Atari game for 2 players. Pong2 is pong written in vaporlang, a language created specifically for this platform. Tetris is a much larger game written in vaporlang. Paint is a multi color character editor. Breakout is another classic clone.
+Example programs in assembly and vaporlang are included. 
 
-![demo](https://github.com/minkcv/vm/blob/master/etc/mars.png)
-![pong](https://github.com/minkcv/vm/blob/master/etc/pong.png)
-![tetris](https://github.com/minkcv/vm/blob/master/etc/tetris.png)
-![paint](https://github.com/minkcv/vm/blob/master/etc/paint.png)
-![breakout](https://github.com/minkcv/vm/blob/master/etc/breakout.png)
+#### Fallen Colony 
+This demo includes many sprites, multiple rooms, and a mini map. It does have combat or win/loss states.
+
+![fallencolony3](./etc/fallen3.png)
+![fallencolony](./etc/fallen.png)
+![fallencolony2](./etc/fallen2.png)
+
+#### Other Programs
+These programs are much simpler and some do not use any rom.
+
+![mars](./etc/mars.png)
+![pong](./etc/pong.png)
+![tetris](./etc/tetris.png)
+![paint](./etc/paint.png)
+![breakout](./etc/breakout.png)
 
 ### Why did you make this? Who is it for?
 This is a hobby project to allow myself and others to write games for a very simple architecture without some of the annoyances that physical architectures impose.
@@ -45,11 +55,11 @@ Install SDL2 and libpng if you don't already have them. Systems with apt should 
 
 To build and test the platform on linux, run one of the included programs:
 
-    cd games
+    cd vm/games
     ./mars.sh
     ./pong.sh
-    ./pong2.sh
     ./tetris.sh
+    ./fallen.sh
 
 #### Windows (x86):
 See the [Releases Section](https://github.com/minkcv/vm/releases) for a pre-built exe and pre-assembled games.
