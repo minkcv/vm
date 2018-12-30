@@ -246,9 +246,9 @@ func playerMoveLeft {
     while i < num_tiles_in_room {
         x = [ WALL_X_SEGMENT , i ];
         y = [ WALL_Y_SEGMENT , i ];
-        if player_y + TILE_HEIGHT > y {
-            if player_y < y + TILE_HEIGHT {
-                if player_x == x + TILE_WIDTH {
+        if player_x == x + TILE_WIDTH {
+            if player_y + TILE_HEIGHT > y {
+                if player_y < y + TILE_HEIGHT {
                     return;
                 }
             }
@@ -283,9 +283,9 @@ func playerMoveRight {
     while i < num_tiles_in_room {
         x = [ WALL_X_SEGMENT , i ];
         y = [ WALL_Y_SEGMENT , i ];
-        if player_y + TILE_HEIGHT > y {
-            if player_y < y + TILE_HEIGHT {
-                if player_x + TILE_WIDTH == x {
+        if player_x + TILE_WIDTH == x {
+            if player_y + TILE_HEIGHT > y {
+                if player_y < y + TILE_HEIGHT {
                     return;
                 }
             }
@@ -320,9 +320,9 @@ func playerMoveUp {
     while i < num_tiles_in_room {
         x = [ WALL_X_SEGMENT , i ];
         y = [ WALL_Y_SEGMENT , i ];
-        if player_x + TILE_WIDTH > x {
-            if player_x < x + TILE_WIDTH {
-                if player_y == y + TILE_HEIGHT {
+        if player_y == y + TILE_HEIGHT {
+            if player_x + TILE_WIDTH > x {
+                if player_x < x + TILE_WIDTH {
                     return;
                 }
             }
@@ -357,9 +357,9 @@ func playerMoveDown {
     while i < num_tiles_in_room {
         x = [ WALL_X_SEGMENT , i ];
         y = [ WALL_Y_SEGMENT , i ];
-        if player_x + TILE_WIDTH > x {
-            if player_x < x + TILE_WIDTH {
-                if player_y + TILE_HEIGHT == y {
+        if player_y + TILE_HEIGHT == y {
+            if player_x + TILE_WIDTH > x {
+                if player_x < x + TILE_WIDTH {
                     return;
                 }
             }
