@@ -19,8 +19,8 @@ compiler/tests/*.bin
 games/paint/*.spr
 **/breakout.asm
 **/breakout.bin
-**/dungeon.bin
-**/dungeon.asm
-**/dungeon.rom
-games/dungeon/*.spr
-games/dungeon/mapdata
+**/fallen.bin
+**/fallen.asm
+**/fallen.rom
+games/fallen/*.spr
+games/fallen/mapdata
