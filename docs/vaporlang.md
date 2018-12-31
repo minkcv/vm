@@ -5,6 +5,7 @@ Vaporlang supports named global variables, constants, functions, conditional flo
 Variable declarations and assignments must end in semicolons. Functions and control flow blocks must be bounded by open and close curly braces `{`,`}`.
 The compiler is very whitespace sensitive, not in terms of logic (like python), but in terms of parsing.
 The compiler stores variables and the call stack in memory segments 59 through 63 (inclusive). The maximum number of variables is 1024 and the maximum call stack size is 127 calls.
+There is no main function, code execution starts at the top of the file and can enter into functions from above them. 
 
 #### Logging
 The compiler can log source code and instruction addresses to the output assembly. This can be useful when debugging the vm by allowing you to cross reference assembly addresses with  Use `-l a` to log instruction addresses, `-l s` to log source code, or `-l sa` to log both.
@@ -29,10 +30,13 @@ Variables are declared with `var`. All variables have global scope and must be d
     var xposition;
 
 #### Assignment
-Variables can have values stored in them using the assignment operator `=`. The right hand side of the `=` must either be another variable, literal integer, memory access, or complex expression. The left hand side of the `=` can be a variable or memory access.
+Variables can have values stored in them using the assignment operator `=`. The right hand side of the `=` must either be another variable, literal integer, memory access, or complex expression. The left hand side of the `=` can be a variable or memory access. Multiple assignment in one statement is not valid.
 
+    // Valid
     xposition = 5;
     xposition = xposition + 1;
+    // Not valid
+    xposition = yposition = 0;
 
 #### Comparison
 Variables can be compared for equality `==`, less than `<`, and greater than `>`. 0 indicates false and 1 indicates true. Comparisons can be done in loop and if conditions. Comparisons will be evaluated after both sides of the comparison have evaluated.
@@ -47,7 +51,7 @@ Variables can be compared for equality `==`, less than `<`, and greater than `>`
     }
 
 #### Other Operators
-Other operators include addition `+`, subtraction `-`, bitwise and `&`, bitwise or `|`, bitwise xor `^`, and bitwise not `~`. Compound use of operators is supported except for not `~` and the order of operations is right to left. Keep in mind that comparisons will be done after these operators.
+Other operators include addition `+`, subtraction `-`, bitwise and `&`, bitwise or `|`, bitwise xor `^`, bitwise not `~`, shift left `<<`, and shift right `>>`. Compound use of operators is supported except for not `~` and the order of operations is right to left, except that comparisons will be done after these operators.
 
     xposition = xposition - 1;
     xposition = xposition & yposition;
@@ -72,7 +76,7 @@ Functions are declared with `func <name> {` and must have a closing `}`. Functio
     }
 
 #### Memory Access
-Addressing memory is done with brackets `[`, `]` via segment and offset. The whitespace around the the brackets and comma is necessary. Operators cannot go after memory access.
+Addressing memory is done with brackets `[`, `]` via segment and offset. The whitespace around the the brackets and comma is necessary. Operators (other than `=`) cannot go after memory access.
 
     // Valid
     [ 0 , index ] = 1;

@@ -9,7 +9,7 @@ Write your assembly code in a plain text file and give it the extension `.asm`. 
 Which will produce a `myprogram.bin` file.
 
 #### Packing data into a ROM
-An included program called `convertsprite` can convert png images into the internal sprite format. The png images must use colors from the screen's 256 color palette as listed in `colorpalette.gpl` with the exception of a fully transparent pixel (alpha 0) which will cause the sprite color palette to use color 4 as transparency. The `colorpalette.gpl` file can be loaded into GIMP to make png creation easier. The png should be RGB, not indexed, and should have an alpha channel.
+An included program called `convertsprite` can convert png images into the internal sprite format. The png images must use colors from the screen's 256 color palette as listed in `colorpalette.gpl` with the exception of a fully transparent pixel (alpha 0) which will cause the sprite color palette to use color 4 as transparency. The `colorpalette.gpl` file can be loaded into GIMP to make png creation easier. The png should be RGB, not indexed, and should have an alpha channel. If the png does not have an alpha channel then the `convertsprite` program will fail.
 Use `convertsprite` as follows:
 
     ./convertsprite mysprite.png
@@ -41,4 +41,4 @@ Optionally add:
 - `-d` to debug the program. See debugging.md for more information.
 - `&> /dev/null` at the end to suppress print statements.
 
-Consider creating a shell script for your program that is similar to the included `games/mars.sh` script.
+Consider creating a shell script for your program that is similar to the included `games/mars.sh` or `games/breakout.sh` scripts.
