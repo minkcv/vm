@@ -36,9 +36,6 @@ const DOOR_DEAD_RIGHT 13;
 const DOOR_DEAD_UP 14;
 const DOOR_DEAD_DOWN 15;
 
-const ROOM_WIDTH 14;
-const ROOM_HEIGHT 12;
-
 // Room layouts are stored starting at this segment in ROM
 // Room layouts are 128 bytes each so 2 fit in a segment.
 const ROOM_LAYOUT_START_SEGMENT 197; // MAP_SEGMENT + 1
@@ -120,9 +117,11 @@ const DOOR_RIGHT_X 128;
 const MOVE_SPEED 2;
 var player_x;
 var player_y;
-var num_tiles_in_room; // Length of the following arrays.
-const WALL_X_SEGMENT 0; // Array of x positions of walls in current room
-const WALL_Y_SEGMENT 1; // Array of y positions of walls in current room
+
+var wall_left;
+var wall_right;
+var wall_above;
+var wall_below;
 
 // Common locals
 var i;
@@ -242,18 +241,21 @@ func playerMoveLeft {
             return;
         }
     }
-    i = 0;
-    while i < num_tiles_in_room {
-        x = [ WALL_X_SEGMENT , i ];
-        if player_x == x + TILE_WIDTH {
-            y = [ WALL_Y_SEGMENT , i ];
-            if player_y + TILE_HEIGHT > y {
-                if player_y < y + TILE_HEIGHT {
-                    return;
-                }
-            }
-        }
-        i = i + 1;
+    i = player_x - TILE_WIDTH + MOVE_SPEED;
+    i = i >> 4;
+    i2 = player_y - TILE_HEIGHT;
+    i2 = i2 >> 4;
+    wall_left = [ i , i2 ];
+    if wall_left {
+        return;
+    }
+    // check with the tile left of the player
+    // player_y has an additional tile length because of the room borders
+    i2 = player_y - MOVE_SPEED;
+    i2 = i2 >> 4;
+    wall_left = [ i , i2 ];
+    if wall_left {
+        return;
     }
     if has_left_door {
         if player_y > DOOR_TOP_Y {
@@ -279,18 +281,20 @@ func playerMoveRight {
             return;
         }
     }
-    i = 0;
-    while i < num_tiles_in_room {
-        x = [ WALL_X_SEGMENT , i ];
-        if player_x + TILE_WIDTH == x {
-            y = [ WALL_Y_SEGMENT , i ];
-            if player_y + TILE_HEIGHT > y {
-                if player_y < y + TILE_HEIGHT {
-                    return;
-                }
-            }
-        }
-        i = i + 1;
+    i = player_x + MOVE_SPEED - 1;
+    i = i >> 4;
+    i2 = player_y - TILE_HEIGHT;
+    i2 = i2 >> 4;
+    wall_right = [ i , i2 ];
+    if wall_right {
+        return;
+    }
+    
+    i2 = player_y - MOVE_SPEED;
+    i2 = i2 >> 4;
+    wall_right = [ i , i2 ];
+    if wall_right {
+        return;
     }
     if has_right_door {
         if player_y > DOOR_TOP_Y {
@@ -316,18 +320,20 @@ func playerMoveUp {
             return;
         }
     }
-    i = 0;
-    while i < num_tiles_in_room {
-        y = [ WALL_Y_SEGMENT , i ];
-        if player_y == y + TILE_HEIGHT {
-            x = [ WALL_X_SEGMENT , i ];
-            if player_x + TILE_WIDTH > x {
-                if player_x < x + TILE_WIDTH {
-                    return;
-                }
-            }
-        }
-        i = i + 1;
+    i = player_x - TILE_WIDTH;
+    i = i >> 4;
+    i2 = player_y - TILE_HEIGHT + MOVE_SPEED;
+    i2 = i2 >> 4;
+    wall_above = [ i , i2 ];
+    if wall_above {
+        return;
+    }
+    
+    i = player_x - 1;
+    i = i >> 4;
+    wall_above = [ i , i2 ];
+    if wall_above {
+        return;
     }
     if has_top_door {
         if player_x > DOOR_LEFT_X {
@@ -353,18 +359,20 @@ func playerMoveDown {
             return;
         }
     }
-    i = 0;
-    while i < num_tiles_in_room {
-        y = [ WALL_Y_SEGMENT , i ];
-        if player_y + TILE_HEIGHT == y {
-            x = [ WALL_X_SEGMENT , i ];
-            if player_x + TILE_WIDTH > x {
-                if player_x < x + TILE_WIDTH {
-                    return;
-                }
-            }
-        }
-        i = i + 1;
+    i = player_x - TILE_WIDTH;
+    i = i >> 4;
+    i2 = player_y + 1;
+    i2 = i2 >> 4;
+    wall_below = [ i , i2 ];
+    if wall_below {
+        return;
+    }
+    
+    i = player_x - 1;
+    i = i >> 4;
+    wall_below = [ i , i2 ];
+    if wall_below {
+        return;
     }
     if has_bottom_door {
         if player_x > DOOR_LEFT_X {
@@ -693,7 +701,6 @@ func renderRoomDoors {
 
 // Uses sprite attributes at addresses 66.80 through ??? because # of room tiles varies per room
 func renderRoomTiles {
-    num_tiles_in_room = 0;
     sprite_segment = 66;
     sprite_index = 80;
     y = 0;
@@ -741,10 +748,9 @@ func renderRoomTiles {
                 sprite_segment = sprite_segment + 1;
             }
             sprite_index = sprite_index + 16;
+            [ x , y ] = 0;
             if tile_type > TILE_TYPE_WALL {
-                [ WALL_X_SEGMENT , num_tiles_in_room ] = x2;
-                [ WALL_Y_SEGMENT , num_tiles_in_room ] = y2;
-                num_tiles_in_room = num_tiles_in_room + 1;
+                [ x , y ] = 1;
             }
             x = x + 1;
             x2 = x2 + TILE_WIDTH;
