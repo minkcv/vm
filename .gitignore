@@ -24,3 +24,5 @@ games/paint/*.spr
 **/fallen.rom
 games/fallen/*.spr
 games/fallen/mapdata
+**/pong3.bin
+
