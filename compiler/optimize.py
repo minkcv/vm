@@ -144,6 +144,7 @@ for line in original:
                 print(f'used {newReg} in place of {arg1}')
                 skipLine = True
                 optimized.append(f'LRC r{newReg} #{arg2}')
+                opsaved -= 1
                 opcount += 1
             else:
                 try:
