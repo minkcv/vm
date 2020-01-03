@@ -592,7 +592,7 @@ int main (int argc, char** argv)
                     token = strtok_r(NULL, ";", &savePtr);
                     char* end;
                     uint16_t value = (uint16_t)strtol(token, &end, 10);
-                    if ('\0' ==  end)
+                    if (NULL == end)
                     {
                         printf("Failed to parse %s as identifier or literal int\n", token);
                         exit(1);
@@ -602,6 +602,10 @@ int main (int argc, char** argv)
                 else if (!strcmp(token, "func"))
                 {
                     token = strtok_r(NULL, "{", &savePtr);
+                    // Trim trailing space after function name and before {
+                    char* firstSpace = strstr(token, " ");
+                    if (firstSpace != NULL) 
+                        strncpy(firstSpace, "\0", 1);
                     if (token == NULL)
                     {
                         printf("Expected identifier after '%s' on line %d\n", token, lineCount);

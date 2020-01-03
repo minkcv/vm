@@ -25,4 +25,4 @@ games/paint/*.spr
 games/fallen/*.spr
 games/fallen/mapdata
 **/pong3.bin
-
+*.opt.asm
