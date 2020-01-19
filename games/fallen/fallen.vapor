@@ -164,6 +164,8 @@ while title_screen {
     }
 }
 
+call initPlayer;
+
 call loadRoom;
 call renderRoomTiles;
 call renderRoomDoors;
@@ -420,19 +422,23 @@ func loadRoom {
     tile_color_2 = [ room_layout_segment , room_index + ROOM_LAYOUT_TILE_COLOR_OFFSET + 2 ];
 }
 
+func initPlayer {
+    // sprite_segment = 79;
+    // sprite_index = 0;
+    [ 79 , 0 ] = 144; // Enable and use transparency
+    [ 79 , 3 ] = TILE_WIDTH; // Width
+    [ 79 , 4 ] = TILE_HEIGHT; // Height
+    [ 79 , 5 ] = PLAYER_SPRITE_SEGMENT; // Sprite segment
+    [ 79 , 6 ] = PLAYER_SPRITE_OFFSET; // Sprite offset
+    [ 79 , 7 ] = 11; // Color from output of `convertsprite`
+    [ 79 , 8 ] = 244; // Color from output of `convertsprite`
+    [ 79 , 9 ] = 255; // Color from output of `convertsprite`
+}
+
 func renderPlayer {
-    sprite_segment = 79;
-    sprite_index = 0;
-    [ sprite_segment , sprite_index ] = 144; // Enable and use transparency
-    [ sprite_segment , sprite_index + 1] = player_x; // X
-    [ sprite_segment , sprite_index + 2] = player_y; // Y
-    [ sprite_segment , sprite_index + 3] = TILE_WIDTH; // Width
-    [ sprite_segment , sprite_index + 4] = TILE_HEIGHT; // Height
-    [ sprite_segment , sprite_index + 5] = PLAYER_SPRITE_SEGMENT; // Sprite segment
-    [ sprite_segment , sprite_index + 6] = PLAYER_SPRITE_OFFSET; // Sprite offset
-    [ sprite_segment , sprite_index + 7] = 11; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 8] = 244; // Color from output of `convertsprite`
-    [ sprite_segment , sprite_index + 9] = 255; // Color from output of `convertsprite`
+    
+    [ 79 , 1 ] = player_x;
+    [ 79 , 2 ] = player_y;
 }
 
 func renderMiniMap {
