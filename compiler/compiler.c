@@ -251,9 +251,9 @@ void decomposeExpression(char** expression, char** assembly, uint32_t* currentAs
         // Memory access
         char* segmentExpression = strtok_r(NULL, ",", &savePtr);
         char* offsetExpression = strtok_r(NULL, "]", &savePtr);
-        decomposeExpression(&segmentExpression, assembly, currentAssemblyLine, instructionCount, map, returnRegister + 1, sourceLine);
-        decomposeExpression(&offsetExpression, assembly, currentAssemblyLine, instructionCount, map, returnRegister + 2, sourceLine);
-        sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "LDR r%d r%d r%d\n", returnRegister, returnRegister + 1, returnRegister + 2);
+        decomposeExpression(&segmentExpression, assembly, currentAssemblyLine, instructionCount, map, returnRegister, sourceLine);
+        decomposeExpression(&offsetExpression, assembly, currentAssemblyLine, instructionCount, map, returnRegister + 1, sourceLine);
+        sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "LDR r%d r%d r%d\n", returnRegister, returnRegister, returnRegister + 1);
         return;
     }
 
@@ -270,9 +270,9 @@ void decomposeExpression(char** expression, char** assembly, uint32_t* currentAs
             if (sym->symbolType == Symbol_Variable)
             {
                 // Variable
-                sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "LRC r%d #%d\n", returnRegister + 1, sym->segment);
-                sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "LRC r%d #%d\n", returnRegister + 2, sym->offset);
-                sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "LDR r%d r%d r%d\n", returnRegister, returnRegister + 1, returnRegister + 2);
+                sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "LRC r%d #%d\n", returnRegister, sym->segment);
+                sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "LRC r%d #%d\n", returnRegister + 1, sym->offset);
+                sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "LDR r%d r%d r%d\n", returnRegister, returnRegister, returnRegister + 1);
             }
             else if (sym->symbolType == Symbol_Constant)
             {
@@ -304,8 +304,8 @@ void decomposeExpression(char** expression, char** assembly, uint32_t* currentAs
             Symbol* sym = lookupSymbol(token2, map);
             if (sym != NULL)
             {
-                decomposeExpression(&token2, assembly, currentAssemblyLine, instructionCount, map, returnRegister + 1, sourceLine);
-                sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "NOT r%d r%d\n", returnRegister, returnRegister + 1);
+                decomposeExpression(&token2, assembly, currentAssemblyLine, instructionCount, map, returnRegister, sourceLine);
+                sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "NOT r%d r%d\n", returnRegister, returnRegister);
             }
         }
         else
@@ -316,37 +316,35 @@ void decomposeExpression(char** expression, char** assembly, uint32_t* currentAs
     }
     else
     {
-        decomposeExpression(&token1, assembly, currentAssemblyLine, instructionCount, map, returnRegister + 1, sourceLine);
-        decomposeExpression(&token3, assembly, currentAssemblyLine, instructionCount, map, returnRegister + 2, sourceLine);
+        decomposeExpression(&token1, assembly, currentAssemblyLine, instructionCount, map, returnRegister, sourceLine);
+        decomposeExpression(&token3, assembly, currentAssemblyLine, instructionCount, map, returnRegister + 1, sourceLine);
         if (!strcmp(token2, "+"))
         {
-            sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "ADD r%d r%d r%d\n", returnRegister, returnRegister + 1, returnRegister + 2);
+            sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "ADD r%d r%d r%d\n", returnRegister, returnRegister, returnRegister + 1);
         }
         else if (!strcmp(token2, "-"))
         {
-            sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "SUB r%d r%d r%d\n", returnRegister, returnRegister + 1, returnRegister + 2);
+            sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "SUB r%d r%d r%d\n", returnRegister, returnRegister, returnRegister + 1);
         }
         else if (!strcmp(token2, "&"))
         {
-            sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "AND r%d r%d r%d\n", returnRegister, returnRegister + 1, returnRegister + 2);
+            sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "AND r%d r%d r%d\n", returnRegister, returnRegister, returnRegister + 1);
         }
         else if (!strcmp(token2, "|"))
         {
-            sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "OR r%d r%d r%d\n", returnRegister, returnRegister + 1, returnRegister + 2);
+            sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "OR r%d r%d r%d\n", returnRegister, returnRegister, returnRegister + 1);
         }
         else if (!strcmp(token2, "^"))
         {
-            sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "XOR r%d r%d r%d\n", returnRegister, returnRegister + 1, returnRegister + 2);
+            sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "XOR r%d r%d r%d\n", returnRegister, returnRegister, returnRegister + 1);
         }
         else if (!strcmp(token2, ">>"))
         {
-            sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "LSR r%d r%d\n", returnRegister + 1, returnRegister + 2);
-            sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "CPY r%d r%d\n", returnRegister, returnRegister + 1);
+            sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "LSR r%d r%d\n", returnRegister, returnRegister + 1);
         }
         else if (!strcmp(token2, "<<"))
         {
-            sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "LSL r%d r%d\n", returnRegister + 1, returnRegister + 2);
-            sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "CPY r%d r%d\n", returnRegister, returnRegister + 1);
+            sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "LSL r%d r%d\n", returnRegister, returnRegister + 1);
         }
     }
 }
