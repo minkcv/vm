@@ -286,7 +286,8 @@ void functionReturn(char** assembly, uint32_t* currentAssemblyLine, int32_t* ins
 // Registers below "startRegister" are in use by higher decompose calls
 uint8_t decomposeExpression(char** expression, char** assembly, uint32_t* currentAssemblyLine, int32_t* instructionCount, Symbol** map, FastVar** fastVars, uint8_t returnRegister, uint8_t startRegister, uint32_t sourceLine)
 {
-    if (startRegister > 9)
+    // TODO this could be checked more specifically for different operators. == uses more than + does.
+    if (startRegister > 16 - (MAX_FASTVARS + 3))
     {
         printf("Expression on line %d is too complex and must be broken up\n", sourceLine);
         exit(1);
