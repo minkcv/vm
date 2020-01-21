@@ -114,7 +114,7 @@ const DOOR_TOP_Y 80;
 const DOOR_BOTTOM_Y 112;
 const DOOR_LEFT_X 96;
 const DOOR_RIGHT_X 128;
-const MOVE_SPEED 1;
+const MOVE_SPEED 2;
 var player_x;
 var player_y;
 
@@ -172,14 +172,10 @@ call renderRoomDoors;
 call renderRoomBorder;
 call renderMiniMap;
 
-var frame;
 // Main loop
 while 1 {
-    if frame << 3 == 0 {
-        call playerMovement;
-        call renderPlayer;
-    }
-    frame = frame + 1;
+    call playerMovement;
+    call renderPlayer;
     call waitScreen;
 }
 

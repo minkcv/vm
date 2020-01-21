@@ -834,7 +834,11 @@ int main (int argc, char** argv)
                             }
                             else
                             {
-                                decomposeExpression(&token, assembly, &currentAssemblyLine, &instructionCount, symbolMap, fastVars, fastReg, 0, lineCount);
+                                uint8_t ret = decomposeExpression(&token, assembly, &currentAssemblyLine, &instructionCount, symbolMap, fastVars, fastReg, 0, lineCount);
+                                if (ret != fastReg)
+                                {
+                                    sprintfAsm(assembly, &currentAssemblyLine, instructionCount++, "CPY r%d r%d\n", fastReg, ret);
+                                }
                             }
                         }
                     }

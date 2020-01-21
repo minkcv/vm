@@ -39,7 +39,6 @@ var c;
 var collideIndex;
 var buttons;
 
-
 call initSprites;
 level = 0;
 call reset;
@@ -49,6 +48,12 @@ call reset;
 
 // Main loop
 while 1 {
+    call update;
+    call render;
+    call waitScreen;
+}
+
+func update {
     buttons = [ 127 , 0 ];
     if buttons & 4 == 4 { // Left
         if paddleX > 0 {
@@ -116,13 +121,11 @@ while 1 {
     if ballMoveUp == 0 {
         ballY = ballY + ballMoveSpeed;
     }
-
-    call render;
-    call waitScreen;
 }
 
 func blockCollision {
     i = 0;
+    //break;
     collideIndex = nBlocks;
     while i < nBlocks {
         x = [ blockXSegment , i ];
@@ -164,6 +167,7 @@ func blockCollision {
         i = i + 1;
     }
 
+    //break;
     if collideIndex < nBlocks {
         // Move the last block into the index of the deleted one, and decrement nBlocks
         x = [ blockXSegment , nBlocks - 1 ];
