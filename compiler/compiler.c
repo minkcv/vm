@@ -478,6 +478,8 @@ int main (int argc, char** argv)
             if (logSourceCode)
             {
                 sprintfAsm(assembly, &currentAssemblyLine, -1, "; %s", lineIn);
+                if (!strstr(lineIn, "\n"))
+                    sprintfAsm(assembly, &currentAssemblyLine, -1, "\n");
             }
             char* token = strtok_r(lineIn, " ;\n", &savePtr);
             while (token != NULL)
