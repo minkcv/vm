@@ -1,0 +1,244 @@
+// Line drawing program
+// 2020 Will Smith (minkcv)
+
+// Memory segments 0 through 48 are used 
+// for one sprite that takes up the whole screen
+
+const POSITIVE 0;
+const NEGATIVE 1;
+const NOSIGN 2;
+
+var previousGPUState;
+var GPUState;
+
+var i;
+var i2;
+
+
+// For plotPoint
+var px;
+var py;
+
+// For drawLine
+var tmp;
+var px0;
+var px1;
+var py0;
+var py1;
+var dx;
+var dy;
+var ndx;
+var ndy;
+var x;
+var y;
+var color;
+var c;
+
+var pointCount;
+var lineCount;
+var lc2;
+var p0;
+var p1;
+var ix;
+var iy;
+
+var line;
+var segment;
+var offset;
+var ptSegment;
+var ptOffset;
+var pixel;
+var pixelMask;
+var bottomX;
+var existing;
+
+call initSprite;
+
+// Enable GPU
+[ 127 , 17 ] = 1;
+
+// Main loop
+while 1 {
+    call update;
+    color = 1;
+    call render;
+    call waitScreen;
+}
+
+func update {
+
+}
+
+func render {
+    // Note this is only setup for
+    // point indices in the first segment
+    // and only points in the first or second segment
+    lineCount = [ 128 , 0 ];
+    ptOffset = 2;
+    line = 0;
+    while line < lineCount {
+        ptSegment = 128;
+        if lineCount < 128 {
+            lc2 = 2 + lineCount << 1;
+        }
+        if lineCount > 127 {
+            lc2 = 0;
+            ptSegment = 129;
+        }
+        p0 = [ 128 , ptOffset ];
+        p1 = [ 128 , ptOffset + 1 ];
+        p0 = p0 << 1;
+        if p0 + lc2 < lc2 {
+            p0 = p0 + lc2;
+            lc2 = 0;
+            ptSegment = 129;
+        }
+        px0 = [ ptSegment , lc2 + p0 ];
+        py0 = [ ptSegment , lc2 + p0 + 1 ];
+        ptSegment = 128;
+        if lineCount < 128 {
+            lc2 = 2 + lineCount << 1;
+        }
+        if lineCount > 127 {
+            lc2 = 0;
+            ptSegment = 129;
+        }
+        p1 = p1 << 1;
+        if p1 + lc2 < lc2 {
+            p1 = p1 + lc2;
+            lc2 = 0;
+            ptSegment = 129;
+        }
+        px1 = [ ptSegment , lc2 + p1 ];
+        py1 = [ ptSegment , lc2 + p1 + 1 ];
+        call drawLine;
+        ptOffset = ptOffset + 2;
+        line = line + 1;
+    }
+}
+
+func plotPoint {
+    bottomX = px & 3; // Bottom 2 bits of x
+    // Double bottomX because 2 bits per pixel
+    // Shift a high bit to the right by the x coordinate
+    c = color << 7;
+    pixel = 64 >> bottomX + bottomX;
+    if color == 0 {
+        pixel = ~ pixel;
+    }
+    offset = py & 3; // Save bottom 2 bits
+    offset = offset << 6; // Multiply by 64
+    offset = offset + px >> 2;
+    segment = py >> 2; // Divide by 4 because 4 rows of sprite per segment of memory
+    existing = [ segment , offset ];
+    if color == 0 {
+        pixel = pixel & existing;
+    }
+    if color > 0 {
+        pixel = pixel | existing;
+    }
+    [ segment , offset ] = pixel;
+}
+
+// Bresenham's line drawing algorithm
+// Modified for use with unsigned numbers
+func drawLine {
+    ndx = POSITIVE;
+    ndy = POSITIVE;
+    dx = px1 - px0;
+    dy = py1 - py0;
+    if px1 < px0 {
+        ndx = NEGATIVE;
+        dx = px0 - px1;
+    }
+    if py1 < py0 {
+        ndy = NEGATIVE;
+        dy = py0 - py1;
+    }
+    if dx == 0 {
+        ndx = NOSIGN;
+    }
+    if dy == 0 {
+        ndy = NOSIGN;
+    }
+    x = dy >> 1;
+    y = dx >> 1;
+    px = px0;
+    py = py0;
+    call plotPoint;
+    if dx > dy {
+        i = 0;
+        while i < dx {
+            y = y + dy;
+            if y > dx {
+                y = y - dx;
+                if ndy == POSITIVE {
+                    py = py + 1;
+                }
+                if ndy == NEGATIVE {
+                    py = py - 1;
+                }
+            }
+            if ndx == POSITIVE {
+                px = px + 1;
+            }
+            if ndx == NEGATIVE {
+                px = px - 1;
+            }
+            call plotPoint;
+            i = i + 1;
+        }
+    }
+    if dx < dy + 1 {
+        i = 0;
+        while i < dy {
+            x = x + dx;
+            if x > dy {
+                x = x - dy;
+                if ndx == POSITIVE {
+                    px = px + 1;
+                }
+                if ndx == NEGATIVE {
+                    px = px - 1;
+                }
+            }
+            if ndy == POSITIVE {
+                py = py + 1;
+            }
+            if ndy == NEGATIVE {
+                py = py - 1;
+            }
+            call plotPoint;
+            i = i + 1;
+        }
+    }
+}
+
+func clear {
+    i = 0;
+    while i < 48 {
+        i2 = 0;
+        while i2 < 255 {
+            [ i , i2 ] = 0;
+            i2 = i2 + 1;
+        }
+        [ i , i2 ] = 0;
+        i = i + 1;
+    }
+}
+
+func initSprite {
+    [ 64 , 0 ] = 140; // Enabled and full width and height
+    [ 64 , 7 ] = 75;
+    [ 64 , 8 ] = 255;
+    [ 64 , 9 ] = 255;
+    [ 64 , 10 ] = 255;
+}
+
+func waitScreen {
+    while GPUState == previousGPUState {
+        GPUState = [ 127 , 17 ];
+        GPUState = GPUState & 2;
+    }
+    previousGPUState = GPUState;
+}

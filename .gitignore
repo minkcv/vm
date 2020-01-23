@@ -26,3 +26,5 @@ games/fallen/*.spr
 games/fallen/mapdata
 **/pong3.bin
 *.opt.asm
+**/lines.bin
+**/lines.asm

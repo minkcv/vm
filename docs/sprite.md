@@ -12,14 +12,14 @@ A sprite will not be rendered if any part of it exceeds the boundaries of the sc
     - Bit 6: 1 to flip the sprite horizontally
     - Bit 5: 1 to flip the sprite vertically
     - Bit 4: 1 to treat the fourth color in the palette as alpha (transparency)
-    - Bit 3: Unused
-    - Bit 2: Unused
+    - Bit 3: 1 to make the sprite have the full width of the screen
+    - Bit 2: 1 to make the sprite have the full height of the screen
     - Bit 1: Unused
     - Bit 0 (LSB): Unused
 - Byte 1 is the x position of the sprite
 - Byte 2 is the y position of the sprite (top left xy coordinate system)
-- Byte 3 is the width of the sprite which must be a multiple of 4
-- Byte 4 is the height of the sprite which must be a multiple of 4
+- Byte 3 is the width of the sprite which must be a multiple of 4, ignored if the full width flag is 1
+- Byte 4 is the height of the sprite which must be a multiple of 4, ignored if the full height flag is 1
 - Byte 5 is the segment address of the sprite data in memory
 - Byte 6 is the offset address of the sprite data in memory
 - Bytes 7-10 are 4 colors from the full 256 color palette that the sprite data maps into

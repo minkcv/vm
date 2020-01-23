@@ -17,7 +17,9 @@ typedef struct
     unsigned int flipHor : 1;
     unsigned int flipVer : 1;
     unsigned int color4Alpha : 1;
-    // 4 bits here for use later
+    unsigned int fullWidth : 1;
+    unsigned int fullHeight : 1;
+    // 2 bits here for use later
     uint8_t x;
     uint8_t y;
     uint8_t width;
