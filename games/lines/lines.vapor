@@ -14,6 +14,28 @@ var GPUState;
 var i;
 var i2;
 
+const UP 0;
+const RIGHT 1;
+const DOWN 2;
+const LEFT 3;
+var buttons;
+
+const BUTTON_RIGHT 8;
+const BUTTON_LEFT 4;
+const BUTTON_DOWN 2;
+const BUTTON_UP 1;
+
+var player1X;
+var player1Y;
+var player1Dir;
+var player2X;
+var player2Y;
+var player2Dir;
+
+var playerX;
+var playerY;
+var playerDir;
+var collide;
 
 // For plotPoint
 var px;
@@ -57,19 +79,104 @@ call initSprite;
 // Enable GPU
 [ 127 , 17 ] = 1;
 
+call reset;
+//call render;
+
 // Main loop
 while 1 {
+    color = 2;
+    playerDir = player1Dir;
+    playerX = player1X;
+    playerY = player1Y;
+    buttons = [ 127 , 1 ];
+    collide = 0;
     call update;
-    color = 1;
-    call render;
+    if collide == 1 {
+        call clear;
+        call reset;
+    }
+    if collide == 0 {
+        player1X = playerX;
+        player1Y = playerY;
+        player1Dir = playerDir;
+    }
+
+    color = 3;
+    playerDir = player2Dir;
+    playerX = player2X;
+    playerY = player2Y;
+    buttons = [ 127 , 0 ];
+    collide = 0;
+    call update;
+    if collide == 1 {
+        call clear;
+        call reset;
+    }
+    if collide == 0 {
+        player2X = playerX;
+        player2Y = playerY;
+        player2Dir = playerDir;
+    }
+
     call waitScreen;
 }
 
 func update {
+    if buttons & BUTTON_LEFT == BUTTON_LEFT {
+        if playerDir != RIGHT {
+            playerDir = LEFT;
+        }
+    }
+    if buttons & BUTTON_RIGHT == BUTTON_RIGHT {
+        if playerDir != LEFT {
+            playerDir = RIGHT;
+        }
+    }
+    if buttons & BUTTON_UP == BUTTON_UP {
+        if playerDir != DOWN {
+            playerDir = UP;
+        }
+    }
+    if buttons & BUTTON_DOWN == BUTTON_DOWN {
+        if playerDir != UP {
+            playerDir = DOWN;
+        }
+    }
+    if playerDir == DOWN {
+        playerY = playerY + 1;
+        if playerY == 193 {
+            playerY = 0;
+        }
+    }
+    if playerDir == UP {
+        playerY = playerY - 1;
+        if playerY == 0 {
+            playerY = 192;
+        }
+    }
+    if playerDir == LEFT {
+        playerX = playerX - 1;
+    }
+    if playerDir == RIGHT {
+        playerX = playerX + 1;
+    }
 
+    px = playerX;
+    py = playerY;
+    call plotPoint;
+}
+
+func reset {
+    player1X = 0;
+    player1Y = 96;
+    player1Dir = RIGHT;
+    player2X = 255;
+    player2Y = 96;
+    player2Dir = LEFT;
 }
 
 func render {
+    color = 1;
     // Note this is only setup for
     // point indices in the first segment
     // and only points in the first or second segment
@@ -121,8 +228,8 @@ func plotPoint {
     bottomX = px & 3; // Bottom 2 bits of x
     // Double bottomX because 2 bits per pixel
     // Shift a high bit to the right by the x coordinate
-    c = color << 7;
-    pixel = 64 >> bottomX + bottomX;
+    c = color << 6;
+    pixel = c >> bottomX + bottomX;
     if color == 0 {
         pixel = ~ pixel;
     }
@@ -131,6 +238,11 @@ func plotPoint {
     offset = offset + px >> 2;
     segment = py >> 2; // Divide by 4 because 4 rows of sprite per segment of memory
     existing = [ segment , offset ];
+    if existing & pixel > 0 {
+        if existing != 3 {
+            collide = 1;
+        }
+    }
     if color == 0 {
         pixel = pixel & existing;
     }
@@ -229,10 +341,10 @@ func clear {
 
 func initSprite {
     [ 64 , 0 ] = 140; // Enabled and full width and height
-    [ 64 , 7 ] = 75;
-    [ 64 , 8 ] = 255;
-    [ 64 , 9 ] = 255;
-    [ 64 , 10 ] = 255;
+    [ 64 , 7 ] = 0;
+    [ 64 , 8 ] = 255; // White
+    [ 64 , 9 ] = 7; // Blue
+    [ 64 , 10 ] = 128; // Red
 }
 
 func waitScreen {
