@@ -39,9 +39,10 @@ Variables can have values stored in them using the assignment operator `=`. The 
     xposition = yposition = 0;
 
 #### Comparison
-Variables can be compared for equality `==`, less than `<`, and greater than `>`. 0 indicates false and 1 indicates true. Comparisons can be done in loop and if conditions. Comparisons will be evaluated after both sides of the comparison have evaluated.
+Variables can be compared for equality `==`, `!=`, less than `<`, and greater than `>`. 0 indicates false and 1 indicates true. Comparisons can be done in while loop and if conditions, as well as have their result assigned to variables and memory. Comparisons will be evaluated after both sides of the operator have evaluated.
 
     isZero = xposition == 0;
+    isNotZero = xposition != 0;
     aboveOne = xposition > 1;
     if isZero {
         xposition = 1;

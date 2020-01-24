@@ -215,6 +215,22 @@ void decomposeExpression(char** expression, char** assembly, uint32_t* currentAs
         sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "LRC r%d #0\n", returnRegister); // Set false (0)
         return;
     }
+    if (strstr(*expression, " != "))
+    {
+        int stopIndex = strstr(*expression, "!=") - *expression;
+        char* after = (*expression) + stopIndex + 3;
+        (*expression)[stopIndex] = '\0';
+        (*expression)[stopIndex + 1] = '\0';
+        decomposeExpression(expression, assembly, currentAssemblyLine, instructionCount, map, returnRegister + 1, sourceLine);
+        decomposeExpression(&after, assembly, currentAssemblyLine, instructionCount, map, returnRegister + 2, sourceLine);
+        sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "CMP r%d r%d r%d\n", returnRegister + 1, returnRegister + 1, returnRegister + 2);
+        sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "LRC r%d #0\n", returnRegister); // Start false (0)
+        sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "LRC r%d #%d\n", returnRegister + 2, (*instructionCount + 4) / SEGMENT_SIZE);
+        sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "LRC r%d #%d\n", returnRegister + 3, (*instructionCount + 3) % SEGMENT_SIZE);
+        sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "JEQ r%d r%d r%d\n", returnRegister + 1, returnRegister + 2, returnRegister + 3); // Jump over setting to false if equal
+        sprintfAsm(assembly, currentAssemblyLine, (*instructionCount)++, "LRC r%d #1\n", returnRegister); // Set true (1)
+        return;
+    }
     if (strstr(*expression, " < "))
     {
         int stopIndex = strstr(*expression, " < ") - *expression;
