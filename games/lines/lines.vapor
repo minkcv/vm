@@ -73,6 +73,7 @@ var pixel;
 var pixelMask;
 var bottomX;
 var existing;
+var ex;
 
 call initSprite;
 
@@ -80,7 +81,7 @@ call initSprite;
 [ 127 , 17 ] = 1;
 
 call reset;
-//call render;
+call render;
 
 // Main loop
 while 1 {
@@ -173,6 +174,7 @@ func reset {
     player2X = 255;
     player2Y = 96;
     player2Dir = LEFT;
+    call render;
 }
 
 func render {
@@ -226,9 +228,9 @@ func render {
 
 func plotPoint {
     bottomX = px & 3; // Bottom 2 bits of x
-    // Double bottomX because 2 bits per pixel
+    c = color << 6; // binary: cc000000 where cc are the bits for the color
     // Shift a high bit to the right by the x coordinate
-    c = color << 6;
+    // Double bottomX because 2 bits per pixel
     pixel = c >> bottomX + bottomX;
     if color == 0 {
         pixel = ~ pixel;
@@ -238,8 +240,11 @@ func plotPoint {
     offset = offset + px >> 2;
     segment = py >> 2; // Divide by 4 because 4 rows of sprite per segment of memory
     existing = [ segment , offset ];
-    if existing & pixel > 0 {
-        if existing != 3 {
+    // 192 = 3 << 6 binary: 11000000
+    c = 192 >> bottomX + bottomX;
+    ex = existing & c;
+    if ex & pixel > 0 {
+        if ex != 64 >> bottomX + bottomX {
             collide = 1;
         }
     }
