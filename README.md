@@ -42,9 +42,9 @@ These programs are much simpler and some do not use any rom.
 ![paint](./etc/paint.png)
 ![breakout](./etc/breakout.png)
 
-One program demonstrates the ability to create sprites at runtime.
+Two programs demonstrate the ability to create sprites at runtime.
 
-![pong3](./etc/pong3.png)
+![pong3](./etc/pong3.png) ![lines](./etc/lines.png)
 
 ### Why did you make this? Who is it for?
 This is a hobby project to allow myself and others to write games for a very simple architecture without some of the annoyances that physical architectures impose.

@@ -28,3 +28,7 @@ games/fallen/mapdata
 *.opt.asm
 **/lines.bin
 **/lines.asm
+vs/Debug
+vs/Release
+VaporSpec.sdf
+VaporSpec.opensdf

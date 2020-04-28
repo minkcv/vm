@@ -10,6 +10,23 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\machine\display.c" />
+    <ClCompile Include="..\machine\gpu.c" />
+    <ClCompile Include="..\machine\ipu.c" />
+    <ClCompile Include="..\machine\vm.c" />
+    <ClCompile Include="..\main.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\machine\constants.h" />
+    <ClInclude Include="..\machine\display.h" />
+    <ClInclude Include="..\machine\gpu.h" />
+    <ClInclude Include="..\machine\instruction.h" />
+    <ClInclude Include="..\machine\ipu.h" />
+    <ClInclude Include="..\machine\joystick.h" />
+    <ClInclude Include="..\machine\opcodes.h" />
+    <ClInclude Include="..\machine\vm.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{0E7F9C81-36CA-4A4D-84ED-3EAF3EDDADB3}</ProjectGuid>
     <RootNamespace>VaporSpec</RootNamespace>
@@ -44,12 +61,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\wsmith\SDL2-2.0.7\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\wsmith\SDL2-2.0.12\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\wsmith\SDL2-2.0.7\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\wsmith\SDL2-2.0.12\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>sdl2.lib;sdl2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>main</EntryPointSymbol>
     </Link>
@@ -61,34 +79,18 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\wsmith\SDL2-2.0.7\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\wsmith\SDL2-2.0.12\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>C:\Users\wsmith\SDL2-2.0.7\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\wsmith\SDL2-2.0.12\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>sdl2.lib;sdl2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>main</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="machine\constants.h" />
-    <ClInclude Include="machine\display.h" />
-    <ClInclude Include="machine\gpu.h" />
-    <ClInclude Include="machine\instruction.h" />
-    <ClInclude Include="machine\ipu.h" />
-    <ClInclude Include="machine\joystick.h" />
-    <ClInclude Include="machine\opcodes.h" />
-    <ClInclude Include="machine\vm.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="machine\display.c" />
-    <ClCompile Include="machine\gpu.c" />
-    <ClCompile Include="machine\ipu.c" />
-    <ClCompile Include="machine\vm.c" />
-    <ClCompile Include="main.c" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

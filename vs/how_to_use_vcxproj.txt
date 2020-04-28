@@ -1,6 +1,4 @@
-The vcxproj file in this folder isn't an entire solution to open in Visual Studio. 
-It is only some parts of the project configuration. 
-It does contain a great many options for the setup of SDL and the build configuration so it should save you some time.
+The vcxproj file in this folder isn't everything you need.
 It also contains file paths like 
 
 C:\Users\wsmith\...
@@ -8,6 +6,3 @@ C:\Users\wsmith\...
 that need to be changed for your setup.
 
 You also need to have SDL2 libs in the correct location, and any vaporspec binaries and roms in the output directory.
-
-Additionally, changes need to be made in the program source code for fopen and sprintf to fopen_s and sprintf_s to work securely with windows.
-And the new functions have different arguments so those must be changed as well.
