@@ -4,7 +4,7 @@ The vm addresses memory by segment and offset. There are 256 segments each with 
 ## Memory Map
 - Segments 0 through 63 (inclusive) are general purpose RAM for your program.
 - Segments 64 through 127 (inclusive) are read and written to by the graphics processing unit (GPU) and input processing unit (IPU).
-- Segments 128 through 255 (inclusive) are for static program resources. These are typically referred to as ROM in classic systems.
+- Segments 128 through 255 (inclusive) are for read only data that is loaded when the machine starts.
 
 ### GPU and IPU Map
 - `64.0` through `79.255` (inclusive) are for 256 sprite attributes. Each sprite attribute is 16 bytes long.

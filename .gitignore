@@ -32,3 +32,9 @@ vs/Debug
 vs/Release
 VaporSpec.sdf
 VaporSpec.opensdf
+**/spritetest.asm
+**/spritetest.bin
+**/spritetest.rom
+**/test1.spr
+**/test2.spr
+**/test3.spr

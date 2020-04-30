@@ -1,0 +1,85 @@
+// Sprite Test
+// 2020 Will Smith (minkcv)
+
+// This program tests the sprite rendering
+// capabilities of the vapor spec vm
+
+var previousGPUState;
+var GPUState;
+var spriteIndex;
+
+var x;
+var y;
+
+// Enable GPU
+[ 127 , 17 ] = 1;
+
+// Full size background
+[ 64 , 0 ] = 140; // Enable, full width and height
+[ 64 , 5 ] = 128; // Sprite data segment
+[ 64 , 6 ] = 144; // Sprite data offset
+// Colors
+[ 64 , 7 ] = 1;
+[ 64 , 8 ] = 255;
+[ 64 , 9 ] = 39;
+[ 64 , 10 ] = 0;
+
+// Transparency test
+[ 66 , 0 ] = 144; // Enable and transparency
+[ 66 , 1 ] = 112; // X
+[ 66 , 2 ] = 88; // Y
+[ 66 , 3 ] = 32; // Width
+[ 66 , 4 ] = 16; // Height
+[ 66 , 5 ] = 128; // Sprite data segment;
+[ 66 , 6 ] = 16; // Sprite data offset;
+[ 66 , 7 ] = 255; // White
+
+// Corner sprites
+spriteIndex = 0;
+while spriteIndex < 65 {
+    [ 65 , spriteIndex ] = 128; // Enable
+    if spriteIndex == 16 {
+        // Top right
+        [ 65 , spriteIndex ] = 192; // Enable and flip x
+        [ 65 , spriteIndex + 1] = 248; // X
+    }
+    if spriteIndex == 32 {
+        // Bottom left
+        [ 65 , spriteIndex ] = 160; // Enable and flip y
+        [ 65 , spriteIndex + 2] = 184; // Y
+    }
+    if spriteIndex == 48 {
+        // Bottom right
+        [ 65 , spriteIndex ] = 224; // Enable and flip x and y
+        [ 65 , spriteIndex + 1] = 248; // X
+        [ 65 , spriteIndex + 2] = 184; // Y
+    }
+    [ 65 , spriteIndex + 3 ] = 8; // Width
+    [ 65 , spriteIndex + 4 ] = 8; // Height
+    [ 65 , spriteIndex + 5 ] = 128; // Sprite data segment
+    // Colors
+    [ 65 , spriteIndex + 7 ] = 224;
+    [ 65 , spriteIndex + 8 ] = 255;
+    [ 65 , spriteIndex + 9 ] = 3;
+    [ 65 , spriteIndex + 10 ] = 28;
+    spriteIndex = spriteIndex + 16;
+}
+
+while 1 {
+    // Move the transparency test sprite across the screen
+    x = [ 66 , 1 ];
+    y = [ 66 , 2 ];
+    x = x + 1;
+    y = y + 1;
+    [ 66 , 1 ] = x;
+    [ 66 , 2 ] = y;
+    call waitScreen;
+}
+
+func waitScreen {
+    while  GPUState == previousGPUState {
+        GPUState = [ 127 , 17 ];
+        GPUState = GPUState & 2;
+    }
+    previousGPUState = GPUState;
+}
