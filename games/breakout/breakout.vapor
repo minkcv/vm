@@ -82,18 +82,18 @@ while 1 {
             if ballY < paddleY + paddleHeight {
                 // Edge cases for paddle at screen edges
                 if paddleX == 0 {
-                    if ballX < paddleWidth{
+                    if ballX < paddleWidth {
                         ballMoveUp = 1; // Bounce
                     }
                 }
                 // Check right screen edge
-                if paddleX == 1 + 255 - paddleWidth{
+                if paddleX == 1 + 255 - paddleWidth {
                     if ballX > paddleX {
                         ballMoveUp = 1;
                     }
                 }
                 if ballX > paddleX {
-                    if ballX < paddleX + paddleWidth{
+                    if ballX < paddleX + paddleWidth {
                         ballMoveUp = 1; // Bounce
                     }
                 }
@@ -209,7 +209,7 @@ func render {
             [ spriteSegment , spriteIndex ] = 128; // Enable
             x = [ blockXSegment , i ];
             y = [ blockYSegment , i ];
-            c = [ blockColorSegment, i ];
+            c = [ blockColorSegment , i ];
             [ spriteSegment , spriteIndex + 1 ] = x;
             [ spriteSegment , spriteIndex + 2 ] = y;
             [ spriteSegment , spriteIndex + 7 ] = c;
