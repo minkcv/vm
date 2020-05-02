@@ -77,7 +77,7 @@ while 1 {
 }
 
 func waitScreen {
-    while  GPUState == previousGPUState {
+    while GPUState == previousGPUState {
         GPUState = [ 127 , 17 ];
         GPUState = GPUState & 2;
     }
