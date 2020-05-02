@@ -41,18 +41,18 @@ while spriteIndex < 65 {
     if spriteIndex == 16 {
         // Top right
         [ 65 , spriteIndex ] = 192; // Enable and flip x
-        [ 65 , spriteIndex + 1] = 248; // X
+        [ 65 , spriteIndex + 1 ] = 248; // X
     }
     if spriteIndex == 32 {
         // Bottom left
         [ 65 , spriteIndex ] = 160; // Enable and flip y
-        [ 65 , spriteIndex + 2] = 184; // Y
+        [ 65 , spriteIndex + 2 ] = 184; // Y
     }
     if spriteIndex == 48 {
         // Bottom right
         [ 65 , spriteIndex ] = 224; // Enable and flip x and y
-        [ 65 , spriteIndex + 1] = 248; // X
-        [ 65 , spriteIndex + 2] = 184; // Y
+        [ 65 , spriteIndex + 1 ] = 248; // X
+        [ 65 , spriteIndex + 2 ] = 184; // Y
     }
     [ 65 , spriteIndex + 3 ] = 8; // Width
     [ 65 , spriteIndex + 4 ] = 8; // Height
