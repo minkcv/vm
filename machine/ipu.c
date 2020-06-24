@@ -8,10 +8,10 @@ IPU* createIPU()
     js1->buttons[1] = SDLK_DOWN;
     js1->buttons[2] = SDLK_LEFT;
     js1->buttons[3] = SDLK_RIGHT;
-    js1->buttons[4] = SDLK_RCTRL; // Right control
-    js1->buttons[5] = SDLK_RALT; // Right alt
-    js1->buttons[6] = SDLK_RSHIFT; // Righ shift
-    js1->buttons[7] = SDLK_RETURN; // AKA Enter
+    js1->buttons[4] = SDLK_o;
+    js1->buttons[5] = SDLK_u;
+    js1->buttons[6] = SDLK_y;
+    js1->buttons[7] = SDLK_h;
     js1->keysAsBits = 0;
     ipu->js1 = js1;
 
@@ -20,10 +20,10 @@ IPU* createIPU()
     js2->buttons[1] = SDLK_s;
     js2->buttons[2] = SDLK_a;
     js2->buttons[3] = SDLK_d;
-    js2->buttons[4] = SDLK_LCTRL; // Left control
-    js2->buttons[5] = SDLK_LALT; // Left alt
-    js2->buttons[6] = SDLK_LSHIFT; // Left shift
-    js2->buttons[7] = SDLK_TAB;
+    js2->buttons[4] = SDLK_q;
+    js2->buttons[5] = SDLK_e;
+    js2->buttons[6] = SDLK_r;
+    js2->buttons[7] = SDLK_f;
     js2->keysAsBits = 0;
     ipu->js2 = js2;
 

@@ -38,3 +38,6 @@ VaporSpec.opensdf
 **/test1.spr
 **/test2.spr
 **/test3.spr
+.suo
+**.VC.db
+**.user

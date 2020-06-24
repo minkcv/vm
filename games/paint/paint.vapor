@@ -55,14 +55,14 @@ while 1 {
     buttons1 = [ 127 , 0 ];
     buttons2 = [ 127 , 1 ];
     moveSpeed = 1;
-    if buttons1 & 64 == 64 { // R Shift
+    if buttons1 & 64 == 64 { // Y
         moveSpeed = 5;
     }
     tileSpeed = 1;
     if buttons2 & 64 == 64 {
         tileSpeed = 5;
     }
-    if buttons1 & 128 == 128 { // Enter
+    if buttons1 & 128 == 128 { // H
         call setTile;
     }
     if buttons1 & 4 == 4 { // Left
