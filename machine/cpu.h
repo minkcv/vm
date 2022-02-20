@@ -10,8 +10,8 @@ typedef struct CPU CPU;
 struct CPU
 {
       uint8_t regs[REGISTER_COUNT]; // General purpose registers
-      uint16_t* pc; // Program counter / instruction pointer
-      uint16_t* code; // List of instructions
+      const uint16_t* pc; // Program counter / instruction pointer
+      const uint16_t* code; // List of instructions
 
       // Debugging
       int debugMode;
