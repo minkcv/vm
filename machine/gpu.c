@@ -7,7 +7,7 @@ GPU* createGPU()
     gpu->active = 1;
     gpu->bytesPerPixel = 3; // From SDL_PIXELFORMAT_RGB24 in display.c
     gpu->pitch = SCREEN_WIDTH * gpu->bytesPerPixel;
-    gpu->pixels = malloc(sizeof(uint8_t) * gpu->bytesPerPixel * SCREEN_WIDTH * SCREEN_HEIGHT);
+    gpu->pixels = (uint8_t *) malloc(sizeof(uint8_t) * gpu->bytesPerPixel * SCREEN_WIDTH * SCREEN_HEIGHT);
     return gpu;
 }
 
