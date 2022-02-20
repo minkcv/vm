@@ -38,7 +38,7 @@ struct GPU
     unsigned int refreshed : 1; // Changes 0 -> 1 or 1 -> 0 when the display refreshes
 };
 
-GPU* createGPU();
+GPU* createGPU(void);
 
 void destroyGPU(GPU* gpu);
 
