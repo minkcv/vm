@@ -1,7 +1,7 @@
 all: main assembler convertsprite
 
 main: clean-main
-	gcc main.c machine/vm.c machine/display.c machine/gpu.c machine/ipu.c `sdl2-config --cflags --libs` -o main
+	gcc main.c machine/vm.c machine/display.c machine/gpu.c machine/ipu.c machine/cpu.c `sdl2-config --cflags --libs` -o main
 
 assembler: clean-assembler
 	gcc assembler.c -o assembler
