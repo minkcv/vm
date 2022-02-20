@@ -2,11 +2,8 @@
 #define GPU_H_
 
 #include "constants.h"
-#include "vm.h"
 #include <stdint.h>
-#include <SDL.h>
 
-typedef struct VM VM;
 typedef struct GPU GPU;
 
 // Sprite Attribute
