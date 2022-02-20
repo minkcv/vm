@@ -52,7 +52,7 @@ void run(VM* vm)
     int wait = 0;
     SDL_Event event;
     SDL_PollEvent(&event);
-    Instruction* decoded = malloc(sizeof(Instruction));
+    Instruction decoded;
     while (event.type != SDL_QUIT)
     {
         while (SDL_PollEvent(&event))
@@ -82,8 +82,8 @@ void run(VM* vm)
         if (!wait)
         {
             uint16_t instr = *(vm->pc);
-            decode(instr, decoded);
-            exec(vm, decoded);
+            decode(instr, &decoded);
+            exec(vm, &decoded);
             vm->pc++;
             cpuInstructionCount++;
 
@@ -118,7 +118,6 @@ void run(VM* vm)
         if (vm->step)
             vm->breakState = 1;
     }
-    free(decoded);
 }
 
 void handleDebugKey(VM* vm, SDL_Keycode key)
@@ -152,14 +151,12 @@ void handleDebugKey(VM* vm, SDL_Keycode key)
         printf("PC:  %03d.%03d 0x%02X.0x%02X\n", 
                 instructionSegment, instructionOffset,
                 instructionSegment, instructionOffset);
-        char* assembly = malloc(sizeof(char) * 256);
+        char assembly[256];
         memset(assembly, 0, sizeof(char) * 256);
-        Instruction* decoded = malloc(sizeof(Instruction));
-        decode(*(vm->pc), decoded);
-        disassemble(decoded, assembly);
-        free(decoded);
+        Instruction decoded;
+        decode(*(vm->pc), &decoded);
+        disassemble(&decoded, assembly);
         printf("ASM: %s\n", assembly);
-        free(assembly);
         int i;
         for (i = 0; i < REGISTER_COUNT; i++)
             printf("r%02d: %03d (0x%02X)\n", i, vm->regs[i], vm->regs[i]);
@@ -209,12 +206,11 @@ void handleDebugKey(VM* vm, SDL_Keycode key)
                 continue; // End of program, can't keep reading instructions.
             int instructionSegment = instructionCount / JUMP_SEGMENT_SIZE;
             int instructionOffset = instructionCount % JUMP_SEGMENT_SIZE;
-            char* assembly = malloc(sizeof(char) * 256);
+            char assembly[256];
             memset(assembly, 0, sizeof(char) * 256);
-            Instruction* decoded = malloc(sizeof(Instruction));
-            decode(*(vm->pc + i), decoded);
-            disassemble(decoded, assembly);
-            free(decoded);
+            Instruction decoded;
+            decode(*(vm->pc + i), &decoded);
+            disassemble(&decoded, assembly);
             // Print star for current instruction
             if (i == 0)
                 printf("*");
@@ -225,7 +221,6 @@ void handleDebugKey(VM* vm, SDL_Keycode key)
             printf(" %-30s ; %03d.%03d 0x%02X.0x%02X\n", assembly,
                     instructionSegment, instructionOffset,
                     instructionSegment, instructionOffset);
-            free(assembly);
         }
     }
 }
