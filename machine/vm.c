@@ -4,6 +4,7 @@
 #include <SDL.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <retro_endianness.h>
 
 // Creates a vm with the supplied code
 VM* createVM(uint16_t* code, uint8_t* rom, Display* display, int debugMode)
@@ -81,7 +82,7 @@ void run(VM* vm)
         // Executing
         if (!wait)
         {
-            uint16_t instr = *(vm->cpu.pc);
+            uint16_t instr = retro_le_to_cpu16(*(vm->cpu.pc));
             decode(instr, &decoded);
             exec(&vm->cpu, &decoded, vm->memory);
             vm->cpu.pc++;

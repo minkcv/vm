@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <retro_endianness.h>
 
 uint16_t* readBinary(const char* filename, int print);
 uint8_t* readRom(const char* filename, int print);
@@ -69,9 +70,10 @@ uint16_t* readBinary(const char* filename, int print)
         printf("Error reading file %s\n", filename);
         exit(1);
     }
-    size_t numInstructions = 0;
+    size_t numInstructions = 0, numInstructionsLe = 0;
     // binaries are length prefixed
-    fread(&numInstructions, sizeof(uint16_t), 1, bin);
+    fread(&numInstructionsLe, sizeof(uint16_t), 1, bin);
+    numInstructions = retro_le_to_cpu16(numInstructionsLe);
     printf("Binary is %Id instructions\n", numInstructions);
     uint16_t* code = malloc(sizeof(uint16_t) * numInstructions);
     fread(code, sizeof(uint16_t), numInstructions, bin);
