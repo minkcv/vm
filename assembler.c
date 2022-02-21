@@ -25,11 +25,21 @@ void createLabelMap(FILE* src, LabelAddress*** labelMap);
 int main (int argc, char** argv)
 {
     char* filename = NULL;
+    char* romfilename = NULL;
+    FILE* romSrc = NULL;
+    uint16_t romSize = 0;
     for (int i = 1; i < argc; i++)
     {
         if (!strcmp(argv[i], "-f") && i + 1 < argc)
         {
 	    filename = argv[i + 1];
+	    i++;
+	    continue;
+        }
+
+	if (!strcmp(argv[i], "-r") && i + 1 < argc)
+        {
+	    romfilename = argv[i + 1];
 	    i++;
 	    continue;
         }
@@ -40,12 +50,29 @@ int main (int argc, char** argv)
         exit(1);
     }
 
-
     FILE* src = fopen(filename, "r");
     if (!src)
     {
         printf("Failed to open file %s: %s\n", filename, strerror(errno));
         return 0;
+    }
+
+    if (romfilename) {
+	romSrc = fopen(romfilename, "r");
+	if (!romSrc)
+	{
+	    printf("Failed to open file %s: %s\n", romfilename, strerror(errno));
+	    return 0;
+	}
+
+	fseek(romSrc, 0, SEEK_END);
+	long romsize_full = ftell(romSrc);
+	fseek(romSrc, 0, SEEK_SET);
+	if (romsize_full > 128 * 256) {
+	    printf("ROM is too large: %d > %d", romsize_full, 128 * 256);
+	    return 0;
+	}
+	romSize = romsize_full;
     }
 
     uint16_t numInstructions = countInstructions(src); 
@@ -257,6 +284,15 @@ int main (int argc, char** argv)
     // Prefix binary with length
     fwrite(&numInstructionsLe, sizeof(uint16_t), 1, bin);
     size_t written = fwrite(binary, sizeof(uint16_t), numInstructions, bin);
+    uint16_t romSizeLe = retro_cpu_to_le16(romSize);
+    fwrite(&romSizeLe, sizeof(uint16_t), 1, bin);
+    if (romSize)
+    {
+	uint8_t *buf = malloc(romSize);
+	fread(buf, sizeof(uint8_t), romSize, romSrc);
+	fwrite(buf, sizeof(uint16_t), romSize, bin);
+	free(buf);
+    }
     fclose(bin);
     free(binary);
     binary = NULL;
