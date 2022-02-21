@@ -6,6 +6,7 @@
 #include <limits.h>
 #include <stdint.h>
 #include <errno.h>
+#include <retro_endianness.h>
 
 #define MAX_LABELS 1024
 
@@ -224,7 +225,7 @@ int main (int argc, char** argv)
 		}
 		token = strtok(NULL, " "); // Get the next token
 	    }
-	    binary[instrIndex] = instr; // Save the assembled instruction
+	    binary[instrIndex] = retro_cpu_to_le16(instr); // Save the assembled instruction
 	    instrIndex++;
 	}
 	// Free and null the line pointer. getline will reallocate for us
@@ -252,8 +253,9 @@ int main (int argc, char** argv)
 
     // Now write the binary array out to a file with .bin appended to the name
     FILE* bin = fopen(strcat(filename, ".bin"), "wb");
+    uint16_t numInstructionsLe = retro_cpu_to_le16(numInstructions);
     // Prefix binary with length
-    fwrite(&numInstructions, sizeof(uint16_t), 1, bin);
+    fwrite(&numInstructionsLe, sizeof(uint16_t), 1, bin);
     size_t written = fwrite(binary, sizeof(uint16_t), numInstructions, bin);
     fclose(bin);
     free(binary);
