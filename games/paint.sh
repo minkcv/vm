@@ -16,6 +16,6 @@ cat games/paint/abc.spr >> games/paint/paint.rom
 cat games/paint/123.spr >> games/paint/paint.rom
 cat games/paint/sym.spr >> games/paint/paint.rom
 cat games/paint/shapes.spr >> games/paint/paint.rom
-./assembler -f games/paint/paint.asm &> /dev/null
-./main -f games/paint/paint.bin -r games/paint/paint.rom -s 2 &> /dev/null
+./assembler -f games/paint/paint.asm -r games/paint/paint.rom &> /dev/null
+./main -f games/paint/paint.bin -s 2 &> /dev/null
 

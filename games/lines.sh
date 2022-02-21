@@ -6,6 +6,6 @@ make &> /dev/null
 cd ..
 make &> /dev/null
 ./compiler/compiler -f games/lines/lines.vapor -l sa &> /dev/null
-./assembler -f games/lines/lines.asm &> /dev/null
-./main -f games/lines/lines.bin -r games/lines/model.bin -s 2 -d
+./assembler -f games/lines/lines.asm -r games/lines/model.bin &> /dev/null
+./main -f games/lines/lines.bin -s 2 -d
 
