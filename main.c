@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <retro_endianness.h>
 
-uint16_t* readBinary(const char* filename, int print);
+uint16_t* readBinary(const char* filename, int print, uint8_t **rom);
 uint8_t* readRom(const char* filename, int print);
 
 int main (int argc, char** argv)
@@ -45,8 +45,8 @@ int main (int argc, char** argv)
     }
 
     Display* display = createDisplay(SCREEN_WIDTH, SCREEN_HEIGHT, scale, SCREEN_WIDTH / 4);
-    uint16_t* code = readBinary(programName, 0);
     uint8_t* rom = NULL;
+    uint16_t* code = readBinary(programName, 0, &rom);
     if (romName != NULL) // ROM is optional
         rom = readRom(romName, 0);
 
@@ -62,7 +62,7 @@ int main (int argc, char** argv)
     return 0;
 }
 
-uint16_t* readBinary(const char* filename, int print)
+uint16_t* readBinary(const char* filename, int print, uint8_t **rom)
 {
     FILE* bin = fopen(filename, "rb");
     if (bin == NULL)
@@ -84,6 +84,27 @@ uint16_t* readBinary(const char* filename, int print)
         for (i = 0; i < numInstructions; i++)
             printf("%4X\n", code[i]);
     }
+
+    size_t romSize = 0, romSizeLe = 0;
+    // binaries are length prefixed
+    if (fread(&romSizeLe, sizeof(uint16_t), 1, bin) == 1)
+    {
+	romSize = retro_le_to_cpu16(romSizeLe);
+	if (romSize > 128 * MEMORY_SEGMENT_SIZE)
+	    romSize = 128 * MEMORY_SEGMENT_SIZE;
+	*rom = malloc(128 * MEMORY_SEGMENT_SIZE);
+	memset(*rom, 0, 128 * MEMORY_SEGMENT_SIZE);
+	size_t bytesRead = fread(*rom, sizeof(uint8_t), romSize, bin);
+	printf("Read %Id bytes from the embed rom\n", bytesRead);
+	if (print)
+	{
+	    printf("Rom:\n");
+	    int i;
+	    for (i = 0; i < bytesRead; i++)
+		printf("%2X\n", rom[i]);
+	}
+    }
+
     fclose(bin);
     return code;
 }
