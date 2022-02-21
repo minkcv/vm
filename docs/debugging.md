@@ -1,5 +1,5 @@
 # Debugging
-Run the vm with the debug option to enable breakpoints and debugging features: `./main -f myprogram.bin -d`. 
+Run the vm with the debug option to enable breakpoints and debugging features: `./main -f myprogram.vaporbin -d`. 
 
 ## Breakpoints
 Create a breakpoint with `break;` in vaporlang and `BRKP` in assembly. Break instructions are a no-op when running without the debug option.

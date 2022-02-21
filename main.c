@@ -40,7 +40,7 @@ int main (int argc, char** argv)
     }
     if (programName == NULL)
     {
-        printf("Usage: main -f program.bin\n");
+        printf("Usage: main -f program.vaporbin\n");
         exit(1);
     }
 

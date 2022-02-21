@@ -1,6 +1,7 @@
 #!/bin/bash
 rm paint/paint.asm &> /dev/null
 rm paint/paint.bin &> /dev/null
+rm paint/paint.vaporbin &> /dev/null
 rm paint/paint.rom &> /dev/null
 rm paint/*.spr &> /dev/null
 cd ../compiler
@@ -17,5 +18,5 @@ cat games/paint/123.spr >> games/paint/paint.rom
 cat games/paint/sym.spr >> games/paint/paint.rom
 cat games/paint/shapes.spr >> games/paint/paint.rom
 ./assembler -f games/paint/paint.asm -r games/paint/paint.rom &> /dev/null
-./main -f games/paint/paint.bin -s 2 &> /dev/null
+./main -f games/paint/paint.vaporbin -s 2 &> /dev/null
 

@@ -278,8 +278,8 @@ int main (int argc, char** argv)
     if (filenameNoExtension != NULL)
 	filename = filenameNoExtension;
 
-    // Now write the binary array out to a file with .bin appended to the name
-    FILE* bin = fopen(strcat(filename, ".bin"), "wb");
+    // Now write the binary array out to a file with .vaporbin appended to the name
+    FILE* bin = fopen(strcat(filename, ".vaporbin"), "wb");
     uint16_t numInstructionsLe = retro_cpu_to_le16(numInstructions);
     // Prefix binary with length
     fwrite(&numInstructionsLe, sizeof(uint16_t), 1, bin);
