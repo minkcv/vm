@@ -1,5 +1,6 @@
 #!/bin/bash
 rm fallen/fallen.bin &> /dev/null
+rm fallen/fallen.vaporbin &> /dev/null
 rm fallen/fallen.asm &> /dev/null
 rm fallen/fallen.rom &> /dev/null
 cd ../compiler
@@ -34,6 +35,6 @@ cat games/fallen/mapdata >> games/fallen/fallen.rom
 cat games/fallen/player.spr >> games/fallen/fallen.rom
 # 19778 bytes used
 ./compiler/compiler -f games/fallen/fallen.vapor &> /dev/null
-./assembler -f games/fallen/fallen.asm
-./main -f games/fallen/fallen.bin -r games/fallen/fallen.rom -s 2 &> /dev/null
+./assembler -f games/fallen/fallen.asm -r games/fallen/fallen.rom
+./main -f games/fallen/fallen.vaporbin -s 2 &> /dev/null
 

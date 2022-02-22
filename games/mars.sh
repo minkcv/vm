@@ -5,13 +5,14 @@ cd games/mars
 rm *.spr
 rm mars.rom
 rm mars.bin
-../../assembler -f mars.asm &> /dev/null
+rm mars.vaporbin
 ../../convertsprite astronaut.png &> /dev/null
 ../../convertsprite stars.png &> /dev/null
 ../../convertsprite rock.png &> /dev/null
 cat astronaut.spr > mars.rom
 cat stars.spr >> mars.rom
 cat rock.spr >> mars.rom
+../../assembler -f mars.asm -r mars.rom &> /dev/null
 cd ../..
-./main -f games/mars/mars.bin -r games/mars/mars.rom -s 2 &> /dev/null
+./main -f games/mars/mars.vaporbin -s 2 &> /dev/null
 

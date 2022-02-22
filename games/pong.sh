@@ -4,5 +4,5 @@ make &> /dev/null
 cd games/pong
 ../../assembler -f pong.asm &> /dev/null
 cd ../..
-./main -f games/pong/pong.bin -s 2 &> /dev/null
+./main -f games/pong/pong.vaporbin -s 2 &> /dev/null
 

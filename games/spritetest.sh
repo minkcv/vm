@@ -1,6 +1,7 @@
 #!/bin/bash
 rm spritetest/spritetest.asm &> /dev/null
 rm spritetest/spritetest.bin &> /dev/null
+rm spritetest/spritetest.vaporbin &> /dev/null
 rm spritetest/spritetest.rom &> /dev/null
 rm spritetest/*.spr &> /dev/null
 cd ../compiler
@@ -14,5 +15,5 @@ make &> /dev/null
 cat games/spritetest/test1.spr >> games/spritetest/spritetest.rom
 cat games/spritetest/test2.spr >> games/spritetest/spritetest.rom
 cat games/spritetest/test3.spr >> games/spritetest/spritetest.rom
-./assembler -f games/spritetest/spritetest.asm &> /dev/null
-# ./main -f games/spritetest/spritetest.bin -r games/spritetest/spritetest.rom -s 2 &> /dev/null
+./assembler -f games/spritetest/spritetest.asm  -r games/spritetest/spritetest.rom &> /dev/null
+# ./main -f games/spritetest/spritetest.vaporbin -s 2 &> /dev/null
