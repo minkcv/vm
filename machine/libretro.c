@@ -22,6 +22,11 @@ typedef unsigned short pixel_t;
 typedef unsigned int pixel_t;
 #define vRGB(r,g,b) (((r) << 16) | ((g) << 8) | (b))
 #endif
+#define FPS 60
+#define AUDIO_SAMPLE_RATE 44100
+#define SAMPLES_PER_FRAME (AUDIO_SAMPLE_RATE / FPS)
+
+static int16_t audio_buffer[2 * SAMPLES_PER_FRAME];
 
 struct LIBRETRO_VM
 {
@@ -262,6 +267,7 @@ void retro_run(void)
     // Output video
     draw_display();
     video_cb(frame, SCREEN_WIDTH, SCREEN_HEIGHT, sizeof(pixel_t) * SCREEN_WIDTH);
+    audio_batch_cb(audio_buffer, SAMPLES_PER_FRAME);
 }
 
 unsigned retro_get_region(void)
@@ -296,8 +302,8 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
     info->geometry.max_height   = SCREEN_HEIGHT;
     info->geometry.aspect_ratio = ((float)SCREEN_WIDTH) / ((float)SCREEN_HEIGHT);
 
-    info->timing.fps = 60;
-    info->timing.sample_rate = 0;
+    info->timing.fps = FPS;
+    info->timing.sample_rate = AUDIO_SAMPLE_RATE;
 
     environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &pixelformat);
 }
