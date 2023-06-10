@@ -2,9 +2,11 @@
 A virtual game platform with capabilities similar to 80s game consoles. 
 This repo is contains the Windows/Linux implementation, some games, the compiler, assembler, and documentation.
 
-A live version is available for the browser [HERE](https://minkcv.github.io/vm-js/)
+A live version is available for the browser [HERE](https://minkcv.github.io/vm-js/studio/)
 
-A Nintendo Switch Homebrew implementation exists [HERE](https://github.com/minkcv/vm-switch).
+A Nintendo Switch Homebrew implementation exists [HERE](https://github.com/minkcv/vm-switch)
+
+Available as a RetroArch core [INFO](https://docs.libretro.com/library/vaporspec/)
 
 #### The platform has:
 - A 16 bit instruction size
