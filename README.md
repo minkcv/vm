@@ -1,6 +1,6 @@
 # Vapor Spec
 A virtual game platform with capabilities similar to 80s game consoles. 
-This repo is contains the Windows/Linux implementation, some games, the compiler, assembler, and documentation.
+This repo contains the Windows/Linux implementation, some games, the compiler, assembler, and documentation.
 
 A live version is available for the browser [HERE](https://minkcv.github.io/vm-js/studio/)
 

@@ -16,4 +16,4 @@ cat games/spritetest/test1.spr >> games/spritetest/spritetest.rom
 cat games/spritetest/test2.spr >> games/spritetest/spritetest.rom
 cat games/spritetest/test3.spr >> games/spritetest/spritetest.rom
 ./assembler -f games/spritetest/spritetest.asm  -r games/spritetest/spritetest.rom &> /dev/null
-# ./main -f games/spritetest/spritetest.vaporbin -s 2 &> /dev/null
+./main -f games/spritetest/spritetest.vaporbin -s 2 &> /dev/null
