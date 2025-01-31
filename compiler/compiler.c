@@ -684,7 +684,7 @@ int main (int argc, char** argv)
                             token = strtok_r(NULL, "\n;", &savePtr);
                             decomposeExpression(&token, assembly, &currentAssemblyLine, &instructionCount, symbolMap, 0, lineCount);
 
-                            // Store the result (r0) into the right hand side identifier
+                            // Store the result (r0) into the left hand side
                             sprintfAsm(assembly, &currentAssemblyLine, instructionCount++, "LRC r1 #%d\n", sym->segment);
                             sprintfAsm(assembly, &currentAssemblyLine, instructionCount++, "LRC r2 #%d\n", sym->offset);
                             sprintfAsm(assembly, &currentAssemblyLine, instructionCount++, "STR r0 r1 r2\n");
