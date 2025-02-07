@@ -1,7 +1,18 @@
 "Vim syntax file
 "Language:          Vaporlang
-"Maintainer:        Will Smith <vim@minkcv.com>
-"Latest Revision:   2018-3-12
+"Maintainer:        Will Smith <minkcv@gmail.com>
+"Latest Revision:   2025-2-6
+"How to use:
+"create ~/.vim/ftdetect/vapor.vim
+"autocmd BufRead,BufNewFile *.vapor set filetype=vapor
+"
+"add to ~/.vimrc
+"syntax on
+"
+"exec
+"mkdir ~/.vim/syntax
+"cd .vim/syntax
+"ln -s ~/vm/etc/vapor.vim vapor.vim
 
 if exists("b:current_syntax")
     finish
