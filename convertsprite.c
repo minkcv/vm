@@ -136,7 +136,7 @@ int main (int argc, char** argv)
 
     fclose(fp);
 
-    printf("This sprite's color palette:\n");
+    printf("%s's color palette:\n", filenameNoExtension);
     printf("Index is -1 if a color is not used\n");
     int i;
     for (i = 0; i < 4 - useAlpha; i++)
@@ -146,7 +146,7 @@ int main (int argc, char** argv)
         printf("Color %d has palette index %d\n", i, fullPaletteIndex);
     }
     if (useAlpha)
-        printf("This sprite uses color 4 as transparency\n");
+        printf("%s uses color 4 as transparency\n", filenameNoExtension);
 
     return 0;
 }
