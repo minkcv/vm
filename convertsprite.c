@@ -137,7 +137,6 @@ int main (int argc, char** argv)
     fclose(fp);
 
     printf("%s's color palette:\n", filenameNoExtension);
-    printf("Index is -1 if a color is not used\n");
     int i;
     for (i = 0; i < 4 - useAlpha; i++)
     {
