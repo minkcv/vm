@@ -1,7 +1,7 @@
 # Vaporlang
 This file describes the syntax of the provided compiler. The language is slightly higher level than assembly.
 
-Vaporlang supports named global variables, constants, functions, conditional flow, loops, memory access, and some operators.
+Vaporlang supports named global variables, constants, functions, control flow, loops, memory access, and some operators.
 Variable declarations and assignments must end in semicolons. Functions and control flow blocks must be bounded by open and close curly braces `{`,`}`.
 The compiler is very whitespace sensitive, not in terms of logic (like python), but in terms of parsing.
 The compiler stores variables and the call stack in memory segments 59 through 63 (inclusive). The maximum number of variables is 1024 and the maximum call stack size is 127 calls.
@@ -38,13 +38,27 @@ Variables can have values stored in them using the assignment operator `=`. The 
     // Not valid
     xposition = yposition = 0;
 
+#### Control flow
+Conditionally execute, repeat, or skip code using `if` or `while`. The code will be executed if the condition is non-zero.
+
+    while 1 {
+        // infinite loop
+        // unless return is used
+    }
+    if 0 {
+        // unreachable code
+    }
+    if i {
+        // executes if i != 0
+    }
+
 #### Comparison
 Variables can be compared for equality `==`, `!=`, less than `<`, and greater than `>`. 0 indicates false and 1 indicates true. Comparisons can be done in while loop and if conditions, as well as have their result assigned to variables and memory. Comparisons will be evaluated after both sides of the operator have evaluated.
 
-    isZero = xposition == 0;
-    isNotZero = xposition != 0;
-    aboveOne = xposition > 1;
-    if isZero {
+    xIsZero = xposition == 0;
+    xIsNotZero = xposition != 0;
+    xAboveOne = xposition > 1;
+    if xIsZero {
         xposition = 1;
     }
     while xposition < 10 {
