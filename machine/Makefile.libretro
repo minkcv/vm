@@ -259,13 +259,6 @@ else ifeq ($(platform), retrofw)
 	CFLAGS += -ffast-math -march=mips32 -mtune=mips32 -mhard-float
 	LIBS = -lm
 
-# Emscripten
-else ifeq ($(platform), emscripten)
-	TARGET := $(TARGET_NAME)_libretro_$(platform).bc
-	fpic := -fPIC
-	SHARED := -shared -r
-	STATIC_LINKING=1
-
 # PS2
 else ifeq ($(platform), ps2)
 	TARGET := $(TARGET_NAME)_libretro_$(platform).a
