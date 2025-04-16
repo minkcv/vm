@@ -89,7 +89,7 @@ void drawSprites(GPU* gpu, uint8_t memory[MEMORY_SEGMENT_COUNT][MEMORY_SEGMENT_S
                 height = SCREEN_HEIGHT;
             uint32_t end = gpu->sprAttrs[i].segmentAddr * MEMORY_SEGMENT_SIZE + gpu->sprAttrs[i].byteAddr;
             end += height * (width / 4);
-            if (end >= MEMORY_SEGMENT_COUNT * MEMORY_SEGMENT_SIZE) {
+            if (end > MEMORY_SEGMENT_COUNT * MEMORY_SEGMENT_SIZE) {
                 // sprite data extends past the end of memory, skip it
                 continue;
             }
