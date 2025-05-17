@@ -1,0 +1,5267 @@
+// Descent
+// 2024 minkcv
+
+var previousGPUState;
+var GPUState;
+const VERSION 0; // TODO 1 on release
+var buttons;
+var btn;
+var prevButtons;
+var count;
+var frameCount;
+var firstInputDone;
+var titleDone;
+var leftDone;
+var rightDone;
+var upDone;
+var dnDone;
+var col0Index;
+var col1Index;
+var col2Index;
+var challengeMode;
+var oxygen;
+// 128: about 3.5 min, enough to pass second check at O2: 20
+const OXYGEN_DELAY 128; // 128: about 3.5 min
+var oxygenDelay;
+var oxygenOne;
+var oxygenTen;
+var random;
+var alive;
+var t;
+var dir;
+var pixels;
+var pixels2;
+var copyFromIndex;
+var copyFromOffset;
+var copyDestSegment;
+var copyDestSegmentT;
+var copyDestOffset;
+var copyDestOffsetT;
+var copyLine;
+var copyBlockedSide;
+var copySkip;
+var copyI;
+var copyT;
+var copyFromStart;
+const LOWER_2_BITS 3; // 0000 0011
+const BTN_DN 2;
+const BTN_UP 1;
+const BTN_LEFT 4;
+const BTN_RIGHT 8;
+// note 59-63 are variables and callstack
+const TITLE_STARS_COUNT 11;
+const TITLE_STARS_X_SEG 50;
+const TITLE_STARS_X_OFFSET 128;
+const TITLE_STARS_Y_SEG 50;
+const TITLE_STARS_Y_OFFSET 139;
+const TITLE_STARS_SPRDATA_SEG 50;
+const TITLE_STARS_SPRDATA_OFFSET 240;
+const TITLE_STARS_TOP_SPRAT_SEG 64;
+const TITLE_STARS_BOT_SPRAT_SEG 65;
+const TITLE_PLANET_SPRAT_SEG 66;
+const TITLE_LETTERS_HOR_SPRAT_SEG 68;
+const TITLE_LETTERS_HOR_SPRDATA_SEG 48;
+const TITLE_LETTERS_HOR_SPRDATA_OFFSET 0;
+const TITLE_LETTERS_HOR_COUNT 14;
+const TITLE_LETTERS_HOR_X_SEG 52;
+const TITLE_LETTERS_HOR_X_OFFSET 150;
+const TITLE_LETTERS_HOR_Y_SEG 52;
+const TITLE_LETTERS_HOR_Y_OFFSET 164;
+const TITLE_LETTERS_VER_SPRAT_SEG 69;
+const TITLE_LETTERS_VER_COUNT 9;
+const TITLE_LETTERS_VER_X_SEG 52;
+const TITLE_LETTERS_VER_X_OFFSET 178;
+const TITLE_LETTERS_VER_Y_SEG 52;
+const TITLE_LETTERS_VER_Y_OFFSET 187;
+const TITLE_LETTERS_VER_SPRDATA_SEG 48;
+const TITLE_LETTERS_VER_SPRDATA_OFFSET 20;
+// one final 16x16 sprite for the n-diagonal
+const TITLE_LETTERS_N_SPRDATA_SEG 48;
+const TITLE_LETTERS_N_SPRDATA_OFFSET 36;
+var currentLetterIterHor;
+var currentLetterIterVer;
+const MAX_TITLE_LETTERS_ITER_HOR 10;
+const MAX_TITLE_LETTERS_ITER_VER 15;
+const TITLE_LETTERS_DELAY 5;
+var titleLettersDelay;
+const TITLE_DIRS_SPRAT_SEG 69;
+const TITLE_DIRS_SPRAT_OFFSET 160;
+const TITLE_DELAY 120;
+var titleDelay;
+const TITLE_DIRS_DELAY 180;
+var titleDirsDelay;
+const TITLE_DONE_DELAY 30;
+var titleDoneDelay;
+
+// same width and height as player sprite 16x16 (64 bytes)
+const DEATH_DELAY 128;
+var deathDelay;
+const DEATH_SPRDATA_SEG 48;
+const DEATH_SPRDATA_OFFSET 100;
+var deathRadius;
+const END_DELAY 50;
+var endDelay;
+var endLine;
+var endLines;
+var endDone;
+
+const PLATFORM_SPRAT_SEG 65;
+const WALL_SPRAT_SEG 66;
+const BLOCK_SPRAT_SEG 67;
+const ROM_BLOCK_SPRDATA_SEG 132;
+var blockSprDataSeg;
+var blockSprDataOffset;
+var selectBlock;
+var currentBlockIndex; // for current block room, also in for saveCurrentBlock
+var nextBlockIndex; // param for copying blocked blocks
+var blockIndex;
+const LEFT_BLOCK_INDEX_OFFSET 131;
+var fallenBlockDone;
+var blockScroll;
+var blockScrollEnd;
+const PLATFORM_SPRDATA_SEG 49;
+const WALL_SPRDATA_SEG 51;
+const HALFWALL_SPRDATA_SEG 53;
+const BLOCKED_L_SPRDATA_SEG 55;
+const BLOCKED_R_SPRDATA_SEG 57;
+const WATERFALL_PLAYER_SPRDATA_SEG 29;
+// 24 bytes
+const WATERFALL_PLAYER_WIDTH 8;
+const WATERFALL_PLAYER_HEIGHT 12;
+const WATERFALL_WALL_TILES_COUNT 8;
+const WATERFALL_TILE_UPDATE_DELAY 8;
+var waterfallTileUpdateDelay;
+const ROM_WALL_BLOCKS_SEG 131;
+const ROM_WATERFALL_SPRDATA_SEG 248; // 7.5 segments
+const ROM_ARROWS_SEG 135;
+const RIGHT_ARROW_OFFSET 64;
+const ARROW_DIM 16;
+const ROM_CHAIN_SEG 135;
+const ROM_CHAIN_OFFSET 128;
+const ROM_PLANET_SEG 136;
+const ROM_OXYGEN_SPRDATA_SEG 139;
+const OXYGEN_DIM 8;
+const ROM_END_TITLE_SEG 140;
+const ROM_END_STATUS_SEG 143;
+const ROM_END_STATUS_OFFSET 16;
+const ROM_END_MODE_SEG 143;
+const ROM_END_MODE_OFFSET 208;
+const ROM_END_CREW_SEG 144;
+const ROM_END_CREW_OFFSET 84;
+const ROM_END_STATUS_DECEASED_SEG 144;
+const ROM_END_STATUS_DECEASED_OFFSET 216;
+const ROM_END_STATUS_SURVIVED_SEG 145;
+const ROM_END_STATUS_SURVIVED_OFFSET 200;
+const ROM_END_MODE_STANDARD_SEG 146;
+const ROM_END_MODE_STANDARD_OFFSET 184;
+const ROM_END_MODE_CHALLENGE_SEG 147;
+const ROM_END_MODE_CHALLENGE_OFFSET 168;
+const ROM_END_CREW_COUNT_SEG 148;
+const ROM_END_CREW_COUNT_OFFSET 176;
+var tile0;
+var tile1;
+var tile2;
+var tile3;
+var tile4;
+var tile5;
+var tile6;
+var tile7;
+var tile8;
+tile0 = 0;
+tile1 = 16;
+tile2 = 32;
+tile3 = 48;
+tile4 = 64;
+tile5 = 80;
+tile6 = 96;
+tile7 = 112;
+tile8 = 128;
+
+// default values 0 -> 0, 1 -> 1, etc
+// challenge mode randomized
+// blockIndex -> randomized block index
+const KEY_SEG 50;
+const KEY_OFFSET 246;
+
+const BLOCK_INDEX_SEG 30;
+var blockIndexPtr;
+
+// array of button presses
+// max length 8
+const TITLE_DIRS_SEG 48;
+const TITLE_DIRS_OFFSET 247;
+var countTitleDirs;
+
+// array of block indices
+var currentBlockPtr;
+const BLOCK_INDICES_SEG 0;
+
+// arrays of blockIndex
+const COL0_BLOCKS_SEG 47;
+var countCol0Blocks;
+const COL1_BLOCKS_SEG 46;
+var countCol1Blocks;
+const COL2_BLOCKS_SEG 45;
+var countCol2Blocks;
+
+// for falling logic
+var colIndex;
+var countColBlocks;
+var colBlocksSeg;
+
+const MAX_COLUMN_BLOCKS 11;
+const COL0_SPRAT_SEG 68;
+const COL1_SPRAT_SEG 69;
+const COL2_SPRAT_SEG 70;
+var colSeg;
+var colSprAtSeg;
+var inPit;
+var colFallingY;
+var currentColFalling;
+const FALLING_START_Y 0;
+const DONE_FALLING 255;
+const FALLING_BLOCK_SPEED 4;
+// TODO use vars
+// an even line the player can walk across
+var checkSuccess;
+// entered the check room
+var checkSeen;
+// descended past the check on the new side
+var checkPassed;
+
+const PLAYER_ROOM_X_START 127;
+
+const ROOM_EMPTY 0;
+const ROOM_BLOCK 1;
+const ROOM_CHECK 2;
+const ROOM_TODO 3; // TODO
+const ROOM_DESCENT 4; // doesn't need to fit in the 2 bit map data
+const ROOM_WATERFALL 8;
+// hint for key (block -> dir) ?
+//const ROOM_
+
+// sides of subslice of a descent room
+const SIDE_NONE 0; // wall, no platform
+const SIDE_CLOSED 1; // wall with platform
+const SIDE_BLOCKED 2; // half wall with blocked platform
+const SIDE_OPEN 3; // half wall with platform
+
+var side;
+var open;
+var currentRoomType;
+var previousRoomType;
+var sideEnteredFrom;
+const SINGLE_BLOCK_START_Y 54;
+const SINGLE_BLOCK_END_Y 80;
+var singleBlockY;
+var sliceEnteredFrom;
+var subSliceEnteredFrom;
+var playerRoomX;
+var playerRoomXDist;
+
+const PASSAGE_PLAYER_FEET_START_Y 96;
+
+const MAP_SEG 40;
+var currentMap;
+const SIDE_L_OFFSET 2;
+const ROOM_R_OFFSET 4;
+const ROOM_L_OFFSET 6;
+// byte: AABB CCDD
+// AA: left room
+// BB: right room
+// CC: left side
+// DD: right side
+// one byte per subslice
+const LEFT_SIDE_MASK 243; // 1111 0011
+const RIGHT_SIDE_MASK 252; // 1111 1100
+
+// 4.5 subslices visible on screen at a time
+var subSlice0Left;
+var subSlice0Right;
+var subSlice1Left;
+var subSlice1Right;
+var subSlice2Left;
+var subSlice2Right;
+var subSlice3Left;
+var subSlice3Right;
+var subSlice4Right;
+
+var playerSlice;
+var playerSubSlice;
+var playerSubSliceAboveLeft;
+var playerSubSliceBelowLeft;
+var playerSubSliceAboveRight;
+var playerSubSliceBelowRight;
+var sliceOffset;
+var subSliceOffset;
+var playerFeetY;
+var playerX;
+var moveLeftDistance;
+var moveRightDistance;
+var fallDistance;
+var onGround;
+var onGroundPrev;
+var onWall;
+var gliderOn;
+const WALL_MOVING_LEFT 1;
+const WALL_MOVING_RIGHT 2;
+var gliderFloatCount;
+var offset;
+var offset2;
+var i;
+var i2;
+var x;
+var y;
+var cnd;
+var cnd0;
+var cnd1;
+
+const HISTORY_MAX 15;
+var playerPosHistory; // index 0-HISTORY_MAX (inclusive), updated at end of main loop
+var playerPosHistoryT;
+var playerFeetYPrev;
+var playerXPrev;
+var crewCount;
+var crewOnGround;
+var crewFacing;
+var crewWalkFrame;
+var crewGliderOn;
+var crewOnWall;
+const PLAYER_POS_HISTORY_SEG 48;
+const PLAYER_Y_HISTORY_OFFSET 230; // 246 - HISTORY_LENGTH
+const PLAYER_X_HISTORY_OFFSET 214;
+// LSB: facing: 0/1
+//   1: onGround: 0/1
+//   2: gliderOn: 0/1
+//   3: onWall: 0/1
+//   4: walkFrame: 0-2
+//   5: walkFrame: 0-2
+// TODO walkDelay?
+const PLAYER_FLAGS_HISTORY_OFFSET 198;
+const PLAYER_ONGROUND_FLAG_OFFSET 1;
+const PLAYER_GLIDERON_FLAG_OFFSET 2;
+const PLAYER_ONWALL_FLAG_OFFSET 3;
+const PLAYER_WALKFRAME_OFFSET 4;
+const CREW_LAG 6; // amount that each crew member is behind the next
+
+// player hitbox, not the sprite
+const PLAYER_WIDTH 4;
+const PLAYER_HEIGHT 10;
+const PLAYER_MOVE_SPEED_X 1;
+const GLIDER_FLOAT 4;
+
+// player sprite
+var playerFacing;
+const DIR_RIGHT 0;
+const DIR_LEFT 1;
+
+const WALK_STANDING 0;
+// 1, 2: stepping
+var walkFrame;
+var walkFrameDelay;
+var walkFrameMiddle;
+const WALK_FRAME_DELAY 3;
+
+const SUBSLICE_HEIGHT 64;
+const PLATFORM_HEIGHT 8;
+const PLATFORM_WIDTH 64;
+const WALL_WIDTH 8;
+const WALL_HEIGHT 64;
+const HALFWALL_HEIGHT 32;
+const BLOCK_DIM 16;
+
+const PLAYER_SPRITE_HEIGHT 16;
+const PLAYER_SPRITE_WIDTH 16;
+const PLAYER_SPRITE_FEET_Y 96;
+
+call writeTransparencyPlatformsWallsHalfWallsBlocked;
+call copyPlatformBlocks;
+call copyWallBlocks;
+call copyHalfWallBlocks;
+call writeWaterfallPlayerTransparency;
+
+[ TITLE_STARS_X_SEG , TITLE_STARS_X_OFFSET ] = 24;
+[ TITLE_STARS_Y_SEG , TITLE_STARS_Y_OFFSET ] = 24;
+[ TITLE_STARS_X_SEG , TITLE_STARS_X_OFFSET + 1 ] = 55;
+[ TITLE_STARS_Y_SEG , TITLE_STARS_Y_OFFSET + 1 ] = 17;
+[ TITLE_STARS_X_SEG , TITLE_STARS_X_OFFSET + 2 ] = 91;
+[ TITLE_STARS_Y_SEG , TITLE_STARS_Y_OFFSET + 2 ] = 34;
+[ TITLE_STARS_X_SEG , TITLE_STARS_X_OFFSET + 3 ] = 23;
+[ TITLE_STARS_Y_SEG , TITLE_STARS_Y_OFFSET + 3 ] = 79;
+[ TITLE_STARS_X_SEG , TITLE_STARS_X_OFFSET + 4 ] = 63;
+[ TITLE_STARS_Y_SEG , TITLE_STARS_Y_OFFSET + 4 ] = 64;
+[ TITLE_STARS_X_SEG , TITLE_STARS_X_OFFSET + 5 ] = 157;
+[ TITLE_STARS_Y_SEG , TITLE_STARS_Y_OFFSET + 5 ] = 16;
+[ TITLE_STARS_X_SEG , TITLE_STARS_X_OFFSET + 6 ] = 229;
+[ TITLE_STARS_Y_SEG , TITLE_STARS_Y_OFFSET + 6 ] = 9;
+[ TITLE_STARS_X_SEG , TITLE_STARS_X_OFFSET + 7 ] = 197;
+[ TITLE_STARS_Y_SEG , TITLE_STARS_Y_OFFSET + 7 ] = 42;
+[ TITLE_STARS_X_SEG , TITLE_STARS_X_OFFSET + 8 ] = 163;
+[ TITLE_STARS_Y_SEG , TITLE_STARS_Y_OFFSET + 8 ] = 64;
+[ TITLE_STARS_X_SEG , TITLE_STARS_X_OFFSET + 9 ] = 225;
+[ TITLE_STARS_Y_SEG , TITLE_STARS_Y_OFFSET + 9 ] = 56;
+// 4x4 sprite with 1px top left
+[ TITLE_STARS_SPRDATA_SEG , TITLE_STARS_SPRDATA_OFFSET ] = 64; // 0100 0000
+
+[ TITLE_LETTERS_HOR_X_SEG , TITLE_LETTERS_HOR_X_OFFSET ] = 49;
+[ TITLE_LETTERS_HOR_Y_SEG , TITLE_LETTERS_HOR_Y_OFFSET ] = 89;
+[ TITLE_LETTERS_HOR_X_SEG , TITLE_LETTERS_HOR_X_OFFSET + 1 ] = 49;
+[ TITLE_LETTERS_HOR_Y_SEG , TITLE_LETTERS_HOR_Y_OFFSET + 1 ] = 101;
+[ TITLE_LETTERS_HOR_X_SEG , TITLE_LETTERS_HOR_X_OFFSET + 2 ] = 72;
+[ TITLE_LETTERS_HOR_Y_SEG , TITLE_LETTERS_HOR_Y_OFFSET + 2 ] = 89;
+[ TITLE_LETTERS_HOR_X_SEG , TITLE_LETTERS_HOR_X_OFFSET + 3 ] = 72;
+[ TITLE_LETTERS_HOR_Y_SEG , TITLE_LETTERS_HOR_Y_OFFSET + 3 ] = 95;
+[ TITLE_LETTERS_HOR_X_SEG , TITLE_LETTERS_HOR_X_OFFSET + 4 ] = 72;
+[ TITLE_LETTERS_HOR_Y_SEG , TITLE_LETTERS_HOR_Y_OFFSET + 4 ] = 101;
+[ TITLE_LETTERS_HOR_X_SEG , TITLE_LETTERS_HOR_X_OFFSET + 5 ] = 95;
+[ TITLE_LETTERS_HOR_Y_SEG , TITLE_LETTERS_HOR_Y_OFFSET + 5 ] = 89;
+[ TITLE_LETTERS_HOR_X_SEG , TITLE_LETTERS_HOR_X_OFFSET + 6 ] = 95;
+[ TITLE_LETTERS_HOR_Y_SEG , TITLE_LETTERS_HOR_Y_OFFSET + 6 ] = 95;
+[ TITLE_LETTERS_HOR_X_SEG , TITLE_LETTERS_HOR_X_OFFSET + 7 ] = 95;
+[ TITLE_LETTERS_HOR_Y_SEG , TITLE_LETTERS_HOR_Y_OFFSET + 7 ] = 101;
+[ TITLE_LETTERS_HOR_X_SEG , TITLE_LETTERS_HOR_X_OFFSET + 8 ] = 118;
+[ TITLE_LETTERS_HOR_Y_SEG , TITLE_LETTERS_HOR_Y_OFFSET + 8 ] = 89;
+[ TITLE_LETTERS_HOR_X_SEG , TITLE_LETTERS_HOR_X_OFFSET + 9 ] = 118;
+[ TITLE_LETTERS_HOR_Y_SEG , TITLE_LETTERS_HOR_Y_OFFSET + 9 ] = 101;
+[ TITLE_LETTERS_HOR_X_SEG , TITLE_LETTERS_HOR_X_OFFSET + 10 ] = 141;
+[ TITLE_LETTERS_HOR_Y_SEG , TITLE_LETTERS_HOR_Y_OFFSET + 10 ] = 89;
+[ TITLE_LETTERS_HOR_X_SEG , TITLE_LETTERS_HOR_X_OFFSET + 11 ] = 141;
+[ TITLE_LETTERS_HOR_Y_SEG , TITLE_LETTERS_HOR_Y_OFFSET + 11 ] = 95;
+[ TITLE_LETTERS_HOR_X_SEG , TITLE_LETTERS_HOR_X_OFFSET + 12 ] = 141;
+[ TITLE_LETTERS_HOR_Y_SEG , TITLE_LETTERS_HOR_Y_OFFSET + 12 ] = 101;
+[ TITLE_LETTERS_HOR_X_SEG , TITLE_LETTERS_HOR_X_OFFSET + 13 ] = 187;
+[ TITLE_LETTERS_HOR_Y_SEG , TITLE_LETTERS_HOR_Y_OFFSET + 13 ] = 89;
+
+[ TITLE_LETTERS_VER_X_SEG , TITLE_LETTERS_VER_X_OFFSET ] = 66;
+[ TITLE_LETTERS_VER_Y_SEG , TITLE_LETTERS_VER_Y_OFFSET ] = 89;
+[ TITLE_LETTERS_VER_X_SEG , TITLE_LETTERS_VER_X_OFFSET + 1 ] = 72;
+[ TITLE_LETTERS_VER_Y_SEG , TITLE_LETTERS_VER_Y_OFFSET + 1 ] = 89;
+[ TITLE_LETTERS_VER_X_SEG , TITLE_LETTERS_VER_X_OFFSET + 2 ] = 95;
+[ TITLE_LETTERS_VER_Y_SEG , TITLE_LETTERS_VER_Y_OFFSET + 2 ] = 89;
+[ TITLE_LETTERS_VER_X_SEG , TITLE_LETTERS_VER_X_OFFSET + 3 ] = 112;
+[ TITLE_LETTERS_VER_Y_SEG , TITLE_LETTERS_VER_Y_OFFSET + 3 ] = 95;
+[ TITLE_LETTERS_VER_X_SEG , TITLE_LETTERS_VER_X_OFFSET + 4 ] = 118;
+[ TITLE_LETTERS_VER_Y_SEG , TITLE_LETTERS_VER_Y_OFFSET + 4 ] = 89;
+[ TITLE_LETTERS_VER_X_SEG , TITLE_LETTERS_VER_X_OFFSET + 5 ] = 141;
+[ TITLE_LETTERS_VER_Y_SEG , TITLE_LETTERS_VER_Y_OFFSET + 5 ] = 89;
+[ TITLE_LETTERS_VER_X_SEG , TITLE_LETTERS_VER_X_OFFSET + 6 ] = 164;
+[ TITLE_LETTERS_VER_Y_SEG , TITLE_LETTERS_VER_Y_OFFSET + 6 ] = 89;
+[ TITLE_LETTERS_VER_X_SEG , TITLE_LETTERS_VER_X_OFFSET + 7 ] = 181;
+[ TITLE_LETTERS_VER_Y_SEG , TITLE_LETTERS_VER_Y_OFFSET + 7 ] = 89;
+[ TITLE_LETTERS_VER_X_SEG , TITLE_LETTERS_VER_X_OFFSET + 8 ] = 196;
+[ TITLE_LETTERS_VER_Y_SEG , TITLE_LETTERS_VER_Y_OFFSET + 8 ] = 89;
+
+call newGame;
+
+// retroarch shows info over the game for a few seconds on load
+titleDelay = 0;
+
+[ 127 , 17 ] = 1; // enable GPU
+
+while 1 {
+    buttons = [ 127 , 0 ];
+    call mainLoop;
+    prevButtons = buttons;
+    call waitScreen;
+}
+
+func mainLoop {
+    if titleDone == 0 {
+        // any button on controller 2: show version
+        t = [ 127 , 1 ];
+        if t > 0 {
+            [ 79 , 240 ] = 144; // enable and transparency
+            [ 79 , 243 ] = OXYGEN_DIM; // width
+            [ 79 , 244 ] = OXYGEN_DIM; // height
+            [ 79 , 245 ] = ROM_OXYGEN_SPRDATA_SEG;
+            [ 79 , 247 ] = 255;
+        }
+        if titleDelay < TITLE_DELAY {
+            titleDelay = titleDelay + 1;
+        }
+        if titleDelay == TITLE_DELAY {
+            call titleUpdate;
+        }
+    }
+    // TODO for testing reset/skip title
+    if buttons > 15 {
+        call newGame;
+        titleDone = 1;
+        titleDoneDelay = TITLE_DONE_DELAY - 1;
+        call generateBlockIndices;
+    }
+    if titleDone {
+        if alive == 0 {
+            if deathDelay < DEATH_DELAY {
+                if inPit {
+                    call pitDeath;
+                }
+                call pitDeathSpriteUpdate;
+                deathDelay = deathDelay + 1;
+                if deathDelay == DEATH_DELAY {
+                    call endSpritesInit;
+                }
+            }
+            if deathDelay == DEATH_DELAY {
+                // TODO put in function?
+                if endDelay < END_DELAY {
+                    endDelay = endDelay + 1;
+                }
+                if endDelay == END_DELAY {
+                    if endDone {
+                        [ 64 , 112 ] = 160; // enable and flip v
+                        if buttons & BTN_DN == BTN_DN {
+                            call newGame;
+                        }
+                        return;
+                    }
+                    if endLine < endLines + 1 {
+                        if endLine == 1 {
+                            [ 64 , 16 ] = 128; // enable
+                            [ 64 , 64 ] = 128; // enable
+                        }
+                        if endLine == 2 {
+                            [ 64 , 32 ] = 128; // enable
+                            [ 64 , 80 ] = 128; // enable
+                        }
+                        if endLine == 3 {
+                            [ 64 , 48 ] = 128; // enable
+                            [ 64 , 96 ] = 128; // enable
+                        }
+                        if endLine == endLines {
+                            endDone = 1;
+                            endDelay = 0;
+                        }
+                    }
+                    if endLine < endLines {
+                        endLine = endLine + 1;
+                        endDelay = 0;
+                    }
+                }
+            }
+            return;
+        }
+        if titleDoneDelay < TITLE_DONE_DELAY {
+            titleDoneDelay = titleDoneDelay + 1;
+            if titleDoneDelay == TITLE_DONE_DELAY {
+                call titleSpritesDisable;
+                if challengeMode {
+                    call oxygenSpritesInit;
+                }
+                call descentSpritesInit;
+            }
+            return;
+        }
+        if currentRoomType != previousRoomType {
+            onGround = 1;
+            playerRoomXDist = playerRoomX - PLAYER_ROOM_X_START;
+            if playerRoomX < PLAYER_ROOM_X_START {
+                playerRoomXDist = PLAYER_ROOM_X_START - playerRoomX;
+            }
+            if currentRoomType == ROOM_DESCENT {
+                call descentSpritesInit;
+            }
+            if currentRoomType == ROOM_EMPTY {
+                playerFeetY = PASSAGE_PLAYER_FEET_START_Y;
+                call passageEmptySpritesInit;
+            }
+            if currentRoomType == ROOM_WATERFALL {
+                call waterfallRoomSpritesInit;
+            }
+            if currentRoomType == ROOM_BLOCK {
+                playerFeetY = PASSAGE_PLAYER_FEET_START_Y;
+                call setCurrentBlock;
+                selectBlock = 0;
+                if sliceEnteredFrom < 1 {
+                    selectBlock = 1;
+                }
+                call passageBlockSpritesInit;
+            }
+            if currentRoomType == ROOM_CHECK {
+                playerFeetY = PASSAGE_PLAYER_FEET_START_Y;
+                checkSeen = 1;
+                call passageCheckSpritesInit;
+            }
+            // this isn't techincally true, just a way of marking the change as done
+            previousRoomType = currentRoomType;
+            call playerHistoryInit;
+        }
+        if currentRoomType == ROOM_DESCENT {
+            call descentMovement;
+            i = 0;
+            sliceOffset = 0;
+            while i < playerSlice {
+                sliceOffset = sliceOffset + 4;
+                i = i + 1;
+            }
+            call descentScroll;
+            call descentPlayerSprite;
+            if currentRoomType != previousRoomType {
+                return;
+            }
+        }
+        if currentRoomType == ROOM_EMPTY {
+            call passageBlockMovement;
+            call passagePlayerSprite;
+            if challengeMode {
+                call waterfallUpdate;
+            }
+            if currentRoomType != previousRoomType {
+                return;
+            }
+        }
+        if currentRoomType == ROOM_WATERFALL {
+            call passageBlockMovement;
+            call passagePlayerSprite;
+            if currentRoomType != previousRoomType {
+                return;
+            }
+        }
+        if currentRoomType == ROOM_BLOCK {
+            call passageBlockMovement;
+            call passagePlayerSprite;
+            call passageBlockSprite;
+        }
+        if currentRoomType == ROOM_CHECK {
+            call passageCheckMovement;
+            call passagePlayerSprite;
+            if inPit {
+                call pitDeath;
+            }
+        }
+        if challengeMode {
+            if oxygenDelay < OXYGEN_DELAY {
+                oxygenDelay = oxygenDelay + 1;
+            }
+            if oxygenDelay == OXYGEN_DELAY {
+                oxygenDelay = 0;
+                oxygen = oxygen - 1;
+                call oxygenSprite;
+            }
+            if oxygen == 0 {
+                alive = 0;
+            }
+        }
+        // the crew don't follow you into a deadly pit
+        if inPit == 0 {
+            cnd0 = playerXPrev != playerX;
+            cnd1 = playerFeetYPrev != playerFeetY;
+            cnd = cnd0 | cnd1;
+            // ensure that the crew lands in the same place as the player
+            cnd0 = currentRoomType == ROOM_DESCENT;
+            cnd1 = currentRoomType == ROOM_CHECK;
+            if cnd0 | cnd1 {
+                if crewCount > 0 {
+                    t = playerPosHistory - CREW_LAG;
+                    if crewCount > 1 {
+                        t = t - CREW_LAG;
+                    }
+                    if crewCount > 2 {
+                        t = t - CREW_LAG;
+                    }
+                    if t > HISTORY_MAX {
+                        t = HISTORY_MAX - 255 - t;
+                    }
+                    t = [ PLAYER_POS_HISTORY_SEG , PLAYER_FLAGS_HISTORY_OFFSET + t ];
+                    t = 1 & t >> PLAYER_ONGROUND_FLAG_OFFSET;
+                    cnd0 = onGround != t;
+                    cnd = cnd | cnd0;
+                }
+            }
+            if cnd {
+                playerPosHistory = playerPosHistory + 1;
+                if playerPosHistory > HISTORY_MAX {
+                    playerPosHistory = 0;
+                }
+                [ PLAYER_POS_HISTORY_SEG , PLAYER_X_HISTORY_OFFSET + playerPosHistory ] = playerX;
+                [ PLAYER_POS_HISTORY_SEG , PLAYER_Y_HISTORY_OFFSET + playerPosHistory ] = playerFeetY;
+                t = playerFacing;
+                t = t | onGround << PLAYER_ONGROUND_FLAG_OFFSET;
+                t = t | gliderOn << PLAYER_GLIDERON_FLAG_OFFSET;
+                t = t | onWall << PLAYER_ONWALL_FLAG_OFFSET;
+                t = t | walkFrame << PLAYER_WALKFRAME_OFFSET;
+                [ PLAYER_POS_HISTORY_SEG , PLAYER_FLAGS_HISTORY_OFFSET + playerPosHistory ] = t;
+            }
+        }
+        playerXPrev = playerX;
+        playerFeetYPrev = playerFeetY;
+        onGroundPrev = onGround;
+    }
+    frameCount = frameCount + 1;
+}
+
+func newGame {
+    [ 127 , 17 ] = 0; // disable GPU
+    oxygen = 99;
+    oxygenDelay = 0;
+    crewCount = 1;
+    playerPosHistory = 0;
+    playerXPrev = 0;
+    playerFeetYPrev = 0;
+    blockIndexPtr = 0;
+    deathRadius = 0;
+    endDone = 0;
+    endLine = 0;
+    endLines = 0;
+    deathDelay = 0;
+    endDelay = 0;
+    copyBlockedSide = 0;
+    copyLine = 255;
+    alive = 1;
+    buttons = 0;
+    prevButtons = 0;
+    titleDone = 0;
+    firstInputDone = 0;
+    countTitleDirs = 0;
+    frameCount = 0;
+    playerRoomX = PLAYER_ROOM_X_START;
+    playerSlice = 0;
+    playerSubSlice = 2; // skip 0,1 at start
+    playerFeetY = 0;
+    playerX = WALL_WIDTH + 4;
+    currentMap = MAP_SEG;
+    currentRoomType = ROOM_DESCENT;
+    previousRoomType = currentRoomType;
+    singleBlockY = SINGLE_BLOCK_START_Y;
+    leftDone = 0;
+    rightDone = 0;
+    upDone = 0;
+    dnDone = 0;
+    col0Index = 2;
+    col1Index = 5;
+    col2Index = 8;
+    countCol0Blocks = 0;
+    countCol1Blocks = 0;
+    countCol2Blocks = 0;
+    colFallingY = DONE_FALLING;
+    currentColFalling = DONE_FALLING;
+    checkSuccess = 0;
+    checkSeen = 0;
+    inPit = 0;
+    challengeMode = 0;
+    titleLettersDelay = 0;
+    titleDelay = 40; // shorten delay after restarts
+    titleDirsDelay = 0;
+    titleDoneDelay = 0;
+    blockIndex = 0;
+    call titleSpritesInit;
+    call resetKey;
+    call createStandardMap;
+    //call createTestMap
+    call writeTransparencyDeath;
+    // TODO reset platform/wall/halfwall if changed
+    call copyPlatformBlocks;
+    call copyWallBlocks;
+    call copyHalfWallBlocks;
+    // player sprite
+    [ 72 , 0 ] = 0; // disable
+    [ 72 , 1 ] = playerX; // X
+    [ 72 , 2 ] = PLAYER_SPRITE_FEET_Y - PLAYER_SPRITE_HEIGHT; // Y
+    [ 72 , 3 ] = PLAYER_SPRITE_WIDTH;
+    [ 72 , 4 ] = PLAYER_SPRITE_HEIGHT;
+    [ 72 , 5 ] = 128; // start of ROM
+    [ 72 , 6 ] = 0;
+    [ 72 , 7 ] = 240; // colors
+    [ 72 , 8 ] = 236;
+    [ 72 , 9 ] = 255;
+    // p2
+    //[ 72 , 16 ] = 144; // TODO testing 
+    [ 72 , 17 ] = playerX; // X
+    [ 72 , 18 ] = PLAYER_SPRITE_FEET_Y - PLAYER_SPRITE_HEIGHT; // Y
+    [ 72 , 19 ] = PLAYER_SPRITE_WIDTH;
+    [ 72 , 20 ] = PLAYER_SPRITE_HEIGHT;
+    [ 72 , 21 ] = 128; // start of ROM
+    [ 72 , 22 ] = 0;
+    [ 72 , 23 ] = 240; // colors
+    [ 72 , 24 ] = 236;
+    [ 72 , 25 ] = 255;
+    [ 127 , 17 ] = 1; // enable GPU
+}
+
+func resetKey {
+    [ KEY_SEG , KEY_OFFSET ] = 0;
+    [ KEY_SEG , KEY_OFFSET + 1 ] = 1;
+    [ KEY_SEG , KEY_OFFSET + 2 ] = 2;
+    [ KEY_SEG , KEY_OFFSET + 3 ] = 3;
+    [ KEY_SEG , KEY_OFFSET + 4 ] = 4;
+    [ KEY_SEG , KEY_OFFSET + 5 ] = 5;
+    [ KEY_SEG , KEY_OFFSET + 6 ] = 6;
+    [ KEY_SEG , KEY_OFFSET + 7 ] = 7;
+    [ KEY_SEG , KEY_OFFSET + 8 ] = 8;
+}
+
+// in: frameCount
+func generateBlockIndices {
+    i = 0;
+    t = 0;
+    while i < 254 {
+        [ BLOCK_INDEX_SEG , i ] = t;
+        i = i + 1;
+        t = t + 1;
+        if t > 8 {
+            t = 0;
+        }
+    }
+    t = frameCount;
+    while t > 8 {
+        t = t - 9;
+    }
+    i = 0;
+    i2 = t;
+    open = 0;
+    offset = 9
+    // TODO better
+    while i < 254 {
+        t = [ BLOCK_INDEX_SEG , i2 ];
+        [ BLOCK_INDEX_SEG , i] = t;
+        i = i + 1;
+        if open {
+            offset = offset + i;
+        }
+        if open == 0 {
+            offset = offset - i;
+        }
+        while offset > 9 {
+            offset = offset - 4;
+        }
+        i2 = i2 - offset;
+        open = ~ open;
+    }
+}
+
+// in: random
+func scrambleKey {
+    i = 0;
+    // challenge mode inputs:
+    // 0, 1, 3, 4, 6, 7
+    // can't pile 4 tall
+    // TODO better
+    while i < 9 {
+        [ KEY_SEG , KEY_OFFSET + i ] = 9 - i;
+        i = i + 1;
+    }
+}
+
+func titleUpdate {
+    if titleLettersDelay < TITLE_LETTERS_DELAY {
+        titleLettersDelay = titleLettersDelay + 1;
+    }
+    if titleLettersDelay == TITLE_LETTERS_DELAY {
+        titleLettersDelay = 0;
+        if currentLetterIterHor < MAX_TITLE_LETTERS_ITER_HOR {
+            call writeTitleLettersHor;
+            currentLetterIterHor = currentLetterIterHor + 1;
+        }
+        if currentLetterIterHor == MAX_TITLE_LETTERS_ITER_HOR {
+            if currentLetterIterVer < MAX_TITLE_LETTERS_ITER_VER {
+                call writeTitleLettersVer;
+                call writeTitleLetterN;
+                currentLetterIterVer = currentLetterIterVer + 1;
+            }
+        }
+    }
+    if titleDirsDelay < TITLE_DIRS_DELAY {
+        titleDirsDelay = titleDirsDelay + 1;
+        return;
+    }
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET ] = 144; // enable and transparency
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 16 ] = 144; // enable and transparency
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 32 ] = 208; // enable, transparency and flip hor
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 48 ] = 176; // enable, transparency nd flip vert
+    if firstInputDone == 0 {
+        if buttons > 0 {
+            if buttons < 16 { // dpad only
+                call setCurrentBlock;
+                firstInputDone = 1;
+            }
+        }
+    }
+    btn = BTN_LEFT;
+    call saveInput;
+    btn = BTN_RIGHT;
+    call saveInput;
+    btn = BTN_UP;
+    call saveInput;
+    btn = BTN_DN;
+    call saveInput;
+    if buttons & BTN_LEFT {
+        if prevButtons & BTN_LEFT == 0 {
+            leftDone = 1;
+            [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 39 ] = 255; // white
+        }
+    }
+    if buttons & BTN_RIGHT {
+        if prevButtons & BTN_RIGHT == 0 {
+            rightDone = 1;
+            [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 23 ] = 255; // white
+        }
+    }
+    if buttons & BTN_UP {
+        if prevButtons & BTN_UP == 0 {
+            upDone = 1;
+            [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 7 ] = 255; // white
+        }
+    }
+    if buttons & BTN_DN {
+        if prevButtons & BTN_DN == 0 {
+            dnDone = 1;
+            [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 55 ] = 255; // white
+        }
+    }
+    if leftDone & rightDone & upDone & dnDone {
+        titleDone = 1;
+        [ 79 , 240 ] = 0; // hide version sprite
+        call generateBlockIndices;
+    }
+    // UP UP DN DN LEFT RIGHT
+    if countTitleDirs == 6 {
+        cnd0 = [ TITLE_DIRS_SEG , TITLE_DIRS_OFFSET ] == BTN_UP;
+        cnd1 = [ TITLE_DIRS_SEG , TITLE_DIRS_OFFSET + 1 ] == BTN_UP;
+        cnd = cnd0 & cnd1;
+        cnd0 = [ TITLE_DIRS_SEG , TITLE_DIRS_OFFSET + 2 ] == BTN_DN;
+        cnd1 = [ TITLE_DIRS_SEG , TITLE_DIRS_OFFSET + 3 ] == BTN_DN;
+        cnd = cnd & cnd0 & cnd1;
+        cnd0 = [ TITLE_DIRS_SEG , TITLE_DIRS_OFFSET + 4 ] == BTN_LEFT;
+        cnd1 = [ TITLE_DIRS_SEG , TITLE_DIRS_OFFSET + 5 ] == BTN_RIGHT;
+        cnd = cnd & cnd0 & cnd1;
+        if cnd {
+            challengeMode = 1;
+            call scrambleKey;
+            countCol0Blocks = 0;
+            countCol1Blocks = 0;
+            countCol2Blocks = 0;
+            currentBlockIndex = [ KEY_SEG , KEY_OFFSET + 0 ];
+            call saveCurrentBlock;
+            currentBlockIndex = [ KEY_SEG , KEY_OFFSET + 1 ];
+            call saveCurrentBlock;
+            currentBlockIndex = [ KEY_SEG , KEY_OFFSET + 3 ];
+            call saveCurrentBlock;
+            currentBlockIndex = [ KEY_SEG , KEY_OFFSET + 4 ];
+            call saveCurrentBlock;
+            currentBlockIndex = [ KEY_SEG , KEY_OFFSET + 6 ];
+            call saveCurrentBlock;
+            currentBlockIndex = [ KEY_SEG , KEY_OFFSET + 7 ];
+            call saveCurrentBlock;
+            call setCurrentBlock;
+        }
+    }
+}
+
+// in: btn
+func saveInput {
+    if buttons & btn == btn {
+        if prevButtons & btn == 0 {
+            if countTitleDirs < 7 {
+                [ TITLE_DIRS_SEG , TITLE_DIRS_OFFSET + countTitleDirs ] = btn;
+                countTitleDirs = countTitleDirs + 1;
+            }
+            // three columns
+            // UP | DN | L/R
+            if btn == BTN_UP {
+                if countCol0Blocks < 11 {
+                    t = [ KEY_SEG , KEY_OFFSET + col0Index ];
+                    [ COL0_BLOCKS_SEG , countCol0Blocks ] = t;
+                    countCol0Blocks = countCol0Blocks + 1;
+                    col0Index = col0Index - 1;
+                    if col0Index == 255 {
+                        col0Index = 0;
+                    }
+                }
+            }
+            if btn == BTN_DN {
+                if countCol1Blocks < 11 {
+                    t = [ KEY_SEG , KEY_OFFSET + col1Index ];
+                    [ COL1_BLOCKS_SEG , countCol1Blocks ] = t;
+                    countCol1Blocks = countCol1Blocks + 1;
+                    col1Index = col1Index - 1;
+                    if col1Index < 3 {
+                        col1Index = 5;
+                    }
+                }
+            }
+            cnd0 = btn == BTN_LEFT;
+            cnd1 = btn == BTN_RIGHT;
+            if cnd0 | cnd1 {
+                if countCol2Blocks < 11 {
+                    t = [ KEY_SEG , KEY_OFFSET + col2Index ];
+                    [ COL2_BLOCKS_SEG , countCol2Blocks ] = t;
+                    countCol2Blocks = countCol2Blocks + 1;
+                    col2Index = col2Index - 1;
+                    if col2Index < 6 {
+                        col2Index = 8;
+                    }
+                }
+            }
+            blockIndex = blockIndex + 1;
+            if blockIndex > 8 {
+                blockIndex = 0;
+            }
+        }
+    }
+}
+
+// add a block to the pit
+// in: currentBlockIndex
+func saveCurrentBlock {
+    // three columns
+    // UP | DN | L/R
+    // KEY is used to scramble locations
+    t = [ KEY_SEG , KEY_OFFSET + currentBlockIndex ];
+    if t < 3 {
+        if countCol0Blocks < 11 {
+            [ COL0_BLOCKS_SEG , countCol0Blocks ] = currentBlockIndex;
+            countCol0Blocks = countCol0Blocks + 1;
+            col0Index = col0Index + 1;
+            if col0Index > 2 {
+                col0Index = 0;
+            }
+        }
+    }
+    cnd0 = t > 2;
+    cnd1 = t < 6;
+    if cnd0 & cnd1 {
+        if countCol1Blocks < 11 {
+            [ COL1_BLOCKS_SEG , countCol1Blocks ] = currentBlockIndex;
+            countCol1Blocks = countCol1Blocks + 1;
+            col1Index = col1Index + 1;
+            if col1Index > 5 {
+                col1Index = 3;
+            }
+        }
+    }
+    if t > 5 {
+        if countCol2Blocks < 11 {
+            [ COL2_BLOCKS_SEG , countCol2Blocks ] = currentBlockIndex;
+            countCol2Blocks = countCol2Blocks + 1;
+            col2Index = col2Index + 1;
+            if col1Index > 8 {
+                col1Index = 5;
+            }
+        }
+    }
+}
+
+func descentMovement {
+    if onGround {
+        // prevent no horizontal movement if gliding
+        // unless slid down the side of a platform/wall
+        moveLeftDistance = 0;
+        moveRightDistance = 0;
+    }
+    if buttons & BTN_LEFT {
+        moveLeftDistance = PLAYER_MOVE_SPEED_X;
+        moveRightDistance = 0;
+        playerFacing = DIR_LEFT;
+    }
+    if buttons & BTN_RIGHT {
+        moveRightDistance = PLAYER_MOVE_SPEED_X;
+        moveLeftDistance = 0;
+        playerFacing = DIR_RIGHT;
+    }
+    if subSliceOffset == 0 { // playerfeety < 40
+        side = [ currentMap , sliceOffset + playerSubSlice - 1 ];
+        playerSubSliceAboveLeft = LOWER_2_BITS & side >> SIDE_L_OFFSET;
+        playerSubSliceAboveRight = LOWER_2_BITS & side;
+        side = [ currentMap , sliceOffset + playerSubSlice ];
+        playerSubSliceBelowLeft = LOWER_2_BITS & side >> SIDE_L_OFFSET;
+        playerSubSliceBelowRight = LOWER_2_BITS & side;
+    }
+    if subSliceOffset == 1 {
+        side = [ currentMap , sliceOffset + playerSubSlice ];
+        playerSubSliceAboveLeft = LOWER_2_BITS & side >> SIDE_L_OFFSET;
+        playerSubSliceAboveRight = LOWER_2_BITS & side;
+        side = [ currentMap , sliceOffset + playerSubSlice + 1 ];
+        playerSubSliceBelowLeft = LOWER_2_BITS & side >> SIDE_L_OFFSET;
+        playerSubSliceBelowRight = LOWER_2_BITS & side;
+    }
+    // horizontal movement
+    if moveLeftDistance > 0 {
+        // door
+        if playerX - PLAYER_MOVE_SPEED_X == 0 {
+            previousRoomType = currentRoomType;
+            sliceEnteredFrom = playerSlice;
+            subSliceEnteredFrom = playerSubSlice;
+            t = playerSubSlice;
+            i = 0;
+            while i < playerSlice {
+                i = i + 1;
+                t = t + 4;
+            }
+            subSliceEnteredFrom = playerSubSlice - 1;
+            if subSliceEnteredFrom == 255 {
+                subSliceEnteredFrom = 3;
+                sliceEnteredFrom = sliceEnteredFrom - 1;
+            }
+            if playerFeetY == 0 {
+                // the "being in the next subslice at feetY == 0" issue
+                t = t - 1;
+            }
+            if playerFeetY > 0 {
+                subSliceEnteredFrom = subSliceEnteredFrom + 1;
+                if subSliceEnteredFrom == 4 {
+                    subSliceEnteredFrom = 0;
+                    sliceEnteredFrom = sliceEnteredFrom + 1;
+                }
+            }
+            currentRoomType = [ currentMap , t ];
+            currentRoomType = currentRoomType >> ROOM_L_OFFSET;
+            side = [ currentMap , t ];
+            side = side >> SIDE_L_OFFSET;
+            side = side & LOWER_2_BITS;
+            if side == SIDE_BLOCKED {
+                // entering from blocked platform
+                // must unblock other side
+                side = [ currentMap - 1 , t ];
+                side = side & RIGHT_SIDE_MASK;
+                side = side | SIDE_OPEN;
+                [ currentMap - 1 , t ] = side;
+            }
+            side = [ currentMap , t ];
+            side = side >> ROOM_L_OFFSET;
+            side = side & LOWER_2_BITS;
+            if side == ROOM_EMPTY {
+                // open side on other end of passage
+                side = [ currentMap - 1 , t ];
+                side = side & RIGHT_SIDE_MASK;
+                side = side | SIDE_OPEN;
+                [ currentMap - 1 , t ] = side;
+            }
+            sideEnteredFrom = DIR_RIGHT;
+            playerX = 0 - WALL_WIDTH;
+            playerRoomX = playerRoomX - 1;
+            //call playerHistoryInit;
+            return;
+        }
+        // wall
+        if playerX == WALL_WIDTH {
+            cnd = 0;
+            if subSliceOffset {
+                if playerFeetY + PLAYER_HEIGHT > 32 {
+                    cnd = playerSubSliceAboveLeft > SIDE_CLOSED;
+                }
+            }
+            if playerFeetY == 0 {
+                cnd = playerSubSliceAboveLeft > SIDE_CLOSED;
+            }
+            if cnd == 0 {
+                onWall = WALL_MOVING_LEFT;
+                moveLeftDistance = 0;
+            }
+        }
+        if playerFeetY > 0 {
+            if playerFeetY < PLATFORM_HEIGHT + PLAYER_HEIGHT {
+                if playerX < PLATFORM_WIDTH + WALL_WIDTH + PLAYER_MOVE_SPEED_X {
+                    if playerSubSliceAboveLeft > SIDE_NONE { // platform
+                        onWall = WALL_MOVING_LEFT;
+                        moveLeftDistance = 0;
+                    }
+                }
+            }
+        }
+        // left block
+        cnd0 = playerX - PLAYER_MOVE_SPEED_X < 64;
+        cnd1 = playerX > 64 - PLAYER_MOVE_SPEED_X;
+        if cnd0 & cnd1 {
+            if playerFeetY == 0 {
+                if playerSubSliceAboveLeft == SIDE_BLOCKED {
+                    onWall = WALL_MOVING_LEFT;
+                    moveLeftDistance = 0;
+                }
+            }
+            if playerFeetY > 32 {
+                if subSliceOffset == 0 {
+                    if playerSubSliceBelowLeft == SIDE_BLOCKED {
+                        onWall = WALL_MOVING_LEFT;
+                        moveLeftDistance = 0;
+                    }
+                }
+                if subSliceOffset {
+                    if playerSubSliceAboveLeft == SIDE_BLOCKED {
+                        onWall = WALL_MOVING_LEFT;
+                        moveLeftDistance = 0;
+                    }
+                }
+            }
+        }
+        // right block
+        cnd0 = playerX - PLAYER_MOVE_SPEED_X < 224;
+        cnd1 = playerX > 223;
+        if cnd0 & cnd1 {
+            if playerSubSliceBelowRight == SIDE_BLOCKED {
+                if subSliceOffset == 0 {
+                    onWall = WALL_MOVING_RIGHT;
+                    moveLeftDistance = 0;
+                }
+                if subSliceOffset {
+                    if playerFeetY > 59 {
+                        onWall = WALL_MOVING_RIGHT;
+                        moveLeftDistance = 0;
+                    }
+                }
+            }
+        }
+    }
+    if moveRightDistance > 0 {
+        // door
+        if playerX + PLAYER_WIDTH + PLAYER_MOVE_SPEED_X == 0 {
+            previousRoomType = currentRoomType;
+            sliceEnteredFrom = playerSlice;
+            subSliceEnteredFrom = playerSubSlice;
+            t = playerSubSlice;
+            i = 0;
+            // TODO use sliceOffset?
+            while i < playerSlice {
+                i = i + 1;
+                t = t + 4;
+            }
+            currentRoomType = [ currentMap , t ];
+            currentRoomType = currentRoomType >> ROOM_R_OFFSET;
+            currentRoomType = currentRoomType & LOWER_2_BITS;
+            side = [ currentMap , t ] ;
+            side = side & LOWER_2_BITS;
+            if side == SIDE_BLOCKED {
+                // entering from blocked platform
+                // must unblock other side
+                side = [ currentMap + 1 , t ];
+                side = side & LEFT_SIDE_MASK;
+                side = side | SIDE_OPEN << SIDE_L_OFFSET;
+                [ currentMap + 1 , t ] = side;
+            }
+            side = [ currentMap , t ];
+            side = side >> ROOM_R_OFFSET;
+            side = side & LOWER_2_BITS;
+            if side == ROOM_EMPTY {
+                // open side on other end of passage
+                side = [ currentMap + 1 , t ];
+                side = side & LEFT_SIDE_MASK;
+                side = side | SIDE_OPEN << SIDE_L_OFFSET;
+                [ currentMap + 1 , t ] = side;
+            }
+            sideEnteredFrom = DIR_LEFT;
+            playerX = WALL_WIDTH;
+            playerRoomX = playerRoomX + 1;
+            //call playerHistoryInit;
+            return;
+        }
+        // wall
+        if playerX > 248 - PLAYER_WIDTH + PLAYER_MOVE_SPEED_X {
+            if playerSubSliceBelowRight < SIDE_BLOCKED {
+                onWall = WALL_MOVING_RIGHT;
+                moveRightDistance = 0;
+            }
+            if playerFeetY < 5 {
+                onWall = WALL_MOVING_RIGHT;
+                moveRightDistance = 0;
+            }
+            if playerFeetY > 5 {
+                cnd = 0;
+                if subSliceOffset == 0 {
+                    if playerFeetY < 28 {
+                        cnd = playerSubSliceBelowRight > SIDE_CLOSED;
+                    }
+                }
+                if cnd == 0 {
+                    onWall = WALL_MOVING_RIGHT;
+                    moveRightDistance = 0;
+                }
+            }
+        }
+        if playerFeetY > 27 {
+            if playerFeetY < 27 + PLATFORM_HEIGHT + PLAYER_HEIGHT {
+                if playerX + PLAYER_WIDTH + PLAYER_MOVE_SPEED_X > 184 {
+                    // above/below subslice changes when playerFeetY > 39
+                    // check necessary for right side platforms
+                    if subSliceOffset == 0 {
+                        if playerSubSliceBelowRight > SIDE_NONE { // platform
+                            onWall = WALL_MOVING_RIGHT;
+                            moveRightDistance = 0;
+                        }
+                    }
+                    if subSliceOffset {
+                        if playerSubSliceAboveRight > SIDE_NONE { // platform
+                            onWall = WALL_MOVING_RIGHT;
+                            moveRightDistance = 0;
+                        }
+                    }
+                }
+            }
+        }
+        // right block
+        if playerSubSliceBelowRight == SIDE_BLOCKED {
+            cnd0 = playerX + PLAYER_WIDTH + PLAYER_MOVE_SPEED_X > 192;
+            cnd1 = playerX + PLAYER_WIDTH < 220;
+            if cnd0 & cnd1 {
+                if subSliceOffset == 0 {
+                    onWall = WALL_MOVING_RIGHT;
+                    moveRightDistance = 0;
+                }
+                if subSliceOffset {
+                    if playerFeetY > 59 {
+                        onWall = WALL_MOVING_RIGHT;
+                        moveRightDistance = 0;
+                    }
+                }
+            }
+        }
+        // left block
+        cnd0 = playerX + PLAYER_WIDTH + PLAYER_MOVE_SPEED_X > 32;
+        cnd1 = playerX + PLAYER_WIDTH < 32 + PLAYER_MOVE_SPEED_X;
+        if cnd0 & cnd1 {
+            if playerFeetY == 0 {
+                if playerSubSliceAboveLeft == SIDE_BLOCKED {
+                    onWall = WALL_MOVING_LEFT;
+                    moveRightDistance = 0;
+                }
+            }
+            if playerFeetY > 32 {
+                if subSliceOffset == 0 {
+                    if playerSubSliceBelowLeft == SIDE_BLOCKED {
+                        onWall = WALL_MOVING_LEFT;
+                        moveRightDistance = 0;
+                    }
+                }
+                if subSliceOffset {
+                    if playerSubSliceAboveLeft == SIDE_BLOCKED {
+                        onWall = WALL_MOVING_LEFT;
+                        moveRightDistance = 0;
+                    }
+                }
+            }
+        }
+    }
+    if moveLeftDistance > 0 {
+        playerX = playerX - moveLeftDistance;
+        walkFrameDelay = walkFrameDelay + 1;
+        onWall = 0;
+    }
+    if moveRightDistance > 0 {
+        playerX = playerX + moveRightDistance;
+        walkFrameDelay = walkFrameDelay + 1;
+        onWall = 0;
+    }
+    call playerWalkUpdate;
+    // vertical movement
+    fallDistance = 2;
+    if onGround {
+        fallDistance = 0;
+    }
+    if gliderOn {
+        fallDistance = 1;
+    }
+    onGround = 0;
+    // platform collisions
+    cnd0 = playerFeetY + fallDistance > 64;
+    cnd1 = playerFeetY + fallDistance < 64 + 8;
+    cnd = cnd0 & cnd1;
+    cnd0 = playerFeetY == 0;
+    cnd = cnd | cnd0;
+    if cnd {
+        if playerSubSliceAboveLeft > SIDE_NONE { // platform
+            if playerX < WALL_WIDTH + PLATFORM_WIDTH {
+                onGround = 1;
+                fallDistance = 0;
+                if cnd0 == 0 {
+                    fallDistance = SUBSLICE_HEIGHT - playerFeetY;
+                }
+            }
+        }
+    }
+    cnd0 = playerFeetY + fallDistance > 26;
+    cnd1 = playerFeetY + fallDistance < 26 + 8;
+    if cnd0 & cnd1 {
+        if playerSubSliceBelowRight > SIDE_NONE { // platform
+            if playerX + PLAYER_WIDTH > 184 {
+                onGround = 1;
+                fallDistance = 27 - playerFeetY;
+            }
+        }
+    }
+    // blocked collisions
+    // left block
+    if subSliceOffset == 0 {
+        cnd0 = playerX + PLAYER_WIDTH > 32;
+        cnd1 = playerX < 64;
+        if cnd0 & cnd1 {
+            if playerSubSliceBelowLeft == SIDE_BLOCKED {
+                if playerFeetY + fallDistance > 31 {
+                    onGround = 1;
+                    fallDistance = 32 - playerFeetY;
+                }
+            }
+        }
+    }
+    // right block
+    if subSliceOffset {
+        cnd0 = playerX + PLAYER_WIDTH > 192;
+        cnd1 = playerX < 224;
+        if cnd0 & cnd1 {
+            if playerSubSliceBelowRight == SIDE_BLOCKED {
+                if playerFeetY + fallDistance > 58 {
+                    onGround = 1;
+                    fallDistance = 59 - playerFeetY;
+                }
+            }
+        }
+    }
+    if onGround {
+        gliderOn = 0;
+    }
+    if onGround == 0 {
+        // turn glider on automatically, unless on wall
+        gliderOn = 1;
+        if onWall {
+            cnd0 = moveLeftDistance > 0;
+            cnd1 = moveRightDistance > 0;
+            if cnd0 == cnd1 {
+                // not moving away from wall, glider stays off
+                gliderOn = 0;
+            }
+        }
+        if buttons & BTN_DN {
+            walkFrame = 0;
+            gliderOn = 0;
+        }
+        if gliderOn {
+            gliderFloatCount = gliderFloatCount + 1;
+            if gliderFloatCount > GLIDER_FLOAT {
+                gliderFloatCount = 0;
+            }
+            if gliderFloatCount > 0 {
+                fallDistance = 0;
+            }
+        }
+        if playerFeetY + fallDistance > SUBSLICE_HEIGHT + PLATFORM_HEIGHT + PLAYER_HEIGHT {
+            side = [ currentMap , playerSubSlice + 1 ];
+            playerSubSliceBelowLeft = LOWER_2_BITS & side >> SIDE_L_OFFSET;
+            playerSubSliceBelowRight = LOWER_2_BITS & side;
+        }
+        if playerX < WALL_WIDTH + PLATFORM_WIDTH {
+            if playerSubSliceBelowLeft > SIDE_NONE { // platform
+                if fallDistance > SUBSLICE_HEIGHT - playerFeetY {
+                    fallDistance = SUBSLICE_HEIGHT - playerFeetY;
+                }
+            }
+        }
+    }
+    playerFeetY = playerFeetY + fallDistance;
+    // done falling
+    if playerFeetY > SUBSLICE_HEIGHT - 1 {
+        playerSubSlice = playerSubSlice + 1;
+        playerFeetY = 0;
+    }
+    if playerSubSlice > 3 {
+        playerSlice = playerSlice + 1;
+        playerSubSlice = 0;
+    }
+    if playerFeetY > 0 {
+        if playerFeetY < 10 {
+            singleBlockY = SINGLE_BLOCK_START_Y;
+        }
+    }
+    if playerFeetY > 27 {
+        if playerFeetY < 37 {
+            singleBlockY = SINGLE_BLOCK_START_Y;
+        }
+    }
+    if playerSlice > 0 {
+        if playerSubSlice == 2 {
+            if copyBlockedSide == WALL_MOVING_RIGHT {
+                copyDestSegment = BLOCKED_R_SPRDATA_SEG;
+                // + 1 because room is in next slice
+                nextBlockIndex = [ BLOCK_INDEX_SEG , playerSlice + 1 ];
+                if playerRoomX < PLAYER_ROOM_X_START {
+                    nextBlockIndex = [ BLOCK_INDEX_SEG , LEFT_BLOCK_INDEX_OFFSET + playerSlice + 1 ];
+                }
+                call copyBlockedLine;
+                copyLine = copyLine + 1;
+                if copyLine > 3 {
+                    copyBlockedSide = WALL_MOVING_LEFT;
+                    copyLine = 0;
+                }
+            }
+        }
+        if playerSubSlice == 3 {
+            if copyBlockedSide == WALL_MOVING_LEFT {
+                copyDestSegment = BLOCKED_L_SPRDATA_SEG;
+                // + 1 because room is in next slice
+                nextBlockIndex = [ BLOCK_INDEX_SEG , LEFT_BLOCK_INDEX_OFFSET + playerSlice + 1 ];
+                if playerRoomX > PLAYER_ROOM_X_START {
+                    nextBlockIndex = [ BLOCK_INDEX_SEG , playerSlice + 1 ];
+                }
+                call copyBlockedLine;
+                copyLine = copyLine + 1;
+                if copyLine > 3 {
+                    copyBlockedSide = 0;
+                }
+            }
+        }
+        if playerSubSlice == 1 {
+            if copyBlockedSide == 0 {
+                copyBlockedSide = WALL_MOVING_RIGHT;
+                copyLine = 0;
+            }
+        }
+    }
+    subSliceOffset = 0;
+    if playerFeetY > 39 {
+        subSliceOffset = 1;
+    }
+}
+
+func passageBlockMovement {
+    moveLeftDistance = 0;
+    moveRightDistance = 0;
+    if buttons & BTN_LEFT {
+        moveLeftDistance = PLAYER_MOVE_SPEED_X;
+        moveRightDistance = 0;
+        playerFacing = DIR_LEFT;
+    }
+    if buttons & BTN_RIGHT {
+        moveRightDistance = PLAYER_MOVE_SPEED_X;
+        moveLeftDistance = 0;
+        playerFacing = DIR_RIGHT;
+    }
+    if moveLeftDistance > 0 {
+        if singleBlockY > SINGLE_BLOCK_START_Y {
+            if playerX > 135 {
+                if playerX - PLAYER_MOVE_SPEED_X < 136 {
+                    moveLeftDistance = 0;
+                }
+            }
+        }
+        if currentRoomType == ROOM_WATERFALL {
+            if playerX - PLAYER_MOVE_SPEED_X < 94 {
+                moveLeftDistance = 0;
+            }
+        }
+        // door
+        if playerX - PLAYER_MOVE_SPEED_X == 0 {
+            previousRoomType = currentRoomType;
+            currentRoomType = ROOM_DESCENT;
+            playerX = 0 - WALL_WIDTH;
+            playerRoomX = playerRoomX - 1;
+            playerFeetY = 27;
+            onGround = 1;
+            gliderOn = 0;
+            playerSlice = sliceEnteredFrom;
+            playerSubSlice = subSliceEnteredFrom;
+            if sideEnteredFrom == DIR_RIGHT {
+                currentMap = currentMap - 1;
+            }
+            copyBlockedSide = WALL_MOVING_RIGHT;
+            copyLine = 0;
+            //call playerHistoryInit;
+            return;
+        }
+        playerX = playerX - moveLeftDistance;
+        walkFrameDelay = walkFrameDelay + 1;
+    }
+    if moveRightDistance > 0 {
+        if singleBlockY > SINGLE_BLOCK_START_Y {
+            if playerX + PLAYER_WIDTH < 121 {
+                if playerX + PLAYER_WIDTH + PLAYER_MOVE_SPEED_X > 120 {
+                    moveRightDistance = 0;
+                }
+            }
+        }
+        if currentRoomType == ROOM_WATERFALL {
+            if playerX + PLAYER_WIDTH + PLAYER_MOVE_SPEED_X > 162 {
+                moveRightDistance = 0;
+            }
+        }
+        // door
+        if playerX + PLAYER_WIDTH + PLAYER_MOVE_SPEED_X == 0 {
+            previousRoomType = currentRoomType;
+            currentRoomType = ROOM_DESCENT;
+            playerX = WALL_WIDTH;
+            playerRoomX = playerRoomX + 1;
+            playerFeetY = 0;
+            onGround = 1;
+            gliderOn = 0;
+            playerSlice = sliceEnteredFrom;
+            // player enters descent at feetY = 0 so +1 subslice
+            playerSubSlice = subSliceEnteredFrom + 1;
+            if playerSubSlice == 4 {
+                playerSubSlice = 0;
+                playerSlice = playerSlice + 1;
+            }
+            if sideEnteredFrom == DIR_LEFT {
+                currentMap = currentMap + 1;
+            }
+            copyBlockedSide = WALL_MOVING_RIGHT;
+            copyLine = 0;
+            //call playerHistoryInit;
+            return;
+        }
+        playerX = playerX + moveRightDistance;
+        walkFrameDelay = walkFrameDelay + 1;
+    }
+    if challengeMode {
+        cnd0 = currentRoomType == ROOM_EMPTY;
+        cnd1 = currentRoomType == ROOM_WATERFALL;
+        if playerX > 121 {
+            if playerX < 135 {
+                if buttons & BTN_DN {
+                    if prevButtons & BTN_DN == 0 {
+                        if cnd0 {
+                            currentRoomType = ROOM_WATERFALL;
+                        }
+                        if cnd1 {
+                            currentRoomType = ROOM_EMPTY;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    cnd0 = singleBlockY == SINGLE_BLOCK_START_Y;
+    if cnd0 & selectBlock {
+        cnd0 = playerX > 64;
+        cnd1 = playerX < 80;
+        cnd = cnd0 & cnd1;
+        cnd0 = playerX > 176;
+        cnd1 = playerX < 192;
+        cnd0 = cnd0 & cnd1;
+        cnd = cnd | cnd0;
+        // player in prompt range
+        cnd0 = blockScroll == blockScrollEnd;
+        cnd = cnd & cnd0;
+        // and not busy scrolling chain/block
+        if cnd {
+            if buttons & BTN_UP {
+                if prevButtons & BTN_UP == 0 {
+                    if currentBlockIndex == 0 {
+                        blockSprDataOffset = 0;
+                        blockSprDataSeg = ROM_BLOCK_SPRDATA_SEG;
+                    }
+                    currentBlockIndex = currentBlockIndex + 1;
+                    if currentBlockIndex == 9 {
+                        currentBlockIndex = 0;
+                    }
+                    blockScroll = 0;
+                    blockScrollEnd = 16;
+                }
+            }
+            if buttons & BTN_DN {
+                if prevButtons & BTN_DN == 0 {
+                    currentBlockIndex = currentBlockIndex - 1;
+                    if currentBlockIndex == 255 {
+                        currentBlockIndex = 8;
+                        blockSprDataOffset = 64;
+                        blockSprDataSeg = ROM_BLOCK_SPRDATA_SEG + 2;
+                    }
+                    blockScroll = 16;
+                    blockScrollEnd = 0;
+                }
+            }
+        }
+        // scroll chains and block
+        if blockScroll < blockScrollEnd {
+            // UP pressed
+            t = 0;
+            i = 0;
+            while i < blockScroll {
+                i = i + 1;
+                t = t + 2;
+            }
+            if blockSprDataOffset + 4 == 0 {
+                blockSprDataSeg = blockSprDataSeg + 1;
+            }
+            blockSprDataOffset = blockSprDataOffset + 4;
+            if blockSprDataSeg == ROM_BLOCK_SPRDATA_SEG + 2 {
+                if blockSprDataOffset == 64 {
+                    blockSprDataSeg = ROM_BLOCK_SPRDATA_SEG;
+                    blockSprDataOffset = 0;
+                }
+            }
+            [ BLOCK_SPRAT_SEG , 5 ] = blockSprDataSeg;
+            [ BLOCK_SPRAT_SEG , 6 ] = blockSprDataOffset;
+            [ BLOCK_SPRAT_SEG , 230 ] = ROM_CHAIN_OFFSET + t;
+            [ BLOCK_SPRAT_SEG , 246 ] = ROM_CHAIN_OFFSET + t;
+            blockScroll = blockScroll + 1;
+        }
+        if blockScroll > blockScrollEnd {
+            // DN pressed
+            t = 32;
+            i = 16;
+            while i > blockScroll {
+                i = i - 1;
+                t = t - 2;
+            }
+            if blockSprDataOffset - 4 == 252 {
+                blockSprDataSeg = blockSprDataSeg - 1;
+            }
+            blockSprDataOffset = blockSprDataOffset - 4;
+            if blockSprDataSeg == ROM_BLOCK_SPRDATA_SEG {
+                if blockSprDataOffset == 0 {
+                    blockSprDataSeg = ROM_BLOCK_SPRDATA_SEG + 2;
+                    blockSprDataOffset = 64;
+                }
+            }
+            [ BLOCK_SPRAT_SEG , 5 ] = blockSprDataSeg;
+            [ BLOCK_SPRAT_SEG , 6 ] = blockSprDataOffset;
+            [ BLOCK_SPRAT_SEG , 230 ] = ROM_CHAIN_OFFSET + t;
+            [ BLOCK_SPRAT_SEG , 246 ] = ROM_CHAIN_OFFSET + t;
+            blockScroll = blockScroll - 1;
+        }
+    }
+    if currentRoomType == ROOM_BLOCK {
+        if singleBlockY == SINGLE_BLOCK_START_Y {
+            fallenBlockDone = 0;
+            if sideEnteredFrom == DIR_LEFT {
+                if playerX > 152 {
+                    if singleBlockY == SINGLE_BLOCK_START_Y {
+                        singleBlockY = singleBlockY + 1;
+                    }
+                }
+            }
+            if sideEnteredFrom == DIR_RIGHT {
+                if playerX - PLAYER_WIDTH < 104 {
+                    if singleBlockY == SINGLE_BLOCK_START_Y {
+                        singleBlockY = singleBlockY + 1;
+                    }
+                }
+            }
+        }
+        if singleBlockY != SINGLE_BLOCK_START_Y {
+            if fallenBlockDone == 0 {
+                fallenBlockDone = 1;
+                call saveCurrentBlock;
+            }
+        }
+    }
+    call playerWalkUpdate;
+}
+
+func passageCheckMovement {
+    moveLeftDistance = 0;
+    moveRightDistance = 0;
+    if buttons & BTN_LEFT {
+        moveLeftDistance = PLAYER_MOVE_SPEED_X;
+        moveRightDistance = 0;
+        playerFacing = DIR_LEFT;
+    }
+    if buttons & BTN_RIGHT {
+        moveRightDistance = PLAYER_MOVE_SPEED_X;
+        moveLeftDistance = 0;
+        playerFacing = DIR_RIGHT;
+    }
+    fallDistance = 0;
+    cnd0 = playerX > 103;
+    cnd1 = playerX + PLAYER_WIDTH < 152;
+    if cnd0 & cnd1 {
+        // moving exclusively within column bounds
+        if playerFeetY > PASSAGE_PLAYER_FEET_START_Y {
+            inPit = 1;
+            call playerHistoryHalt;
+            // in the pit
+            if moveLeftDistance > 0 {
+                if playerX - PLAYER_MOVE_SPEED_X < 104 {
+                    moveLeftDistance = 0;
+                }
+            }
+            if moveRightDistance > 0 {
+                if playerX + PLAYER_WIDTH + PLAYER_MOVE_SPEED_X > 152 {
+                    moveRightDistance = 0;
+                }
+            }
+        }
+        // start falling once off the edges of the pit
+        if playerX > 103 {
+            if playerX + PLAYER_WIDTH < 152 {
+                fallDistance = 2;
+            }
+        }
+    }
+    cnd0 = playerX + PLAYER_WIDTH > 104;
+    cnd1 = playerX < 152;
+    if moveRightDistance > 0 {
+        cnd0 = playerX + PLAYER_WIDTH + PLAYER_MOVE_SPEED_X > 104;
+    }
+    if moveLeftDistance > 0 {
+        cnd1 = playerX - PLAYER_MOVE_SPEED_X < 152;
+    }
+    if cnd0 & cnd1 {
+        // three columns
+        i = 0;
+        while i < 3 {
+            // x = left side of current block
+            if i == 0 {
+                count = countCol0Blocks;
+                colSeg = COL0_BLOCKS_SEG;
+                x = 104;
+            }
+            if i == 1 {
+                count = countCol1Blocks;
+                colSeg = COL1_BLOCKS_SEG;
+                x = 120;
+            }
+            if i == 2 {
+                count = countCol2Blocks;
+                colSeg = COL2_BLOCKS_SEG;
+                x = 136;
+            }
+            y = 144; // bottom of pit
+            // only check for blocks at or below player height
+            // 4 for first check, 6 for second check
+            if playerRoomXDist < 4 {
+                if count > 4 {
+                    count = 4;
+                }
+            }
+            if playerRoomXDist > 3 {
+                y = 176; // second check bottom of pit
+                if count > 6 {
+                    count = 6;
+                }
+            }
+            // y = top of current column
+            i2 = 0;
+            while i2 < count {
+                y = y - BLOCK_DIM;
+                i2 = i2 + 1;
+            }
+            if moveRightDistance > 0 {
+                if playerFeetY > y {
+                    // vertically able to collide
+                    if playerX + PLAYER_WIDTH == x {
+                        if playerX + PLAYER_WIDTH + PLAYER_MOVE_SPEED_X > x {
+                            moveRightDistance = 0;
+                        }
+                    }
+                }
+            }
+            if moveLeftDistance > 0 {
+                if playerFeetY > y {
+                    // vertically able to collide
+                    if playerX == x + BLOCK_DIM {
+                        if playerX - PLAYER_MOVE_SPEED_X < x + BLOCK_DIM {
+                            moveLeftDistance = 0;
+                        }
+                    }
+                }
+            }
+            cnd0 = playerX > x;
+            cnd1 = playerX == x;
+            if cnd0 | cnd1 {
+                cnd0 = playerX < x + BLOCK_DIM;
+                cnd1 = playerX == x + BLOCK_DIM;
+                if cnd0 | cnd1 {
+                    if playerFeetY == y {
+                        fallDistance = 0;
+                    }
+                }
+            }
+            i = i + 1;
+        }
+    }
+    playerFeetY = playerFeetY + fallDistance;
+    // moving within column bounds
+    if playerFeetY > PASSAGE_PLAYER_FEET_START_Y {
+        inPit = 1;
+        call playerHistoryHalt;
+        // in the pit
+        if moveLeftDistance > 0 {
+            if playerX - PLAYER_MOVE_SPEED_X < 104 {
+                moveLeftDistance = 0;
+            }
+        }
+        if moveRightDistance > 0 {
+            if playerX + PLAYER_WIDTH + PLAYER_MOVE_SPEED_X > 151 {
+                moveRightDistance = 0;
+            }
+        }
+    }
+    if moveLeftDistance > 0 {
+        // door
+        if playerX - PLAYER_MOVE_SPEED_X == 0 {
+            previousRoomType = currentRoomType;
+            currentRoomType = ROOM_DESCENT;
+            playerX = 0 - WALL_WIDTH;
+            playerRoomX = playerRoomX - 1;
+            playerFeetY = 27;
+            onGround = 1;
+            gliderOn = 0;
+            playerSlice = sliceEnteredFrom;
+            playerSubSlice = subSliceEnteredFrom;
+            if sideEnteredFrom == DIR_RIGHT {
+                currentMap = currentMap - 1;
+            }
+            //call playerHistoryInit;
+            return;
+        }
+        playerX = playerX - moveLeftDistance;
+        walkFrameDelay = walkFrameDelay + 1;
+        onWall = 0;
+    }
+    if moveRightDistance > 0 {
+        // door
+        if playerX + PLAYER_WIDTH + PLAYER_MOVE_SPEED_X == 0 {
+            previousRoomType = currentRoomType;
+            currentRoomType = ROOM_DESCENT;
+            playerX = WALL_WIDTH;
+            playerRoomX = playerRoomX + 1;
+            playerFeetY = 0;
+            onGround = 1;
+            gliderOn = 0;
+            playerSlice = sliceEnteredFrom;
+            // player enters descent at feeY = 0 so +1 subslice
+            playerSubSlice = subSliceEnteredFrom + 1;
+            if sideEnteredFrom == DIR_LEFT {
+                currentMap = currentMap + 1;
+            }
+            //call playerHistoryInit;
+            return;
+        }
+        playerX = playerX + moveRightDistance;
+        walkFrameDelay = walkFrameDelay + 1;
+        onWall = 0;
+    }
+    call playerWalkUpdate;
+}
+
+func pitDeath {
+    t = 3;
+    if playerRoomXDist > 3 {
+        t = 5;
+    }
+    if currentColFalling == DONE_FALLING {
+        if countCol2Blocks < t {
+            currentColFalling = 2;
+        }
+        if countCol1Blocks < t {
+            currentColFalling = 1;
+        }
+        if countCol0Blocks < t {
+            currentColFalling = 0;
+        }
+    }
+    if currentColFalling == 0 {
+        x = 104;
+        colSprAtSeg = COL0_SPRAT_SEG;
+        colBlocksSeg = COL0_BLOCKS_SEG;
+        countColBlocks = countCol0Blocks;
+        colIndex = col0Index;
+        cnd0 = playerX > 103;
+        cnd1 = playerX < 120;
+    }
+    if currentColFalling == 1 {
+        x = 120;
+        colSprAtSeg = COL1_SPRAT_SEG;
+        colBlocksSeg = COL1_BLOCKS_SEG;
+        countColBlocks = countCol1Blocks;
+        colIndex = col1Index;
+        cnd0 = playerX > 119;
+        cnd1 = playerX < 136;
+    }
+    if currentColFalling == 2 {
+        x = 136;
+        colSprAtSeg = COL2_SPRAT_SEG;
+        colBlocksSeg = COL2_BLOCKS_SEG;
+        countColBlocks = countCol2Blocks;
+        colIndex = col2Index;
+        cnd0 = playerX > 135;
+        cnd1 = playerX < 152;
+    }
+    if currentColFalling != DONE_FALLING {
+        if colFallingY == DONE_FALLING {
+            colFallingY = FALLING_START_Y;
+            call fallingBlockSpriteInit;
+        }
+    }
+    if colFallingY != DONE_FALLING {
+        i = 0;
+        t = 0;
+        while i < countColBlocks {
+            i = i + 1;
+            t = t + 16;
+        }
+        colFallingY = colFallingY + FALLING_BLOCK_SPEED;
+        [ colSprAtSeg , t + 2 ] = colFallingY;
+        if colFallingY + BLOCK_DIM > playerFeetY - PLAYER_HEIGHT {
+            if cnd0 & cnd1 {
+                alive = 0;
+                deathDelay = 0;
+                call deathSpriteInit;
+            }
+        }
+        i = 0;
+        // bottom of pit - BLOCK_DIM
+        t = 128;
+        if playerRoomXDist > 3 {
+            t = 160;
+        }
+        while i < countColBlocks {
+            i = i + 1;
+            t = t - BLOCK_DIM;
+        }
+        if colFallingY == t {
+            [ colBlocksSeg , countColBlocks ] = colIndex;
+            countColBlocks = countColBlocks + 1;
+            colIndex = colIndex - 1;
+            if colIndex == 255 {
+                colIndex = 0;
+            }
+            if currentColFalling == 0 {
+                col0Index = colIndex;
+                countCol0Blocks = countColBlocks;
+            }
+            if currentColFalling == 1 {
+                col1Index = colIndex;
+                countCol1Blocks = countColBlocks;
+            }
+            if currentColFalling == 2 {
+                col2Index = colIndex;
+                countCol2Blocks = countColBlocks;
+            }
+            colFallingY = DONE_FALLING;
+            currentColFalling = DONE_FALLING;
+        }
+    }
+}
+
+// in: colIndex
+// in: countColBlocks
+// in: colSprAtSeg
+func fallingBlockSpriteInit {
+    i = 0;
+    t = 0;
+    while i < countColBlocks {
+        i = i + 1;
+        t = t + 16;
+    }
+    i2 = 0;
+    blockSprDataSeg = ROM_BLOCK_SPRDATA_SEG;
+    blockSprDataOffset = 0;
+    while i2 < colIndex {
+        blockSprDataOffset = blockSprDataOffset + 64;
+        if blockSprDataOffset == 0 {
+            blockSprDataSeg = blockSprDataSeg + 1;
+        }
+        i2 = i2 + 1;
+    }
+    [ colSprAtSeg , t ] = 128; // enable
+    [ colSprAtSeg , t + 1 ] = x;
+    [ colSprAtSeg , t + 2 ] = FALLING_START_Y;
+    [ colSprAtSeg , t + 3 ] = BLOCK_DIM; // width
+    [ colSprAtSeg , t + 4 ] = BLOCK_DIM; // height
+    [ colSprAtSeg , t + 5 ] = blockSprDataSeg;
+    [ colSprAtSeg , t + 6 ] = blockSprDataOffset;
+    [ colSprAtSeg , t + 7 ] = 73;
+    [ colSprAtSeg , t + 8 ] = 36;
+    [ colSprAtSeg , t + 9 ] = 255;
+    [ colSprAtSeg , t + 10 ] = 0;
+}
+
+func passageBlockSprite {
+    if singleBlockY > SINGLE_BLOCK_START_Y {
+        if singleBlockY != SINGLE_BLOCK_END_Y {
+            singleBlockY = singleBlockY + 1;
+        }
+    }
+    [ BLOCK_SPRAT_SEG , 2 ] = singleBlockY; // Y
+}
+
+func descentPlayerSprite {
+    i = 0;
+    offset = 0;
+    while i < crewCount {
+        if i == 0 {
+            crewOnGround = onGround;
+            crewFacing = playerFacing;
+            crewWalkFrame = walkFrame;
+            crewGliderOn = gliderOn;
+            crewOnWall = onWall;
+            x = playerX;
+            y = playerFeetY;
+        }
+        if i != 0 {
+            playerPosHistoryT = playerPosHistory - CREW_LAG;
+            if i > 1 {
+                playerPosHistoryT = playerPosHistory - CREW_LAG + CREW_LAG;
+            }
+            if playerPosHistoryT > HISTORY_MAX {
+                playerPosHistoryT = HISTORY_MAX - 255 - playerPosHistoryT;
+            }
+            x = [ PLAYER_POS_HISTORY_SEG , PLAYER_X_HISTORY_OFFSET + playerPosHistoryT ];
+            y = [ PLAYER_POS_HISTORY_SEG , PLAYER_Y_HISTORY_OFFSET + playerPosHistoryT ];
+            t = playerFeetY - y;
+            if y > playerFeetY {
+                // player in next subslice, crew in previous subslice
+                t = playerFeetY + SUBSLICE_HEIGHT;
+                t = t - y;
+            }
+            [ 72 , offset + 2 ] = PLAYER_SPRITE_FEET_Y - t + PLAYER_SPRITE_HEIGHT; // Y
+            t = [ PLAYER_POS_HISTORY_SEG , PLAYER_FLAGS_HISTORY_OFFSET + playerPosHistory ];
+            crewFacing = 1 & t;
+            crewOnGround = 1 & t >> PLAYER_ONGROUND_FLAG_OFFSET;
+            crewGliderOn = 1 & t >> PLAYER_GLIDERON_FLAG_OFFSET;
+            crewOnWall = 1 & t >> PLAYER_ONWALL_FLAG_OFFSET;
+            crewWalkFrame = LOWER_2_BITS & t >> PLAYER_WALKFRAME_OFFSET;
+        }
+        if crewOnGround {
+            if x < 240 {
+                [ 72 , offset + 1 ] = x; // X
+                if crewFacing == DIR_RIGHT {
+                    [ 72 , offset ] = 144; // enable and transparency
+                    [ 72 , offset + 5 ] = 128;
+                }
+                if crewFacing == DIR_LEFT {
+                    [ 72 , offset ] = 208; // enable, transparency, and flip horizontal
+                    [ 72 , offset + 5 ] = 129;
+                }
+                if crewWalkFrame == WALK_STANDING {
+                    [ 72 , offset + 6 ] = 0;
+                }
+                if crewWalkFrame == 1 {
+                    [ 72 , offset + 6 ] = 64;
+                }
+                if crewWalkFrame == 2 {
+                    [ 72 , offset + 6 ] = 128;
+                }
+            }
+            if x > 239 {
+                [ 72 , offset + 1 ] = x - 12; // X
+                if crewFacing == DIR_RIGHT {
+                    [ 72 , offset ] = 144; // enable and transparency
+                    [ 72 , offset + 5 ] = 129;
+                }
+                if crewFacing == DIR_LEFT {
+                    [ 72 , offset ] = 208; // enable, transparency, and flip horizontal
+                    [ 72 , offset + 5 ] = 128;
+                }
+                if crewWalkFrame == WALK_STANDING {
+                    [ 72 , offset + 6 ] = 0;
+                }
+                if crewWalkFrame == 1 {
+                    [ 72 , offset + 6 ] = 64;
+                }
+                if crewWalkFrame == 2 {
+                    [ 72 , offset + 6 ] = 128;
+                }
+            }
+        }
+        if crewOnGround == 0 {
+            if crewGliderOn {
+                [ 72 , offset + 1 ] = x - 6; // X
+                if crewFacing == DIR_RIGHT {
+                    [ 72 , offset ] = 144; // enable and transparency
+                    [ 72 , offset + 5 ] = 128;
+                    [ 72 , offset + 6 ] = 192;
+                }
+                if crewFacing == DIR_LEFT {
+                    [ 72 , offset ] = 208; // enable, transparency, and flip horizontal
+                    [ 72 , offset + 5 ] = 128;
+                    [ 72 , offset + 6 ] = 192;
+                }
+            }
+            if crewOnWall {
+                if crewFacing == DIR_RIGHT {
+                    [ 72 , offset + 1 ] = x - 12; // X
+                    [ 72 , offset ] = 144; // enable and transparency
+                    [ 72 , offset + 5 ] = 130;
+                    [ 72 , offset + 6 ] = 64;
+                }
+                if crewFacing == DIR_LEFT {
+                    [ 72 , offset + 1 ] = x; // X
+                    [ 72 , offset ] = 144; // enable and transparency
+                    [ 72 , offset + 5 ] = 130;
+                    [ 72 , offset + 6 ] = 0;
+                }
+            }
+            cnd0 = crewGliderOn == 0;
+            cnd1 = crewOnWall == 0;
+            if cnd0 & cnd1 {
+                [ 72 , offset + 1 ] = x - 6; // X
+                if crewFacing == DIR_RIGHT {
+                    [ 72 , offset ] = 144; // enable and transparency
+                    [ 72 , offset + 5 ] = 129;
+                    [ 72 , offset + 6 ] = 192;
+                }
+                if crewFacing == DIR_LEFT {
+                    [ 72 , offset ] = 208; // enable, transparency, and flip horizontal
+                    [ 72 , offset + 5 ] = 129;
+                    [ 72 , offset + 6 ] = 192;
+                }
+            }
+        }
+        i = i + 1;
+        offset = offset + 16;
+    }
+}
+
+func passagePlayerSprite {
+    i = 0;
+    offset = 0;
+    while i < crewCount {
+        if i == 0 {
+            crewOnGround = onGround;
+            crewFacing = playerFacing;
+            crewWalkFrame = walkFrame;
+            crewGliderOn = gliderOn;
+            crewOnWall = onWall;
+            x = playerX;
+            y = playerFeetY;
+        }
+        if i != 0 {
+            playerPosHistoryT = playerPosHistory - 5; // 5 for first previous crew
+            if i > 1 {
+                playerPosHistoryT = playerPosHistory - 10;
+            }
+            if playerPosHistoryT > HISTORY_MAX {
+                playerPosHistoryT = HISTORY_MAX - 255 - playerPosHistoryT;
+            }
+            x = [ PLAYER_POS_HISTORY_SEG , PLAYER_X_HISTORY_OFFSET + playerPosHistoryT ];
+            y = [ PLAYER_POS_HISTORY_SEG , PLAYER_Y_HISTORY_OFFSET + playerPosHistoryT ];
+            t = playerFeetY - y;
+            if y > playerFeetY {
+                // player in next subslice, crew in previous subslice
+                t = playerFeetY + SUBSLICE_HEIGHT;
+                t = t - y;
+            }
+            [ 72 , offset + 2 ] = PLAYER_SPRITE_FEET_Y - t + PLAYER_SPRITE_HEIGHT; // Y
+            t = [ PLAYER_POS_HISTORY_SEG , PLAYER_FLAGS_HISTORY_OFFSET + playerPosHistory ];
+            crewFacing = 1 & t;
+            crewOnGround = 1 & t >> PLAYER_ONGROUND_FLAG_OFFSET;
+            crewGliderOn = 1 & t >> PLAYER_GLIDERON_FLAG_OFFSET;
+            crewOnWall = 1 & t >> PLAYER_ONWALL_FLAG_OFFSET;
+            crewWalkFrame = LOWER_2_BITS & t >> PLAYER_WALKFRAME_OFFSET;
+        }
+        [ 72 , offset + 2 ] = y - PLAYER_SPRITE_HEIGHT;
+        if x < 240 {
+            [ 72 , offset + 1 ] = x; // X
+            if crewFacing == DIR_RIGHT {
+                [ 72 , offset ] = 144; // enable and transparency
+                [ 72 , offset + 5 ] = 128;
+            }
+            if crewFacing == DIR_LEFT {
+                [ 72 , offset ] = 208; // enable, transparency, and flip horizontal
+                [ 72 , offset + 5 ] = 129;
+            }
+            if crewWalkFrame == WALK_STANDING {
+                [ 72 , offset + 6 ] = 0;
+            }
+            if crewWalkFrame == 1 {
+                [ 72 , offset + 6 ] = 64;
+            }
+            if crewWalkFrame == 2 {
+                [ 72 , offset + 6 ] = 128;
+            }
+        }
+        if x > 239 {
+            [ 72 , offset + 1 ] = x - 12; // X
+            if crewFacing == DIR_RIGHT {
+                [ 72 , offset ] = 144; // enable and transparency
+                [ 72 , offset + 5 ] = 129;
+            }
+            if crewFacing == DIR_LEFT {
+                [ 72 , offset ] = 208; // enable, transparency, and flip horizontal
+                [ 72 , offset + 5 ] = 128;
+            }
+            if crewWalkFrame == WALK_STANDING {
+                [ 72 , offset + 6 ] = 0;
+            }
+            if crewWalkFrame == 1 {
+                [ 72 , offset + 6 ] = 64;
+            }
+            if crewWalkFrame == 2 {
+                [ 72 , offset + 6 ] = 128;
+            }
+        }
+        i = i + 1;
+        offset = offset + 16;
+    }
+}
+
+// call after advancing walkFrameDelay
+// 0, 1, 0, 2, 0, 1, repeat
+func playerWalkUpdate {
+    if walkFrameDelay > WALK_FRAME_DELAY {
+        cnd = 1;
+        if walkFrame == 0 {
+            if walkFrameMiddle {
+                walkFrame = 2;
+            }
+            if walkFrameMiddle == 0 {
+                walkFrame = 1;
+            }
+            cnd = 0;
+        }
+        if cnd {
+            if walkFrame == 1 {
+                walkFrame = 0;
+                walkFrameMiddle = 1;
+            }
+            if walkFrame == 2 {
+                walkFrame = 0;
+                walkFrameMiddle = 0;
+            }
+        }
+        walkFrameDelay = 0;
+    }
+    if moveLeftDistance == moveRightDistance {
+        walkFrame = WALK_STANDING;
+        walkFrameDelay = 0;
+    }
+}
+
+// TODO crew
+func waterfallUpdate {
+    if playerX < 104 {
+        [ 73 , 0 ] = 0; // disable
+    }
+    cnd0 = playerX > 107;
+    cnd1 = playerX < 144;
+    cnd = cnd0 & cnd1;
+    if cnd {
+        [ 73 , 0 ] = 0; // disable
+    }
+    if playerX > 147 {
+        [ 73 , 0 ] = 0; // disable
+    }
+    // entirely between edges
+    if cnd {
+        // dark colors
+        [ 72 , 7 ] = 37; // colors
+        [ 72 , 8 ] = 33;
+        [ 72 , 9 ] = 42;
+    }
+    if cnd == 0 {
+        // bright colors
+        [ 72 , 7 ] = 240;
+        [ 72 , 8 ] = 236;
+        [ 72 , 9 ] = 255;
+    }
+    cnd0 = playerX > 103;
+    cnd1 = playerX < 108;
+    // left edge
+    if cnd0 & cnd1 {
+        [ 73 , 0 ] = 144; // enable and transparency
+        [ 73 , 1 ] = 108; // X
+        // offset + 24 (skip top 6 lines)
+        if walkFrame == WALK_STANDING {
+            copyFromOffset = 24;
+        }
+        if walkFrame == 1 {
+            copyFromOffset = 88;
+        }
+        if walkFrame == 2 {
+            copyFromOffset = 152;
+        }
+        // skip top two empty lines of 8px
+        i = 2;
+        copyDestOffset = 4;
+        while i < WATERFALL_PLAYER_HEIGHT {
+            pixels = [ 128 , copyFromOffset ];
+            pixels2 = [ 128 , copyFromOffset + 1 ];
+            if playerFacing == DIR_LEFT {
+                offset = 107 - playerX;
+                offset = offset + offset; // 2 bits per pixel
+                // reverse bits in pairs of two
+                t = pixels >> 6;
+                copyLine = pixels >> 2;
+                copyLine = copyLine & LOWER_2_BITS << 2;
+                copyT = pixels << 2;
+                copyT = copyT & LOWER_2_BITS << 4;
+                copyI = pixels << 6;
+                pixels = t | copyLine | copyT | copyI;
+                // shift by x difference (offset)
+                t = pixels;
+                pixels = pixels << offset;
+                i2 = 0;
+                // fill transparency in newly shifted in zeros
+                while i2 < offset {
+                    pixels = pixels | LOWER_2_BITS << i2;
+                    i2 = i2 + 2;
+                }
+                [ WATERFALL_PLAYER_SPRDATA_SEG , copyDestOffset ] = pixels;
+                [ WATERFALL_PLAYER_SPRDATA_SEG , copyDestOffset + 1 ] = 255;
+            }
+            if playerFacing == DIR_RIGHT {
+                offset = 108 - playerX; // pixels offset
+                offset = offset + offset; // 2 bits per pixel
+                // shift by x difference (offset)
+                t = pixels2;
+                pixels = pixels << offset;
+                pixels2 = pixels2 << offset;
+                i2 = 0;
+                // fill transparency in newly shifted in zeros
+                while i2 < offset {
+                    pixels2 = pixels2 | LOWER_2_BITS << i2;
+                    i2 = i2 + 2;
+                }
+                // move from pixels2 to pixels
+                pixels = pixels | t >> 8 - offset;
+                if offset == 8 {
+                    pixels = t;
+                }
+                [ WATERFALL_PLAYER_SPRDATA_SEG , copyDestOffset ] = pixels;
+                [ WATERFALL_PLAYER_SPRDATA_SEG , copyDestOffset + 1 ] = pixels2;
+            }
+            copyDestOffset = copyDestOffset + 2; // +1 line of 8px
+            copyFromOffset = copyFromOffset + 4; // +1 line of 16px
+            i = i + 1;
+        }
+    }
+    cnd0 = playerX > 143;
+    cnd1 = playerX < 148;
+    // right edge
+    if cnd0 & cnd1 {
+        [ 73 , 0 ] = 144; // enable and transparency
+        [ 73 , 1 ] = 140; // X
+        // offset + 24 (skip top 6 lines)
+        if walkFrame == WALK_STANDING {
+            copyFromOffset = 24;
+        }
+        if walkFrame == 1 {
+            copyFromOffset = 88;
+        }
+        if walkFrame == 2 {
+            copyFromOffset = 152;
+        }
+        // skip top two empty lines of 8px
+        i = 2;
+        copyDestOffset = 4;
+        while i < WATERFALL_PLAYER_HEIGHT {
+            pixels = [ 128 , copyFromOffset ];
+            pixels2 = [ 128 , copyFromOffset + 1 ];
+            if playerFacing == DIR_LEFT {
+                offset = 148 - playerX;
+                offset = 4 - offset;
+                offset = offset + offset; // 2 bits per pixel
+                // reverse bits in pairs of two
+                t = pixels >> 6;
+                copyLine = pixels >> 2;
+                copyLine = copyLine & LOWER_2_BITS << 2;
+                copyT = pixels << 2;
+                copyT = copyT & LOWER_2_BITS << 4;
+                copyI = pixels << 6;
+                pixels = t | copyLine | copyT | copyI;
+                // shift 2 pixels off
+                pixels = pixels >> 2;
+                // move last 2 pixels from pixels2 to pixels
+                t = pixels2 >> 6;
+                pixels = pixels | t << 6;
+                // shift by x difference (offset)
+                pixels = pixels >> offset;
+                //pixels2 = pixels2 >> offset;
+                i2 = 0;
+                // fill transparency in newly shifted in zeros
+                while i2 < offset {
+                    pixels = pixels | LOWER_2_BITS << 6 - i2;
+                    i2 = i2 + 2;
+                }
+                [ WATERFALL_PLAYER_SPRDATA_SEG , copyDestOffset ] = 255;
+                [ WATERFALL_PLAYER_SPRDATA_SEG , copyDestOffset + 1 ] = pixels;
+            }
+            if playerFacing == DIR_RIGHT {
+                offset = 148 - playerX;
+                offset = 4 - offset;
+                offset = offset + offset; // 2 bits per pixel
+                // shift by x difference (offset)
+                pixels = pixels >> offset;
+                i2 = 0;
+                // fill transparency in newly shifted in zeros
+                while i2 < offset {
+                    pixels = pixels | LOWER_2_BITS << 6 - i2;
+                    i2 = i2 + 2;
+                }
+                [ WATERFALL_PLAYER_SPRDATA_SEG , copyDestOffset ] = 255;
+                [ WATERFALL_PLAYER_SPRDATA_SEG , copyDestOffset + 1 ] = pixels;
+            }
+            copyDestOffset = copyDestOffset + 2; // +1 line of 8px
+            copyFromOffset = copyFromOffset + 4; // +1 line of 16px
+            i = i + 1;
+        }
+    }
+    // waterfall tiles effect
+    if waterfallTileUpdateDelay < WATERFALL_TILE_UPDATE_DELAY {
+        waterfallTileUpdateDelay = waterfallTileUpdateDelay + 1;
+        if waterfallTileUpdateDelay & 1 == 1 {
+            // skip odd frames
+            return;
+        }
+        i = 0;
+        t = 0;
+        while i < WATERFALL_WALL_TILES_COUNT {
+            y = [ WALL_SPRAT_SEG , t + 2 ];
+            offset = [ WALL_SPRAT_SEG , t + 6 ];
+            y = y + 1;
+            [ WALL_SPRAT_SEG , t + 2 ] = y;
+            offset = offset + 2; // line of 8px
+            if offset > tile8 + 8 {
+                offset = 0;
+            }
+            [ WALL_SPRAT_SEG , t + 6 ] = offset;
+            i = i + 1;
+            t = t + 16;
+        }
+    }
+    if waterfallTileUpdateDelay != WATERFALL_TILE_UPDATE_DELAY {
+        return;
+    }
+    waterfallTileUpdateDelay = 0;
+    i = 0;
+    t = 0;
+    random = frameCount ^ random;
+    while i < WATERFALL_WALL_TILES_COUNT {
+        x = [ WALL_SPRAT_SEG , t + 1 ];
+        y = [ WALL_SPRAT_SEG , t + 2 ];
+        cnd = random & 1;
+        if cnd {
+            x = x + WALL_WIDTH;
+        }
+        if cnd == 0 {
+            x = x - WALL_WIDTH;
+        }
+        if x < 108 {
+            x = 140;
+        }
+        if x > 140 {
+            x = 108;
+        }
+        y = [ WALL_SPRAT_SEG , t + 2 ];
+        y = y + 4;
+        if y > 192 - 4 {
+            y = 0;
+        }
+        [ WALL_SPRAT_SEG , t + 1 ] = x;
+        [ WALL_SPRAT_SEG , t + 2 ] = y;
+        open = 1; // 1: random tile
+        cnd0 = y > 69;
+        cnd1 = y < 96;
+        cnd = cnd0 & cnd1;
+        if cnd {
+            // walls of secret doorway
+            if x == 116 {
+                if y == 72 {
+                    offset = tile0;
+                    open = 0;
+                }
+                if y == 80 {
+                    offset = tile1;
+                    open = 0;
+                }
+                if y == 88 {
+                    offset = tile1;
+                    open = 0;
+                }
+            }
+            if x == 132 {
+                if y == 72 {
+                    offset = tile6;
+                    open = 0;
+                }
+                if y == 80 {
+                    offset = tile7;
+                    open = 0;
+                }
+                if y == 88 {
+                    offset = tile7;
+                    open = 0;
+                }
+            }
+            if y == 72 {
+                if x == 124 {
+                    offset = tile3;
+                    open = 0;
+                }
+                if x == 80 {
+                    offset = tile3;
+                    open = 0;
+                }
+            }
+        }
+        // top and bottom platforms
+        if y == 64 {
+            offset = tile3;
+            open = 0;
+        }
+        if y == 96 {
+            offset = tile3;
+            open = 0;
+        }
+        if open {
+            count = [ BLOCK_INDEX_SEG , t + random];
+            if count > 8 {
+                count = count - 9;
+            }
+            i2 = 0;
+            offset = 0;
+            while i2 < count {
+                offset = offset + 16;
+                i2 = i2 + 1;
+            }
+        }
+        [ WALL_SPRAT_SEG , t + 6 ] = offset;
+        i = i + 1;
+        t = t + 16;
+        random = random + i;
+    }
+}
+
+func oxygenSprite {
+    oxygenTen = 0;
+    oxygenOne = oxygen;
+    while oxygenOne > 9{
+        oxygenTen = oxygenTen + 1;
+        oxygenOne = oxygenOne - 10;
+    }
+    offset = 0;
+    i = 0;
+    while i < oxygenOne {
+        offset = offset + 16;
+        i = i + 1;
+    }
+    [ 79 , 38 ] = offset;
+    i = 0;
+    offset = 0;
+    while i < oxygenTen {
+        offset = offset + 16;
+        i = i + 1;
+    }
+    [ 79 , 22 ] = offset;
+    if oxygen < 20 {
+        [ 79 , 23 ] = 224; // red
+        [ 79 , 39 ] = 224; // red
+    }
+}
+
+func setCurrentBlock {
+    // for blocked rooms
+    if playerRoomX > PLAYER_ROOM_X_START {
+        // right side
+        currentBlockIndex = [ BLOCK_INDEX_SEG , sliceEnteredFrom ];
+    }
+    if playerRoomX < PLAYER_ROOM_X_START {
+        // left side
+        currentBlockIndex = [ BLOCK_INDEX_SEG , LEFT_BLOCK_INDEX_OFFSET + sliceEnteredFrom ];
+    }
+    if playerRoomX == PLAYER_ROOM_X_START {
+        // right side
+        currentBlockIndex = [ BLOCK_INDEX_SEG , sliceEnteredFrom ];
+        // left side
+        cnd0 = playerFeetY > 37;
+        cnd1 = playerFeetY == 0;
+        if cnd0 | cnd1 {
+            currentBlockIndex = [ BLOCK_INDEX_SEG , LEFT_BLOCK_INDEX_OFFSET + sliceEnteredFrom ];
+        }
+    }
+    // for standard rooms
+    if playerSlice < 2 {
+        currentBlockIndex = subSliceEnteredFrom << sliceEnteredFrom;
+        if playerRoomX < PLAYER_ROOM_X_START {
+            currentBlockIndex = 0 - currentBlockIndex;
+        }
+        while currentBlockIndex > 8 {
+            currentBlockIndex = currentBlockIndex - 9;
+        }
+    }
+    blockSprDataSeg = ROM_BLOCK_SPRDATA_SEG;
+    blockSprDataOffset = 0;
+    i = 0;
+    while i < currentBlockIndex {
+        blockSprDataOffset = blockSprDataOffset + 64;
+        if blockSprDataOffset == 0 {
+            blockSprDataSeg = blockSprDataSeg + 1;
+        }
+        i = i + 1;
+    }
+}
+
+func oxygenSpritesInit {
+    [ 79 , 0 ] = 144; // enable and transparency
+    [ 79 , 1 ] = 24; // X
+    [ 79 , 2 ] = 16; // Y
+    [ 79 , 3 ] = OXYGEN_DIM; // width
+    [ 79 , 4 ] = OXYGEN_DIM; // height
+    [ 79 , 5 ] = ROM_OXYGEN_SPRDATA_SEG;
+    [ 79 , 6 ] = 160;
+    [ 79 , 7 ] = 182; // gray
+
+    [ 79 , 16 ] = 144; // enable and transparency
+    [ 79 , 17 ] = 32; // X
+    [ 79 , 18 ] = 16; // Y
+    [ 79 , 19 ] = OXYGEN_DIM; // width
+    [ 79 , 20 ] = OXYGEN_DIM; // height
+    [ 79 , 21 ] = ROM_OXYGEN_SPRDATA_SEG;
+    [ 79 , 22 ] = 144;
+    [ 79 , 23 ] = 91; // light blue
+
+    [ 79 , 32 ] = 144; // enable and transparency
+    [ 79 , 33 ] = 40; // X
+    [ 79 , 34 ] = 16; // Y
+    [ 79 , 35 ] = OXYGEN_DIM; // width
+    [ 79 , 36 ] = OXYGEN_DIM; // height
+    [ 79 , 37 ] = ROM_OXYGEN_SPRDATA_SEG;
+    [ 79 , 38 ] = 144;
+    [ 79 , 39 ] = 91; // light blue
+}
+
+func deathSpriteInit {
+    [ 72 , 1 ] = playerX - 4; // X
+    [ 72 , 5 ] = DEATH_SPRDATA_SEG;
+    [ 72 , 6 ] = DEATH_SPRDATA_OFFSET;
+}
+
+func pitDeathSpriteUpdate {
+    x = 2;
+    if deathRadius > 3 {
+        x = 3;
+    }
+    if deathRadius > 5 {
+        x = 5;
+    }
+    y = 32 + deathRadius;
+    t = 207;
+    offset = y + x;
+    [ DEATH_SPRDATA_SEG , DEATH_SPRDATA_OFFSET + deathRadius ] = 255;
+    [ DEATH_SPRDATA_SEG , DEATH_SPRDATA_OFFSET + deathRadius + 1 ] = 255;
+    [ DEATH_SPRDATA_SEG , DEATH_SPRDATA_OFFSET + offset ] = t;
+    y = 32 - deathRadius;
+    [ DEATH_SPRDATA_SEG , DEATH_SPRDATA_OFFSET + offset ] = t;
+    if deathRadius < 6 {
+        deathRadius = deathRadius + 1;
+    }
+    x = 2;
+    if deathRadius > 3 {
+        x = 3;
+    }
+    if deathRadius > 5 {
+        x = 5;
+    }
+    y = 32 + deathRadius;
+    t = random ^ deathRadius;
+    t = t | LOWER_2_BITS;
+    offset = y + x;
+    [ DEATH_SPRDATA_SEG , DEATH_SPRDATA_OFFSET + offset ] = t;
+    y = 32 - deathRadius;
+    [ DEATH_SPRDATA_SEG , DEATH_SPRDATA_OFFSET + offset ] = t;
+    t = playerFeetY - PLAYER_SPRITE_HEIGHT;
+    [ 72 , 2 ] = t + deathRadius; // Y
+}
+
+func endSpritesInit {
+    call disableAllSprites;
+    // title
+    [ 64 , 0 ] = 128; // enable
+    [ 64 , 1 ] = 31; // X
+    [ 64 , 2 ] = 19; // Y
+    [ 64 , 3 ] = 196; // width
+    [ 64 , 4 ] = 16; // height
+    [ 64 , 5 ] = ROM_END_TITLE_SEG;
+    [ 64 , 6 ] = 0;
+    [ 64 , 7 ] = 255;
+    [ 64 , 8 ] = 0;
+    // status
+    [ 64 , 16 ] = 0; // disable
+    [ 64 , 17 ] = 20; // X
+    [ 64 , 18 ] = 44; // Y
+    [ 64 , 19 ] = 64; // width
+    [ 64 , 20 ] = 12; // height
+    [ 64 , 21 ] = ROM_END_STATUS_SEG;
+    [ 64 , 22 ] = ROM_END_STATUS_OFFSET;
+    [ 64 , 23 ] = 0;
+    [ 64 , 24 ] = 255;
+    // status result
+    [ 64 , 64 ] = 0; // disable
+    [ 64 , 65 ] = 158; // X
+    [ 64 , 66 ] = 44; // Y
+    [ 64 , 67 ] = 80; // width
+    [ 64 , 68 ] = 12; // height
+    endLines = 1;
+    if alive {
+        endLines = 2;
+        [ 64 , 69 ] = ROM_END_STATUS_SURVIVED_SEG;
+        [ 64 , 70 ] = ROM_END_STATUS_SURVIVED_OFFSET;
+        // mode
+        [ 64 , 32 ] = 0; // disable
+        [ 64 , 33 ] = 20; // X
+        [ 64 , 34 ] = 59; // Y
+        [ 64 , 35 ] = 44; // width
+        [ 64 , 36 ] = 12; // height
+        [ 64 , 37 ] = ROM_END_MODE_SEG;
+        [ 64 , 38 ] = ROM_END_MODE_OFFSET;
+        [ 64 , 39 ] = 255;
+        [ 64 , 40 ] = 0;
+        // mode result
+        [ 64 , 80 ] = 0; // disable
+        [ 64 , 82 ] = 59; // Y
+        [ 64 , 83 ] = 44; // width
+        [ 64 , 84 ] = 12; // height
+        [ 64 , 87 ] = 255;
+        [ 64 , 88 ] = 0;
+        if challengeMode {
+            endLines = 3;
+            [ 64 , 81 ] = 148; // X
+            [ 64 , 85 ] = ROM_END_MODE_CHALLENGE_SEG;
+            [ 64 , 86 ] = ROM_END_MODE_CHALLENGE_OFFSET;
+            // crew
+            [ 64 , 48 ] = 0; // disable
+            [ 64 , 49 ] = 20; // X
+            [ 64 , 50 ] = 73; // Y
+            [ 64 , 51 ] = 44; // width
+            [ 64 , 52 ] = 12; // height
+            [ 64 , 53 ] = ROM_END_CREW_SEG;
+            [ 64 , 54 ] = ROM_END_CREW_OFFSET;
+            [ 64 , 55 ] = 255;
+            [ 64 , 56 ] = 0;
+            // crew result
+            [ 64 , 96 ] = 0; // disable
+            [ 64 , 97 ] = 0; // X
+            [ 64 , 98 ] = 0; // Y
+            [ 64 , 99 ] = 0; // width
+            [ 64 , 100 ] = 0; // height
+            [ 64 , 101 ] = 0;
+            [ 64 , 102 ] = 0;
+            [ 64 , 103 ] = 0;
+            [ 64 , 104 ] = 0;
+        }
+        if challengeMode == 0 {
+            [ 64 , 81 ] = 158; // X
+            [ 64 , 85 ] = ROM_END_MODE_STANDARD_SEG;
+            [ 64 , 86 ] = ROM_END_MODE_STANDARD_OFFSET;
+        }
+    }
+    if alive == 0 {
+        [ 64 , 69 ] = ROM_END_STATUS_DECEASED_SEG;
+        [ 64 , 70 ] = ROM_END_STATUS_DECEASED_OFFSET;
+    }
+    [ 64 , 71 ] = 255;
+    [ 64 , 72 ] = 0;
+    // down arrow
+    [ 64 , 112 ] = 0; // disable
+    [ 64 , 113 ] = 238; // X
+    [ 64 , 114 ] = 174; // Y
+    [ 64 , 115 ] = ARROW_DIM; // width
+    [ 64 , 116 ] = ARROW_DIM; // height
+    [ 64 , 117 ] = ROM_ARROWS_SEG;
+    [ 64 , 118 ] = 0; // up, flip it later
+    [ 64 , 119 ] = 73;
+    [ 64 , 120 ] = 0;
+}
+
+func descentScroll {
+    side = [ currentMap , sliceOffset + playerSubSlice - 2 - subSliceOffset ];
+    subSlice0Left = LOWER_2_BITS & side >> SIDE_L_OFFSET;
+    subSlice0Right = LOWER_2_BITS & side;
+    side = [ currentMap , sliceOffset + playerSubSlice - 1 - subSliceOffset ];
+    subSlice1Left = LOWER_2_BITS & side >> SIDE_L_OFFSET;
+    subSlice1Right = LOWER_2_BITS & side;
+    side = [ currentMap , sliceOffset + playerSubSlice + subSliceOffset ];
+    subSlice2Left = LOWER_2_BITS & side >> SIDE_L_OFFSET;
+    subSlice2Right = LOWER_2_BITS & side;
+    side = [ currentMap , sliceOffset + playerSubSlice + 1 + subSliceOffset ];
+    subSlice3Left = LOWER_2_BITS & side >> SIDE_L_OFFSET;
+    subSlice3Right = LOWER_2_BITS & side;
+    side = [ currentMap , sliceOffset + playerSubSlice + 2 + subSliceOffset ];
+    subSlice4Right = LOWER_2_BITS & side;
+    cnd0 = playerFeetY > 32;
+    cnd1 = playerFeetY < 40;
+    cnd = cnd0 | cnd1;
+    if cnd {
+        // top left
+        open = subSlice1Left > SIDE_CLOSED;
+        if open == 0 {
+            [ WALL_SPRAT_SEG , 5 ] = WALL_SPRDATA_SEG;
+        }
+        if open {
+            [ WALL_SPRAT_SEG , 5 ] = HALFWALL_SPRDATA_SEG;
+        }
+        // middle left
+        open = subSlice2Left > SIDE_CLOSED;
+        if open == 0 {
+            [ WALL_SPRAT_SEG , 37 ] = WALL_SPRDATA_SEG;
+        }
+        if open {
+            [ WALL_SPRAT_SEG , 37 ] = HALFWALL_SPRDATA_SEG;
+        }
+        // lower middle left
+        open = subSlice3Left > SIDE_CLOSED;
+        if open == 0 {
+            [ WALL_SPRAT_SEG , 53 ] = WALL_SPRDATA_SEG;
+        }
+        if open {
+            [ WALL_SPRAT_SEG , 53 ] = HALFWALL_SPRDATA_SEG;
+        }
+    }
+    cnd0 = playerFeetY > 39;
+    cnd1 = playerFeetY < 33;
+    cnd = cnd0 | cnd1;
+    if cnd {
+        // top left
+        open = subSlice0Left > SIDE_CLOSED;
+        if open == 0 {
+            [ WALL_SPRAT_SEG , 5 ] = WALL_SPRDATA_SEG;
+        }
+        if open {
+            [ WALL_SPRAT_SEG , 5 ] = HALFWALL_SPRDATA_SEG;
+        }
+        // bottom left
+        open = subSlice3Left > SIDE_CLOSED;
+        if open == 0 {
+            [ WALL_SPRAT_SEG , 21 ] = WALL_SPRDATA_SEG;
+        }
+        if open {
+            [ WALL_SPRAT_SEG , 21 ] = HALFWALL_SPRDATA_SEG;
+        }
+        // middle left
+        open = subSlice1Left > SIDE_CLOSED;
+        if open == 0 {
+            [ WALL_SPRAT_SEG , 37 ] = WALL_SPRDATA_SEG;
+        }
+        if open {
+            [ WALL_SPRAT_SEG , 37 ] = HALFWALL_SPRDATA_SEG;
+        }
+        // lower middle left
+        open = subSlice2Left > SIDE_CLOSED;
+        if open == 0 {
+            [ WALL_SPRAT_SEG , 53 ] = WALL_SPRDATA_SEG;
+        }
+        if open {
+            [ WALL_SPRAT_SEG , 53 ] = HALFWALL_SPRDATA_SEG;
+        }
+    }
+    if playerFeetY < 3 {
+        // need to do clipping/offsetting
+        // top right
+        side = subSlice0Right == SIDE_NONE;
+        if side {
+            [ PLATFORM_SPRAT_SEG , 64 ] = 0; // disable
+        }
+        if side == 0 {
+            [ PLATFORM_SPRAT_SEG , 64 ] = 144; // enable and transparency
+        }
+        [ PLATFORM_SPRAT_SEG , 66 ] = 0; // Y
+        offset = 80; // 16 * 5
+        i = 0;
+        while i < playerFeetY {
+            offset = offset + 16;
+            i = i + 1;
+        }
+        [ PLATFORM_SPRAT_SEG , 70 ] = 128 + offset; // start in color
+        // bottom right
+        side = subSlice3Right == SIDE_NONE;
+        if side {
+            [ PLATFORM_SPRAT_SEG , 96 ] = 0; // disable
+        }
+        if side == 0 {
+            [ PLATFORM_SPRAT_SEG , 96 ] = 144; // enable and transparency
+        }
+        [ PLATFORM_SPRAT_SEG , 98 ] = 184; // Y
+        [ PLATFORM_SPRAT_SEG , 102 ] = offset;
+        // middle right
+        side = subSlice1Right == SIDE_NONE;
+        if side {
+            [ PLATFORM_SPRAT_SEG , 80 ] = 0; // disable
+        }
+        if side == 0 {
+            [ PLATFORM_SPRAT_SEG , 80 ] = 128; // enable
+        }
+        [ PLATFORM_SPRAT_SEG , 82 ] = 59 - playerFeetY; // Y
+        // temp mid bottom right
+        side = subSlice2Right == SIDE_NONE;
+        if side {
+            [ PLATFORM_SPRAT_SEG , 48 ] = 0; // disable
+        }
+        if side == 0 {
+            [ PLATFORM_SPRAT_SEG , 48 ] = 128; // enable
+        }
+        [ PLATFORM_SPRAT_SEG , 49 ] = 184; // X
+        [ PLATFORM_SPRAT_SEG , 50 ] = 123 - i; // Y
+    }
+    if playerFeetY > 59 {
+        // need to do clipping/offsetting
+        // top right
+        side = subSlice0Right == SIDE_NONE;
+        if side {
+            [ PLATFORM_SPRAT_SEG , 64 ] = 0; // disable
+        }
+        if side == 0 {
+            [ PLATFORM_SPRAT_SEG , 64 ] = 144; // enable and transparency
+        }
+        [ PLATFORM_SPRAT_SEG , 66 ] = 0; // Y
+        offset = 16;
+        offset2 = playerFeetY - 60;
+        offset2 = offset2 + offset2;
+        i = 0;
+        while i < playerFeetY - 60 {
+            offset = offset + 16;
+            i = i + 1;
+        }
+        t = playerFeetY - 60;
+        [ PLATFORM_SPRAT_SEG , 70 ] = 128 + offset; // start in color
+        // bottom right
+        side = subSlice3Right == SIDE_NONE;
+        if side {
+            [ PLATFORM_SPRAT_SEG , 96 ] = 0; // disable
+        }
+        if side == 0 {
+            [ PLATFORM_SPRAT_SEG , 96 ] = 144; // enable and transparency
+        }
+        [ PLATFORM_SPRAT_SEG , 98 ] = 184; // Y
+        [ PLATFORM_SPRAT_SEG , 102 ] = offset;
+        // middle right
+        side = subSlice1Right == SIDE_NONE;
+        if side {
+            [ PLATFORM_SPRAT_SEG , 80 ] = 0; // disable
+        }
+        if side == 0 {
+            [ PLATFORM_SPRAT_SEG , 80 ] = 128; // enable
+        }
+        [ PLATFORM_SPRAT_SEG , 82 ] = 63 - t; // Y
+        // temp mid bottom right
+        side = subSlice2Right == SIDE_NONE;
+        if side {
+            [ PLATFORM_SPRAT_SEG , 48 ] = 0; // disable
+        }
+        if side == 0 {
+            [ PLATFORM_SPRAT_SEG , 48 ] = 128; // enable
+        }
+        [ PLATFORM_SPRAT_SEG , 49 ] = 184; // X
+        [ PLATFORM_SPRAT_SEG , 50 ] = 127 - i; // Y
+
+        // top right wall
+        [ WALL_SPRAT_SEG , 70 ] = 130 + offset2; // start in color
+        // bottom right wall
+        [ WALL_SPRAT_SEG , 86 ] = 2 + offset2; // start in transparency
+        // middle right wall
+        [ WALL_SPRAT_SEG , 98 ] = 63 - t; // Y
+        // lower middle right wall
+        [ WALL_SPRAT_SEG , 114 ] = 127 - t; // Y
+        // top right wall
+        open = subSlice1Right > SIDE_CLOSED;
+        if open {
+            [ WALL_SPRAT_SEG , 69 ] = HALFWALL_SPRDATA_SEG;
+        }
+        if open == 0 {
+            [ WALL_SPRAT_SEG , 69 ] = WALL_SPRDATA_SEG;
+        }
+        // bottom right wall not fully visible
+        [ WALL_SPRAT_SEG , 85 ] = WALL_SPRDATA_SEG;
+        // middle right wall
+        open = subSlice2Right > SIDE_CLOSED;
+        if open {
+            [ WALL_SPRAT_SEG , 101 ] = HALFWALL_SPRDATA_SEG;
+        }
+        if open == 0 {
+            [ WALL_SPRAT_SEG , 101 ] = WALL_SPRDATA_SEG;
+        }
+        // lower middle right wall
+        open = subSlice3Right > SIDE_CLOSED;
+        if open {
+            [ WALL_SPRAT_SEG , 117 ] = HALFWALL_SPRDATA_SEG;
+        }
+        if open == 0 {
+            [ WALL_SPRAT_SEG , 117 ] = WALL_SPRDATA_SEG;
+        }
+    }
+    if playerFeetY < 40 {
+        // top right wall
+        open = subSlice1Right > SIDE_CLOSED;
+        if open {
+            [ WALL_SPRAT_SEG , 69 ] = HALFWALL_SPRDATA_SEG;
+        }
+        if open == 0 {
+            [ WALL_SPRAT_SEG , 69 ] = WALL_SPRDATA_SEG;
+        }
+        // bottom right wall
+        open = subSlice4Right > SIDE_CLOSED;
+        if open {
+            [ WALL_SPRAT_SEG , 85 ] = HALFWALL_SPRDATA_SEG;
+        }
+        if open == 0 {
+            [ WALL_SPRAT_SEG , 85 ] = WALL_SPRDATA_SEG;
+        }
+        // middle right wall
+        open = subSlice2Right > SIDE_CLOSED;
+        if open {
+            [ WALL_SPRAT_SEG , 101 ] = HALFWALL_SPRDATA_SEG;
+        }
+        if open == 0 {
+            [ WALL_SPRAT_SEG , 101 ] = WALL_SPRDATA_SEG;
+        }
+        // lower middle right wall
+        open = subSlice3Right > SIDE_CLOSED;
+        if open {
+            [ WALL_SPRAT_SEG , 117 ] = HALFWALL_SPRDATA_SEG;
+        }
+        if open == 0 {
+            [ WALL_SPRAT_SEG , 117 ] = WALL_SPRDATA_SEG;
+        }
+        // blocked passage left
+        open = 0;
+        if subSlice0Left == SIDE_BLOCKED {
+            open = 1;
+            [ WALL_SPRAT_SEG , 130 ] = 0; // Y
+            [ WALL_SPRAT_SEG , 132 ] = 32; // height
+            [ WALL_SPRAT_SEG , 133 ] = BLOCKED_L_SPRDATA_SEG;
+            i = 0;
+            offset = 0;
+            while i < playerFeetY {
+                offset = offset + 8;
+                i = i + 1;
+            }
+            [ WALL_SPRAT_SEG , 134 ] = 128 + offset; // color start
+            if playerFeetY > 15 {
+                [ WALL_SPRAT_SEG , 133 ] = BLOCKED_L_SPRDATA_SEG + 1;
+                [ WALL_SPRAT_SEG , 134 ] = offset - 128; // in color
+                [ WALL_SPRAT_SEG , 132 ] = 16; // height
+            }
+            if playerFeetY > 31 {
+                open = 0;
+            }
+        }
+        if subSlice1Left == SIDE_BLOCKED {
+            open = 1;
+            [ WALL_SPRAT_SEG , 130 ] = 64 - playerFeetY; // Y
+        }
+        if subSlice2Left == SIDE_BLOCKED {
+            open = 1;
+            [ WALL_SPRAT_SEG , 132 ] = 32; // height
+            [ WALL_SPRAT_SEG , 130 ] = 128 - playerFeetY; // Y
+            [ WALL_SPRAT_SEG , 134 ] = 128; // start in color
+        }
+        if subSlice3Left == SIDE_BLOCKED {
+            open = 1;
+            [ WALL_SPRAT_SEG , 130 ] = 176; // Y
+            [ WALL_SPRAT_SEG , 132 ] = 16; // height
+            [ WALL_SPRAT_SEG , 133 ] = BLOCKED_L_SPRDATA_SEG;
+            i = 0;
+            offset = 0;
+            while i < playerFeetY {
+                offset = offset + 8;
+                i = i + 1;
+            }
+            [ WALL_SPRAT_SEG , 134 ] = offset; // start in transparency
+            if playerFeetY > 16 {
+                [ WALL_SPRAT_SEG , 130 ] = 160; // Y
+                [ WALL_SPRAT_SEG , 132 ] = 32; // height
+                [ WALL_SPRAT_SEG , 134 ] = 128 + offset; // start in color
+            }
+            if playerFeetY > 31 {
+                [ WALL_SPRAT_SEG , 130 ] = 160 - playerFeetY - 32; // Y
+                [ WALL_SPRAT_SEG , 134 ] = 128; // start in color
+            }
+        }
+        if open == 0 {
+            [ WALL_SPRAT_SEG , 128 ] = 0; // disable
+        }
+        if open {
+            [ WALL_SPRAT_SEG , 128 ] = 144; // enable and transparency
+        }
+    }
+    if playerFeetY < 60 {
+        // top right wall
+        [ WALL_SPRAT_SEG , 70 ] = 128 + 10 + playerFeetY + playerFeetY; // start in color
+        // bottom right wall
+        [ WALL_SPRAT_SEG , 86 ] = 10 + playerFeetY + playerFeetY; // color start
+        // middle right wall
+        [ WALL_SPRAT_SEG , 98 ] = 59 - playerFeetY; // Y
+        // lower middle right wall
+        [ WALL_SPRAT_SEG , 114 ] = 123 - playerFeetY; // Y
+        if playerFeetY > 2 {
+            // top right
+            // middle right
+            // bottom right
+            if playerFeetY > 39 {
+                side = subSlice0Right == SIDE_NONE;
+                if side {
+                    [ PLATFORM_SPRAT_SEG , 64 ] = 0; // disable
+                }
+                if side == 0 {
+                    [ PLATFORM_SPRAT_SEG , 64 ] = 128; // enable
+                }
+                side = subSlice1Right == SIDE_NONE
+                if side {
+                    [ PLATFORM_SPRAT_SEG , 80 ] = 0; // disable
+                }
+                if side == 0 {
+                    [ PLATFORM_SPRAT_SEG , 80 ] = 128; // enable
+                }
+                side = subSlice2Right == SIDE_NONE;
+                if side {
+                    [ PLATFORM_SPRAT_SEG , 96 ] = 0; // disable
+                }
+                if side == 0 {
+                    [ PLATFORM_SPRAT_SEG , 96 ] = 128; // enable
+                }
+            }
+            if playerFeetY < 40 {
+                side = subSlice1Right == SIDE_NONE;
+                if side {
+                    [ PLATFORM_SPRAT_SEG , 64 ] = 0; // disable
+                }
+                if side == 0 {
+                    [ PLATFORM_SPRAT_SEG , 64 ] = 128; // enable
+                }
+                side = subSlice2Right == SIDE_NONE;
+                if side {
+                    [ PLATFORM_SPRAT_SEG , 80 ] = 0; // disable
+                }
+                if side == 0 {
+                    [ PLATFORM_SPRAT_SEG , 80 ] = 128; // enable
+                }
+                side = subSlice3Right == SIDE_NONE;
+                if side {
+                    [ PLATFORM_SPRAT_SEG , 96 ] = 0; // disable
+                }
+                if side == 0 {
+                    [ PLATFORM_SPRAT_SEG , 96 ] = 128; // enable
+                }
+            }
+            // top right
+            t = playerFeetY - 3;
+            [ PLATFORM_SPRAT_SEG , 66 ] = 56 - t; // Y
+            [ PLATFORM_SPRAT_SEG , 70 ] = 128; // start in color
+            // middle right
+            [ PLATFORM_SPRAT_SEG , 82 ] = 120 - t; // Y
+            // bottom right
+            [ PLATFORM_SPRAT_SEG , 98 ] = 184 - t; // Y
+            [ PLATFORM_SPRAT_SEG , 102 ] = 128; // start in color
+        }
+    }
+    if playerFeetY > 32 {
+        // need to do clipping/offsetting
+        offset = 0;
+        offset2 = playerFeetY - 32;
+        offset2 = offset2 + offset2;
+        i = 0;
+        while i < playerFeetY - 32 {
+            offset = offset + 16;
+            i = i + 1;
+        }
+        // top left
+        if playerFeetY < 40 {
+            // top left
+            side = subSlice0Left == SIDE_NONE;
+            if side {
+                [ PLATFORM_SPRAT_SEG , 0 ] = 0; // disable
+            }
+            if side == 0 {
+                [ PLATFORM_SPRAT_SEG , 0 ] = 144; // enable and transparency
+            }
+            [ PLATFORM_SPRAT_SEG , 2 ] = 0; // Y
+            [ PLATFORM_SPRAT_SEG , 6 ] = 128 + offset; // start in color
+
+            // bottom left
+            side = subSlice3Left == SIDE_NONE;
+            if side {
+                [ PLATFORM_SPRAT_SEG , 32 ] = 0; // disable
+            }
+            if side == 0 {
+                [ PLATFORM_SPRAT_SEG , 32 ] = 144; // enable and transparency
+            }
+            [ PLATFORM_SPRAT_SEG , 34 ] = 184; // Y
+            [ PLATFORM_SPRAT_SEG , 38 ] = offset; // start in transparency
+
+            // temp mid bottom left
+            side = subSlice2Left == SIDE_NONE;
+            if side {
+                [ PLATFORM_SPRAT_SEG , 48 ] = 0; // disable
+            }
+            if side == 0 {
+                [ PLATFORM_SPRAT_SEG , 48 ] = 128; // enable
+            }
+            [ PLATFORM_SPRAT_SEG , 49 ] = 8; // X
+            [ PLATFORM_SPRAT_SEG , 50 ] = 128 - i; // Y
+        }
+        // middle left
+        side = subSlice1Left == SIDE_NONE;
+        if side {
+            [ PLATFORM_SPRAT_SEG , 16 ] = 0; // disable
+        }
+        if side == 0 {
+            [ PLATFORM_SPRAT_SEG , 16 ] = 128; // enable
+        }
+        [ PLATFORM_SPRAT_SEG , 18 ] = 96 - playerFeetY; // Y
+        // top left wall
+        [ WALL_SPRAT_SEG , 6 ] = 128 + offset2; // start in color
+        // bottom left wall
+        [ WALL_SPRAT_SEG , 22 ] = offset2; // start in transparency
+        // middle left wall
+        t = playerFeetY - 32;
+        [ WALL_SPRAT_SEG , 34 ] = 64 - t; // Y
+        // lower middle left wall
+        //[ WALL_SPRAT_SEG , 48 ] = 144; // enable and transparency
+        [ WALL_SPRAT_SEG , 50 ] = 128 - t; // Y
+    }
+    if playerFeetY < 33 {
+        // top left
+        side = subSlice0Left == SIDE_NONE;
+        if side {
+            [ PLATFORM_SPRAT_SEG, 0 ] = 0; // disable
+        }
+        if side == 0 {
+            [ PLATFORM_SPRAT_SEG, 0 ] = 144; // enable and transparency
+        }
+        [ PLATFORM_SPRAT_SEG , 2 ] = 32 - playerFeetY ; // Y
+        [ PLATFORM_SPRAT_SEG , 6 ] = 128; // color start
+        // middle left
+        side = subSlice1Left == SIDE_NONE;
+        if side {
+            [ PLATFORM_SPRAT_SEG , 16 ] = 0; // disable
+        }
+        if side == 0 {
+            [ PLATFORM_SPRAT_SEG , 16 ] = 128; // enable
+        }
+        [ PLATFORM_SPRAT_SEG , 18 ] = 96 - playerFeetY; // Y
+        // bottom left
+        side = subSlice2Left == SIDE_NONE;
+        if side {
+            [ PLATFORM_SPRAT_SEG , 32 ] = 0; // disable
+        }
+        if side == 0 {
+            [ PLATFORM_SPRAT_SEG , 32 ] = 128; // enable
+        }
+        [ PLATFORM_SPRAT_SEG , 34 ] = 160 - playerFeetY; // Y
+        if playerFeetY > 2 {
+            // hide temp mid bottom
+            [ PLATFORM_SPRAT_SEG , 48 ] = 0; // disable
+        }
+        // need to clip top and bottom walls
+        i = 0;
+        offset = 0;
+        while i < playerFeetY {
+            offset = offset + 2;
+            i = i + 1;
+        }
+        // top left wall
+        [ WALL_SPRAT_SEG , 6 ] = 192 + offset; // start in color
+        // bottom left wall
+        [ WALL_SPRAT_SEG , 22 ] = 64 + offset; // start in transparency
+        // middle left wall
+        [ WALL_SPRAT_SEG , 34 ] = 32 - playerFeetY; // Y
+        // lower middle left wall
+        //[ WALL_SPRAT_SEG , 48 ] = 144; // enable and transparency
+        [ WALL_SPRAT_SEG , 50 ] = 96 - playerFeetY; // Y
+    }
+    if playerFeetY > 39 {
+        // top left
+        side = subSlice0Left != SIDE_NONE
+        if side {
+            [ PLATFORM_SPRAT_SEG, 0 ] = 128; // enable
+        }
+        if side == 0 {
+            [ PLATFORM_SPRAT_SEG, 0 ] = 0; // disable
+        }
+        // the top left platform is no longer visible, take over for previous middle left
+        t = playerFeetY - 40;
+        [ PLATFORM_SPRAT_SEG , 2 ] = 56 - t ; // Y
+        [ PLATFORM_SPRAT_SEG , 6 ] = 128; // color start
+        // middle left
+        [ PLATFORM_SPRAT_SEG , 18 ] = 120 - t; // Y
+        // bottom left
+        [ PLATFORM_SPRAT_SEG , 34 ] = 184 - t; // Y
+        [ PLATFORM_SPRAT_SEG , 38 ] = 128; // color start
+        if playerFeetY < 60 {
+            // hide temp mid bottom
+            [ PLATFORM_SPRAT_SEG , 48 ] = 0; // disable
+        }
+        // blocked passage left
+        open = 0;
+        if subSlice0Left == SIDE_BLOCKED {
+            open = 1;
+            [ WALL_SPRAT_SEG , 130 ] = 24 - t; // Y
+            [ WALL_SPRAT_SEG , 132 ] = 32; // height
+            [ WALL_SPRAT_SEG , 133 ] = BLOCKED_L_SPRDATA_SEG;
+        }
+        if subSlice1Left == SIDE_BLOCKED {
+            open = 1;
+            [ WALL_SPRAT_SEG , 130 ] = 88 - t; // Y
+        }
+        if subSlice2Left == SIDE_BLOCKED {
+            open = 1;
+            [ WALL_SPRAT_SEG , 130 ] = 152 - t; // Y
+            [ WALL_SPRAT_SEG , 134 ] = 128; // start in color
+        }
+        if open == 0 {
+            [ WALL_SPRAT_SEG , 128 ] = 0; // disable
+        }
+        if open {
+            [ WALL_SPRAT_SEG , 128 ] = 144; // enable and transparency
+        }
+    }
+    // blocked passage right
+    if playerFeetY > 27 {
+        open = 0;
+        cnd0 = 0;
+        cnd1 = 0;
+        if playerFeetY > 39 {
+            cnd0 = subSlice3Right == SIDE_BLOCKED;
+        }
+        if playerFeetY < 40 {
+            cnd1 = subSlice4Right == SIDE_BLOCKED;
+            if subSlice3Right == SIDE_BLOCKED {
+                open = 1;
+                [ WALL_SPRAT_SEG , 146 ] = 127 - playerFeetY - 28; // Y
+            }
+        }
+        cnd = cnd0 | cnd1;
+        if cnd {
+            open = 1;
+            i = 0;
+            offset = 0;
+            while i < playerFeetY - 27 {
+                offset = offset + 8;
+                i = i + 1;
+            }
+            [ WALL_SPRAT_SEG , 146 ] = 176; // Y
+            [ WALL_SPRAT_SEG , 148 ] = 16; // height
+            [ WALL_SPRAT_SEG , 149 ] = BLOCKED_R_SPRDATA_SEG;
+            [ WALL_SPRAT_SEG , 150 ] = offset; // start in transparency
+            if playerFeetY > 43 {
+                [ WALL_SPRAT_SEG , 146 ] = 159; // Y
+                [ WALL_SPRAT_SEG , 148 ] = 32; // height
+                [ WALL_SPRAT_SEG , 150 ] = offset - 136; // start in transparency
+            }
+            if playerFeetY > 58 {
+                [ WALL_SPRAT_SEG , 144 ] = 128; // enable
+                [ WALL_SPRAT_SEG , 146 ] = 160 - playerFeetY - 59; // Y
+                [ WALL_SPRAT_SEG , 150 ] = 128; // start in color
+            }
+        }
+        cnd0 = 0;
+        cnd1 = 0;
+        if playerFeetY < 40 {
+            cnd0 = subSlice1Right == SIDE_BLOCKED;
+        }
+        if playerFeetY > 39 {
+            cnd1 = subSlice0Right == SIDE_BLOCKED;
+            if subSlice1Right == SIDE_BLOCKED {
+                open = 1;
+                [ WALL_SPRAT_SEG , 146 ] = 51 - t; // Y
+            }
+        }
+        cnd = cnd0 | cnd1;
+        if cnd {
+            open = 1;
+            i = 0;
+            offset = 0;
+            while i < playerFeetY - 27 {
+                offset = offset + 8;
+                i = i + 1;
+            }
+            [ WALL_SPRAT_SEG , 146 ] = 0; // Y
+            [ WALL_SPRAT_SEG , 150 ] = 128 + offset; // start in color
+            if playerFeetY > 42 {
+                [ WALL_SPRAT_SEG , 148 ] = 16; // height
+                [ WALL_SPRAT_SEG , 149 ] = BLOCKED_R_SPRDATA_SEG + 1;
+                [ WALL_SPRAT_SEG , 150 ] = offset - 128; // start in color
+            }
+            if playerFeetY > 58 {
+                open = 0;
+            }
+        }
+        if subSlice2Right == SIDE_BLOCKED {
+            open = 1;
+            if playerFeetY < 40 {
+                [ WALL_SPRAT_SEG , 146 ] = 63 - playerFeetY - 28; // Y
+            }
+            if playerFeetY > 39 {
+                [ WALL_SPRAT_SEG , 146 ] = 115 - t; // Y
+            }
+        }
+        if open == 0 {
+            [ WALL_SPRAT_SEG , 144] = 0; // disable
+        }
+        if open {
+            [ WALL_SPRAT_SEG , 144 ] = 144; // enable and transparency
+        }
+    }
+    if playerFeetY < 28 {
+        open = 0;
+        if subSlice3Right == SIDE_BLOCKED {
+            open = 1;
+            [ WALL_SPRAT_SEG , 146 ] = 155 - playerFeetY; // Y
+        }
+        if subSlice2Right == SIDE_BLOCKED {
+            open = 1;
+            [ WALL_SPRAT_SEG , 146 ] = 91 - playerFeetY; // Y
+        }
+        if subSlice1Right == SIDE_BLOCKED {
+            open = 1;
+            [ WALL_SPRAT_SEG , 146 ] = 27 - playerFeetY; // Y
+        }
+        if open {
+            [ WALL_SPRAT_SEG , 144 ] = 144; // enable and transparency
+        }
+        if open == 0 {
+            [ WALL_SPRAT_SEG , 144 ] = 0; // disable
+        }
+    }
+}
+
+func descentSpritesInit {
+    [ PLATFORM_SPRAT_SEG , 128 ] = 0; // disable
+    [ PLATFORM_SPRAT_SEG , 144 ] = 0; // disable
+    [ PLATFORM_SPRAT_SEG , 160 ] = 0; // disable
+    [ PLATFORM_SPRAT_SEG , 208 ] = 0; // disable
+    [ PLATFORM_SPRAT_SEG , 224 ] = 0; // disable
+    i = 0;
+    t = 0;
+    while i < MAX_COLUMN_BLOCKS {
+        [ COL0_SPRAT_SEG , t ] = 0; // disable
+        [ COL1_SPRAT_SEG , t ] = 0; // disable
+        [ COL2_SPRAT_SEG , t ] = 0; // disable
+        i = i + 1;
+        t = t + 16;
+    }
+    [ BLOCK_SPRAT_SEG , 0 ] = 0; // disable
+    [ BLOCK_SPRAT_SEG , 160 ] = 0; // disable
+    [ BLOCK_SPRAT_SEG , 176 ] = 0; // disable
+    [ BLOCK_SPRAT_SEG , 192 ] = 0; // disable
+    [ BLOCK_SPRAT_SEG , 208 ] = 0; // disable
+    [ BLOCK_SPRAT_SEG , 224 ] = 0; // disable
+    [ BLOCK_SPRAT_SEG , 240 ] = 0; // disable
+    [ PLATFORM_SPRAT_SEG , 176 ] = 0; // disable
+    [ PLATFORM_SPRAT_SEG , 192 ] = 0; // disable
+    // TODO crew
+    [ 72 , 0 ] = 144; // enable and transparency
+    [ 72 , 2 ] = PLAYER_SPRITE_FEET_Y - PLAYER_SPRITE_HEIGHT; // Y
+    // platforms
+    [ PLATFORM_SPRAT_SEG , 0 ] = 0; // disable
+    [ PLATFORM_SPRAT_SEG , 1 ] = 8; // X: margin for walls
+    [ PLATFORM_SPRAT_SEG , 2 ] = 0; // Y
+    [ PLATFORM_SPRAT_SEG , 3 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 4 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 5 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 6 ] = 128; // color starts at 64x8 pixels from start (64*8*2)/8 = 128
+    [ PLATFORM_SPRAT_SEG , 7 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 8 ] = 0; // black
+
+    [ PLATFORM_SPRAT_SEG , 16 ] = 0; // disable
+    [ PLATFORM_SPRAT_SEG , 17 ] = 8; // X
+    [ PLATFORM_SPRAT_SEG , 18 ] = 64; // Y
+    [ PLATFORM_SPRAT_SEG , 19 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 20 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 21 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 22 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 23 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 24 ] = 0; // black
+
+    [ PLATFORM_SPRAT_SEG , 32 ] = 0; // disable
+    [ PLATFORM_SPRAT_SEG , 33 ] = 8; // X
+    [ PLATFORM_SPRAT_SEG , 34 ] = 0; // Y
+    [ PLATFORM_SPRAT_SEG , 35 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 36 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 37 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 38 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 39 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 40 ] = 0; // black
+
+    [ PLATFORM_SPRAT_SEG , 48 ] = 0; // disable
+    [ PLATFORM_SPRAT_SEG , 49 ] = 8; // X
+    [ PLATFORM_SPRAT_SEG , 50 ] = 0; // Y
+    [ PLATFORM_SPRAT_SEG , 51 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 52 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 53 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 54 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 55 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 56 ] = 0; // black
+
+    [ PLATFORM_SPRAT_SEG , 64 ] = 0; // disable
+    [ PLATFORM_SPRAT_SEG , 65 ] = 184; // X
+    [ PLATFORM_SPRAT_SEG , 66 ] = 0; // Y
+    [ PLATFORM_SPRAT_SEG , 67 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 68 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 69 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 70 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 71 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 72 ] = 0; // black
+
+    [ PLATFORM_SPRAT_SEG , 80 ] = 0; // disable
+    [ PLATFORM_SPRAT_SEG , 81 ] = 184; // X
+    [ PLATFORM_SPRAT_SEG , 82 ] = 0; // Y
+    [ PLATFORM_SPRAT_SEG , 83 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 84 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 85 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 86 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 87 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 88 ] = 0; // black
+
+    [ PLATFORM_SPRAT_SEG , 96 ] = 0; // disable
+    [ PLATFORM_SPRAT_SEG , 97 ] = 184; // X
+    [ PLATFORM_SPRAT_SEG , 98 ] = 0; // Y
+    [ PLATFORM_SPRAT_SEG , 99 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 100 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 101 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 102 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 103 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 104 ] = 0; // black
+
+    [ PLATFORM_SPRAT_SEG , 112 ] = 0; // disable
+
+    // walls
+    // top left
+    [ WALL_SPRAT_SEG , 0 ] = 144; // enable and transparency
+    [ WALL_SPRAT_SEG , 1 ] = 0; // X
+    [ WALL_SPRAT_SEG , 2 ] = 0; // Y
+    [ WALL_SPRAT_SEG , 3 ] = 8; // width
+    [ WALL_SPRAT_SEG , 4 ] = 64; // height
+    [ WALL_SPRAT_SEG , 5 ] = WALL_SPRDATA_SEG;
+    [ WALL_SPRAT_SEG , 6 ] = 128; // color start
+    [ WALL_SPRAT_SEG , 7 ] = 255; // white
+    [ WALL_SPRAT_SEG , 8 ] = 0; // black
+
+    // bottom left
+    [ WALL_SPRAT_SEG , 16 ] = 144; // enable and transparency
+    [ WALL_SPRAT_SEG , 17 ] = 0; // X
+    [ WALL_SPRAT_SEG , 18 ] = 128; // Y
+    [ WALL_SPRAT_SEG , 19 ] = 8; // width
+    [ WALL_SPRAT_SEG , 20 ] = 64; // height
+    [ WALL_SPRAT_SEG , 21 ] = WALL_SPRDATA_SEG;
+    [ WALL_SPRAT_SEG , 22 ] = 128; // color start
+    [ WALL_SPRAT_SEG , 23 ] = 255; // white
+    [ WALL_SPRAT_SEG , 24 ] = 0; // black
+
+    // middle left
+    [ WALL_SPRAT_SEG , 32 ] = 144; // enable and transparency
+    [ WALL_SPRAT_SEG , 33 ] = 0; // X
+    [ WALL_SPRAT_SEG , 34 ] = 64; // Y
+    [ WALL_SPRAT_SEG , 35 ] = 8; // width
+    [ WALL_SPRAT_SEG , 36 ] = 64; // height
+    [ WALL_SPRAT_SEG , 37 ] = WALL_SPRDATA_SEG;
+    [ WALL_SPRAT_SEG , 38 ] = 128; // color start
+    [ WALL_SPRAT_SEG , 39 ] = 255; // white
+    [ WALL_SPRAT_SEG , 40 ] = 0; // black
+
+    // lower middle left
+    [ WALL_SPRAT_SEG , 48 ] = 144; // enable and transparency
+    [ WALL_SPRAT_SEG , 49 ] = 0; // X
+    [ WALL_SPRAT_SEG , 50 ] = 64; // Y
+    [ WALL_SPRAT_SEG , 51 ] = 8; // width
+    [ WALL_SPRAT_SEG , 52 ] = 64; // height
+    [ WALL_SPRAT_SEG , 53 ] = WALL_SPRDATA_SEG;
+    [ WALL_SPRAT_SEG , 54 ] = 128; // color start
+    [ WALL_SPRAT_SEG , 55 ] = 255; // white
+    [ WALL_SPRAT_SEG , 56 ] = 0; // black
+
+    // top right
+    [ WALL_SPRAT_SEG , 64 ] = 208; // enable, transparency, and flip h
+    [ WALL_SPRAT_SEG , 65 ] = 248; // X
+    [ WALL_SPRAT_SEG , 66 ] = 0; // Y
+    [ WALL_SPRAT_SEG , 67 ] = 8; // width
+    [ WALL_SPRAT_SEG , 68 ] = 64; // height
+    [ WALL_SPRAT_SEG , 69 ] = WALL_SPRDATA_SEG;
+    [ WALL_SPRAT_SEG , 70 ] = 128; // color start
+    [ WALL_SPRAT_SEG , 71 ] = 255; // white
+    [ WALL_SPRAT_SEG , 72 ] = 0; // black
+
+    // bottom right
+    [ WALL_SPRAT_SEG , 80 ] = 208; // enable, transparency, and flip h
+    [ WALL_SPRAT_SEG , 81 ] = 248; // X
+    [ WALL_SPRAT_SEG , 82 ] = 128; // Y
+    [ WALL_SPRAT_SEG , 83 ] = 8; // width
+    [ WALL_SPRAT_SEG , 84 ] = 64; // height
+    [ WALL_SPRAT_SEG , 85 ] = WALL_SPRDATA_SEG;
+    [ WALL_SPRAT_SEG , 86 ] = 128; // color start
+    [ WALL_SPRAT_SEG , 87 ] = 255; // white
+    [ WALL_SPRAT_SEG , 88 ] = 0; // black
+
+    // middle right
+    [ WALL_SPRAT_SEG , 96 ] = 208; // enable, transparency, and flip h
+    [ WALL_SPRAT_SEG , 97 ] = 248; // X
+    [ WALL_SPRAT_SEG , 98 ] = 0; // Y
+    [ WALL_SPRAT_SEG , 99 ] = 8; // width
+    [ WALL_SPRAT_SEG , 100 ] = 64; // height
+    [ WALL_SPRAT_SEG , 101 ] = WALL_SPRDATA_SEG;
+    [ WALL_SPRAT_SEG , 102 ] = 128; // color start
+    [ WALL_SPRAT_SEG , 103 ] = 255; // white
+    [ WALL_SPRAT_SEG , 104 ] = 0; // black
+
+    // lower middle right
+    [ WALL_SPRAT_SEG , 112 ] = 208; // enable, transparency, and flip h
+    [ WALL_SPRAT_SEG , 113 ] = 248; // X
+    [ WALL_SPRAT_SEG , 114 ] = 0; // Y
+    [ WALL_SPRAT_SEG , 115 ] = 8; // width
+    [ WALL_SPRAT_SEG , 116 ] = 64; // height
+    [ WALL_SPRAT_SEG , 117 ] = WALL_SPRDATA_SEG;
+    [ WALL_SPRAT_SEG , 118 ] = 128; // color start
+    [ WALL_SPRAT_SEG , 119 ] = 255; // white
+    [ WALL_SPRAT_SEG , 120 ] = 0; // black
+
+    // blocked passage left
+    [ WALL_SPRAT_SEG , 128 ] = 0;
+    [ WALL_SPRAT_SEG , 129 ] = 32; // X
+    [ WALL_SPRAT_SEG , 130 ] = 0; // Y
+    [ WALL_SPRAT_SEG , 131 ] = 32; // width
+    [ WALL_SPRAT_SEG , 132 ] = 32; // height
+    [ WALL_SPRAT_SEG , 133 ] = BLOCKED_L_SPRDATA_SEG;
+    [ WALL_SPRAT_SEG , 134 ] = 128; // color start
+    [ WALL_SPRAT_SEG , 135 ] = 255; // white
+    [ WALL_SPRAT_SEG , 136 ] = 0; // black
+
+    // blocked passage right
+    [ WALL_SPRAT_SEG , 144 ] = 0;
+    [ WALL_SPRAT_SEG , 145 ] = 192; // X
+    [ WALL_SPRAT_SEG , 146 ] = 0; // Y
+    [ WALL_SPRAT_SEG , 147 ] = 32; // width
+    [ WALL_SPRAT_SEG , 148 ] = 32; // height
+    [ WALL_SPRAT_SEG , 149 ] = BLOCKED_R_SPRDATA_SEG;
+    [ WALL_SPRAT_SEG , 150 ] = 128; // color start
+    [ WALL_SPRAT_SEG , 151 ] = 255; // white
+    [ WALL_SPRAT_SEG , 152 ] = 0; // black
+}
+
+func playerHistoryInit {
+    i = 0;
+    while i < HISTORY_MAX + 1 {
+        [ PLAYER_POS_HISTORY_SEG , PLAYER_Y_HISTORY_OFFSET + i ] = playerX;
+        [ PLAYER_POS_HISTORY_SEG , PLAYER_X_HISTORY_OFFSET + i ] = playerFeetY;
+        [ PLAYER_POS_HISTORY_SEG , PLAYER_FLAGS_HISTORY_OFFSET + i ] = playerFacing;
+        i = i + 1;
+    }
+}
+
+func playerHistoryHalt {
+    i = 0;
+    while i < HISTORY_MAX + 1 {
+        [ PLAYER_POS_HISTORY_SEG , PLAYER_FLAGS_HISTORY_OFFSET + i ] = 0;
+        i = i + 1;
+    }
+}
+
+func passageBlockSpritesInit {
+    // TODO crew
+    [ 72 , 0 ] = 144; // enable and transparency
+    // platforms
+    // bottom
+    // left
+    [ PLATFORM_SPRAT_SEG , 0 ] = 128; // enable
+    [ PLATFORM_SPRAT_SEG , 1 ] = 0; // X
+    [ PLATFORM_SPRAT_SEG , 2 ] = 96; // Y
+    [ PLATFORM_SPRAT_SEG , 3 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 4 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 5 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 6 ] = 128; // color starts at 64x8 pixels from start (64*8*2)/8 = 128
+    [ PLATFORM_SPRAT_SEG , 7 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 8 ] = 0; // black
+    // mid left
+    [ PLATFORM_SPRAT_SEG , 16 ] = 128; // enable
+    [ PLATFORM_SPRAT_SEG , 17 ] = 64; // X
+    [ PLATFORM_SPRAT_SEG , 18 ] = 96; // Y
+    [ PLATFORM_SPRAT_SEG , 19 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 20 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 21 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 22 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 23 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 24 ] = 0; // black
+    // mid right
+    [ PLATFORM_SPRAT_SEG , 32 ] = 128; // enable
+    [ PLATFORM_SPRAT_SEG , 33 ] = 128; // X
+    [ PLATFORM_SPRAT_SEG , 34 ] = 96; // Y
+    [ PLATFORM_SPRAT_SEG , 35 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 36 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 37 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 38 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 39 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 40 ] = 0; // black
+    // right
+    [ PLATFORM_SPRAT_SEG , 48 ] = 128; // enable
+    [ PLATFORM_SPRAT_SEG , 49 ] = 192; // X
+    [ PLATFORM_SPRAT_SEG , 50 ] = 96; // Y
+    [ PLATFORM_SPRAT_SEG , 51 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 52 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 53 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 54 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 55 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 56 ] = 0; // black
+    // top
+    // left
+    [ PLATFORM_SPRAT_SEG , 64 ] = 160; // enable and flip v
+    [ PLATFORM_SPRAT_SEG , 65 ] = 0; // X
+    [ PLATFORM_SPRAT_SEG , 66 ] = 62; // Y
+    [ PLATFORM_SPRAT_SEG , 67 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 68 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 69 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 70 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 71 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 72 ] = 0; // black
+    // mid left
+    [ PLATFORM_SPRAT_SEG , 80 ] = 160; // enable and flip v
+    [ PLATFORM_SPRAT_SEG , 81 ] = 48; // X
+    [ PLATFORM_SPRAT_SEG , 82 ] = 62; // Y
+    [ PLATFORM_SPRAT_SEG , 83 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 84 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 85 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 86 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 87 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 88 ] = 0; // black
+    // mid right
+    [ PLATFORM_SPRAT_SEG , 96 ] = 160; // enable and flip v
+    [ PLATFORM_SPRAT_SEG , 97 ] = 144; // X
+    [ PLATFORM_SPRAT_SEG , 98 ] = 62; // Y
+    [ PLATFORM_SPRAT_SEG , 99 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 100 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 101 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 102 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 103 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 104 ] = 0; // black
+    // right
+    [ PLATFORM_SPRAT_SEG , 112 ] = 160; // enable flip v
+    [ PLATFORM_SPRAT_SEG , 113 ] = 192; // X
+    [ PLATFORM_SPRAT_SEG , 114 ] = 62; // Y
+    [ PLATFORM_SPRAT_SEG , 115 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 116 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 117 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 118 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 119 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 120 ] = 0; // black
+    // single tiles
+    [ WALL_SPRAT_SEG , 0 ] = 128; // enable
+    [ WALL_SPRAT_SEG , 1 ] = 112; // X
+    [ WALL_SPRAT_SEG , 2 ] = 62; // Y
+    [ WALL_SPRAT_SEG , 3 ] = 8; // width
+    [ WALL_SPRAT_SEG , 4 ] = 8; // height
+    [ WALL_SPRAT_SEG , 5 ] = ROM_WALL_BLOCKS_SEG;
+    [ WALL_SPRAT_SEG , 6 ] = tile8;
+    [ WALL_SPRAT_SEG , 7 ] = 255; // white
+    [ WALL_SPRAT_SEG , 8 ] = 0; // black
+
+    [ WALL_SPRAT_SEG , 16 ] = 128; // enable
+    [ WALL_SPRAT_SEG , 17 ] = 112; // X
+    [ WALL_SPRAT_SEG , 18 ] = 56; // Y
+    [ WALL_SPRAT_SEG , 19 ] = 8; // width
+    [ WALL_SPRAT_SEG , 20 ] = 8; // height
+    [ WALL_SPRAT_SEG , 21 ] = ROM_WALL_BLOCKS_SEG;
+    [ WALL_SPRAT_SEG , 22 ] = tile7;
+    [ WALL_SPRAT_SEG , 23 ] = 255; // white
+    [ WALL_SPRAT_SEG , 24 ] = 0; // black
+
+    [ WALL_SPRAT_SEG , 32 ] = 128; // enable
+    [ WALL_SPRAT_SEG , 33 ] = 114; // X
+    [ WALL_SPRAT_SEG , 34 ] = 48; // Y
+    [ WALL_SPRAT_SEG , 35 ] = 8; // width
+    [ WALL_SPRAT_SEG , 36 ] = 8; // height
+    [ WALL_SPRAT_SEG , 37 ] = ROM_WALL_BLOCKS_SEG;
+    [ WALL_SPRAT_SEG , 38 ] = tile0;
+    [ WALL_SPRAT_SEG , 39 ] = 255; // white
+    [ WALL_SPRAT_SEG , 40 ] = 0; // black
+
+    [ WALL_SPRAT_SEG , 48 ] = 128; // enable
+    [ WALL_SPRAT_SEG , 49 ] = 120; // X
+    [ WALL_SPRAT_SEG , 50 ] = 46; // Y
+    [ WALL_SPRAT_SEG , 51 ] = 8; // width
+    [ WALL_SPRAT_SEG , 52 ] = 8; // height
+    [ WALL_SPRAT_SEG , 53 ] = ROM_WALL_BLOCKS_SEG;
+    [ WALL_SPRAT_SEG , 54 ] = tile5;
+    [ WALL_SPRAT_SEG , 55 ] = 255; // white
+    [ WALL_SPRAT_SEG , 56 ] = 0; // black
+
+    [ WALL_SPRAT_SEG , 64 ] = 128; // enable
+    [ WALL_SPRAT_SEG , 65 ] = 128; // X
+    [ WALL_SPRAT_SEG , 66 ] = 46; // Y
+    [ WALL_SPRAT_SEG , 67 ] = 8; // width
+    [ WALL_SPRAT_SEG , 68 ] = 8; // height
+    [ WALL_SPRAT_SEG , 69 ] = ROM_WALL_BLOCKS_SEG;
+    [ WALL_SPRAT_SEG , 70 ] = tile5;
+    [ WALL_SPRAT_SEG , 71 ] = 255; // white
+    [ WALL_SPRAT_SEG , 72 ] = 0; // black
+
+    [ WALL_SPRAT_SEG , 80 ] = 128; // enable
+    [ WALL_SPRAT_SEG , 81 ] = 134; // X
+    [ WALL_SPRAT_SEG , 82 ] = 48; // Y
+    [ WALL_SPRAT_SEG , 83 ] = 8; // width
+    [ WALL_SPRAT_SEG , 84 ] = 8; // height
+    [ WALL_SPRAT_SEG , 85 ] = ROM_WALL_BLOCKS_SEG;
+    [ WALL_SPRAT_SEG , 86 ] = tile6;
+    [ WALL_SPRAT_SEG , 87 ] = 255; // white
+    [ WALL_SPRAT_SEG , 88 ] = 0; // black
+
+    [ WALL_SPRAT_SEG , 96 ] = 128; // enable
+    [ WALL_SPRAT_SEG , 97 ] = 136; // X
+    [ WALL_SPRAT_SEG , 98 ] = 56; // Y
+    [ WALL_SPRAT_SEG , 99 ] = 8; // width
+    [ WALL_SPRAT_SEG , 100 ] = 8; // height
+    [ WALL_SPRAT_SEG , 101 ] = ROM_WALL_BLOCKS_SEG;
+    [ WALL_SPRAT_SEG , 102 ] = tile1;
+    [ WALL_SPRAT_SEG , 103 ] = 255; // white
+    [ WALL_SPRAT_SEG , 104 ] = 0; // black
+
+    [ WALL_SPRAT_SEG , 112 ] = 128; // enable
+    [ WALL_SPRAT_SEG , 113 ] = 136; // X
+    [ WALL_SPRAT_SEG , 114 ] = 62; // Y
+    [ WALL_SPRAT_SEG , 115 ] = 8; // width
+    [ WALL_SPRAT_SEG , 116 ] = 8; // height
+    [ WALL_SPRAT_SEG , 117 ] = ROM_WALL_BLOCKS_SEG;
+    [ WALL_SPRAT_SEG , 118 ] = tile2;
+    [ WALL_SPRAT_SEG , 119 ] = 255; // white
+    [ WALL_SPRAT_SEG , 120 ] = 0; // black
+
+    [ WALL_SPRAT_SEG , 128 ] = 0; // disable
+    [ WALL_SPRAT_SEG , 144 ] = 0; // disable
+
+    [ BLOCK_SPRAT_SEG , 0 ] = 128; // enable
+    [ BLOCK_SPRAT_SEG , 1 ] = 120; // X
+    [ BLOCK_SPRAT_SEG , 2 ] = singleBlockY; // Y
+    [ BLOCK_SPRAT_SEG , 3 ] = BLOCK_DIM; // width
+    [ BLOCK_SPRAT_SEG , 4 ] = BLOCK_DIM; // height
+    [ BLOCK_SPRAT_SEG , 5 ] = blockSprDataSeg;
+    [ BLOCK_SPRAT_SEG , 6 ] = blockSprDataOffset;
+    [ BLOCK_SPRAT_SEG , 7 ] = 73;
+    [ BLOCK_SPRAT_SEG , 8 ] = 36;
+    [ BLOCK_SPRAT_SEG , 9 ] = 255;
+    [ BLOCK_SPRAT_SEG , 10 ] = 0;
+
+    if selectBlock {
+        [ BLOCK_SPRAT_SEG , 160 ] = 128; // enable
+        [ BLOCK_SPRAT_SEG , 161 ] = 64; // X
+        [ BLOCK_SPRAT_SEG , 162 ] = 46; // Y
+        [ BLOCK_SPRAT_SEG , 163 ] = ARROW_DIM; // width
+        [ BLOCK_SPRAT_SEG , 164 ] = ARROW_DIM; // height
+        [ BLOCK_SPRAT_SEG , 165 ] = ROM_ARROWS_SEG;
+        [ BLOCK_SPRAT_SEG , 166 ] = 0;
+        [ BLOCK_SPRAT_SEG , 167 ] = 73;
+
+        [ BLOCK_SPRAT_SEG , 176 ] = 160; // enable and flip v
+        [ BLOCK_SPRAT_SEG , 177 ] = 64; // X
+        [ BLOCK_SPRAT_SEG , 178 ] = 104; // Y
+        [ BLOCK_SPRAT_SEG , 179 ] = ARROW_DIM; // width
+        [ BLOCK_SPRAT_SEG , 180 ] = ARROW_DIM; // height
+        [ BLOCK_SPRAT_SEG , 181 ] = ROM_ARROWS_SEG;
+        [ BLOCK_SPRAT_SEG , 182 ] = 0;
+        [ BLOCK_SPRAT_SEG , 183 ] = 73;
+
+        [ BLOCK_SPRAT_SEG , 192 ] = 128; // enable
+        [ BLOCK_SPRAT_SEG , 193 ] = 176; // X
+        [ BLOCK_SPRAT_SEG , 194 ] = 46; // Y
+        [ BLOCK_SPRAT_SEG , 195 ] = ARROW_DIM; // width
+        [ BLOCK_SPRAT_SEG , 196 ] = ARROW_DIM; // height
+        [ BLOCK_SPRAT_SEG , 197 ] = ROM_ARROWS_SEG;
+        [ BLOCK_SPRAT_SEG , 198 ] = 0;
+        [ BLOCK_SPRAT_SEG , 199 ] = 73;
+
+        [ BLOCK_SPRAT_SEG , 208 ] = 160; // enable and flip v
+        [ BLOCK_SPRAT_SEG , 209 ] = 176; // X
+        [ BLOCK_SPRAT_SEG , 210 ] = 104; // Y
+        [ BLOCK_SPRAT_SEG , 211 ] = ARROW_DIM; // width
+        [ BLOCK_SPRAT_SEG , 212 ] = ARROW_DIM; // height
+        [ BLOCK_SPRAT_SEG , 213 ] = ROM_ARROWS_SEG;
+        [ BLOCK_SPRAT_SEG , 214 ] = 0;
+        [ BLOCK_SPRAT_SEG , 215 ] = 73;
+
+        [ BLOCK_SPRAT_SEG , 224 ] = 128; // enable
+        [ BLOCK_SPRAT_SEG , 225 ] = 68; // X
+        [ BLOCK_SPRAT_SEG , 226 ] = 75; // Y
+        [ BLOCK_SPRAT_SEG , 227 ] = 8; // width
+        [ BLOCK_SPRAT_SEG , 228 ] = 16; // height
+        [ BLOCK_SPRAT_SEG , 229 ] = ROM_CHAIN_SEG;
+        [ BLOCK_SPRAT_SEG , 230 ] = ROM_CHAIN_OFFSET;
+        [ BLOCK_SPRAT_SEG , 231 ] = 0;
+        [ BLOCK_SPRAT_SEG , 232 ] = 73;
+
+        [ BLOCK_SPRAT_SEG , 240 ] = 128; // enable
+        [ BLOCK_SPRAT_SEG , 241 ] = 180; // X
+        [ BLOCK_SPRAT_SEG , 242 ] = 75; // Y
+        [ BLOCK_SPRAT_SEG , 243 ] = 8; // width
+        [ BLOCK_SPRAT_SEG , 244 ] = 16; // height
+        [ BLOCK_SPRAT_SEG , 245 ] = ROM_CHAIN_SEG;
+        [ BLOCK_SPRAT_SEG , 246 ] = ROM_CHAIN_OFFSET;
+        [ BLOCK_SPRAT_SEG , 247 ] = 0;
+        [ BLOCK_SPRAT_SEG , 248 ] = 73;
+    }
+}
+
+func passageEmptySpritesInit {
+    i = 0;
+    t = 0;
+    while i < 16 {
+        [ WALL_SPRAT_SEG , t ] = 0; // disable
+        i = i + 1;
+        t = t + 16;
+    }
+    // TODO crew
+    [ 72 , 0 ] = 144; // enable and transparency
+    // platforms
+    // bottom
+    // left
+    [ PLATFORM_SPRAT_SEG , 0 ] = 128; // enable
+    [ PLATFORM_SPRAT_SEG , 1 ] = 0; // X: margin for walls
+    [ PLATFORM_SPRAT_SEG , 2 ] = 96; // Y
+    [ PLATFORM_SPRAT_SEG , 3 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 4 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 5 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 6 ] = 128; // color starts at 64x8 pixels from start (64*8*2)/8 = 128
+    [ PLATFORM_SPRAT_SEG , 7 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 8 ] = 0; // black
+    // mid left
+    [ PLATFORM_SPRAT_SEG , 16 ] = 128; // enable
+    [ PLATFORM_SPRAT_SEG , 17 ] = 44; // X
+    [ PLATFORM_SPRAT_SEG , 18 ] = 96; // Y
+    [ PLATFORM_SPRAT_SEG , 19 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 20 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 21 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 22 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 23 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 24 ] = 0; // black
+    // mid right
+    [ PLATFORM_SPRAT_SEG , 32 ] = 128; // enable
+    [ PLATFORM_SPRAT_SEG , 33 ] = 148; // X
+    [ PLATFORM_SPRAT_SEG , 34 ] = 96; // Y
+    [ PLATFORM_SPRAT_SEG , 35 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 36 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 37 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 38 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 39 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 40 ] = 0; // black
+    // right
+    [ PLATFORM_SPRAT_SEG , 48 ] = 128; // enable
+    [ PLATFORM_SPRAT_SEG , 49 ] = 192; // X
+    [ PLATFORM_SPRAT_SEG , 50 ] = 96; // Y
+    [ PLATFORM_SPRAT_SEG , 51 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 52 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 53 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 54 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 55 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 56 ] = 0; // black
+    // top
+    // left
+    [ PLATFORM_SPRAT_SEG , 64 ] = 160; // enable and flip v
+    [ PLATFORM_SPRAT_SEG , 65 ] = 0; // X
+    [ PLATFORM_SPRAT_SEG , 66 ] = 62; // Y
+    [ PLATFORM_SPRAT_SEG , 67 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 68 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 69 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 70 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 71 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 72 ] = 0; // black
+    // mid left
+    [ PLATFORM_SPRAT_SEG , 80 ] = 160; // enable and flip v
+    [ PLATFORM_SPRAT_SEG , 81 ] = 44; // X
+    [ PLATFORM_SPRAT_SEG , 82 ] = 62; // Y
+    [ PLATFORM_SPRAT_SEG , 83 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 84 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 85 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 86 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 87 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 88 ] = 0; // black
+    // mid right
+    [ PLATFORM_SPRAT_SEG , 96 ] = 160; // enable and flip v
+    [ PLATFORM_SPRAT_SEG , 97 ] = 148; // X
+    [ PLATFORM_SPRAT_SEG , 98 ] = 62; // Y
+    [ PLATFORM_SPRAT_SEG , 99 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 100 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 101 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 102 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 103 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 104 ] = 0; // black
+    // right
+    [ PLATFORM_SPRAT_SEG , 112 ] = 160; // enable flip v
+    [ PLATFORM_SPRAT_SEG , 113 ] = 192; // X
+    [ PLATFORM_SPRAT_SEG , 114 ] = 62; // Y
+    [ PLATFORM_SPRAT_SEG , 115 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 116 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 117 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 118 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 119 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 120 ] = 0; // black
+
+    if challengeMode == 0 {
+        // bottom
+        [ PLATFORM_SPRAT_SEG , 128 ] = 128; // enable
+        [ PLATFORM_SPRAT_SEG , 129 ] = 108; // X
+        [ PLATFORM_SPRAT_SEG , 130 ] = 96; // Y
+        [ PLATFORM_SPRAT_SEG , 131 ] = 64; // width
+        [ PLATFORM_SPRAT_SEG , 132 ] = 8; // height
+        [ PLATFORM_SPRAT_SEG , 133 ] = PLATFORM_SPRDATA_SEG;
+        [ PLATFORM_SPRAT_SEG , 134 ] = 128; // color start
+        [ PLATFORM_SPRAT_SEG , 135 ] = 255; // white
+        [ PLATFORM_SPRAT_SEG , 136 ] = 0; // black
+        // top
+        [ PLATFORM_SPRAT_SEG , 144 ] = 160; // enable and flip v
+        [ PLATFORM_SPRAT_SEG , 145 ] = 108; // X
+        [ PLATFORM_SPRAT_SEG , 146 ] = 62; // Y
+        [ PLATFORM_SPRAT_SEG , 147 ] = 64; // width
+        [ PLATFORM_SPRAT_SEG , 148 ] = 8; // height
+        [ PLATFORM_SPRAT_SEG , 149 ] = PLATFORM_SPRDATA_SEG;
+        [ PLATFORM_SPRAT_SEG , 150 ] = 128; // color start
+        [ PLATFORM_SPRAT_SEG , 151 ] = 255; // white
+        [ PLATFORM_SPRAT_SEG , 152 ] = 0; // black
+
+    }
+    if challengeMode {
+        // waterfall
+        [ PLATFORM_SPRAT_SEG , 160 ] = 128; // enable
+        [ PLATFORM_SPRAT_SEG , 161 ] = 108; // X
+        [ PLATFORM_SPRAT_SEG , 162 ] = 0; // Y
+        [ PLATFORM_SPRAT_SEG , 163 ] = 40; // width
+        [ PLATFORM_SPRAT_SEG , 164 ] = 192; // height
+        [ PLATFORM_SPRAT_SEG , 165 ] = ROM_WATERFALL_SPRDATA_SEG;
+        [ PLATFORM_SPRAT_SEG , 166 ] = 0;
+        [ PLATFORM_SPRAT_SEG , 167 ] = 1; // color
+
+        i = 0;
+        t = 0;
+        while i < WATERFALL_WALL_TILES_COUNT {
+            [ WALL_SPRAT_SEG , t ] = 128; // enable
+            count = [ BLOCK_INDEX_SEG , t ];
+            if count > 4 {
+                count = count - 5;
+            }
+            x = 108;
+            i2 = 0;
+            while i2 < count {
+                x = x + WALL_WIDTH;
+                i2 = i2 + 1;
+            }
+            [ WALL_SPRAT_SEG , t + 1 ] = x;
+            count = i;
+            y = 0;
+            i2 = 0;
+            while i2 < count {
+                y = y + 24;
+                i2 = i2 + 1;
+            }
+            [ WALL_SPRAT_SEG , t + 2 ] = y;
+            [ WALL_SPRAT_SEG , t + 3 ] = WALL_WIDTH; // width
+            [ WALL_SPRAT_SEG , t + 4 ] = 4; // height
+            [ WALL_SPRAT_SEG , t + 5 ] = ROM_WALL_BLOCKS_SEG;
+            [ WALL_SPRAT_SEG , t + 6 ] = 0;
+            [ WALL_SPRAT_SEG , t + 7 ] = 37; // colors
+            [ WALL_SPRAT_SEG , t + 8 ] = 1;
+            i = i + 1;
+            t = t + 16;
+        }
+
+        // player behind waterfall
+        [ 73 , 0 ] = 0; // disable
+        [ 73 , 1 ] = 108; // X
+        [ 73 , 2 ] = 84; // Y
+        [ 73 , 3 ] = WATERFALL_PLAYER_WIDTH; // width
+        [ 73 , 4 ] = WATERFALL_PLAYER_HEIGHT; // height
+        [ 73 , 5 ] = WATERFALL_PLAYER_SPRDATA_SEG;
+        [ 73 , 6 ] = 0;
+        [ 73 , 7 ] = 37; // colors
+        [ 73 , 8 ] = 33;
+        [ 73 , 9 ] = 42;
+    }
+}
+
+func passageCheckSpritesInit {
+    // TODO crew
+    [ 72 , 0 ] = 144; // enable and transparency
+    // platforms
+    // bottom
+    // left
+    [ PLATFORM_SPRAT_SEG , 0 ] = 128; // enable
+    [ PLATFORM_SPRAT_SEG , 1 ] = 0; // X: margin for walls
+    [ PLATFORM_SPRAT_SEG , 2 ] = 96; // Y
+    [ PLATFORM_SPRAT_SEG , 3 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 4 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 5 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 6 ] = 128; // color starts at 64x8 pixels from start (64*8*2)/8 = 128
+    [ PLATFORM_SPRAT_SEG , 7 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 8 ] = 0; // black
+    // mid left
+    [ PLATFORM_SPRAT_SEG , 16 ] = 128; // enable
+    [ PLATFORM_SPRAT_SEG , 17 ] = 32; // X
+    [ PLATFORM_SPRAT_SEG , 18 ] = 96; // Y
+    [ PLATFORM_SPRAT_SEG , 19 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 20 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 21 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 22 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 23 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 24 ] = 0; // black
+    // mid right
+    [ PLATFORM_SPRAT_SEG , 32 ] = 128; // enable
+    [ PLATFORM_SPRAT_SEG , 33 ] = 160; // X
+    [ PLATFORM_SPRAT_SEG , 34 ] = 96; // Y
+    [ PLATFORM_SPRAT_SEG , 35 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 36 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 37 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 38 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 39 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 40 ] = 0; // black
+    // right
+    [ PLATFORM_SPRAT_SEG , 48 ] = 128; // enable
+    [ PLATFORM_SPRAT_SEG , 49 ] = 192; // X
+    [ PLATFORM_SPRAT_SEG , 50 ] = 96; // Y
+    [ PLATFORM_SPRAT_SEG , 51 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 52 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 53 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 54 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 55 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 56 ] = 0; // black
+    // top
+    // left
+    [ PLATFORM_SPRAT_SEG , 64 ] = 160; // enable and flip v
+    [ PLATFORM_SPRAT_SEG , 65 ] = 0; // X
+    [ PLATFORM_SPRAT_SEG , 66 ] = 62; // Y
+    [ PLATFORM_SPRAT_SEG , 67 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 68 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 69 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 70 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 71 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 72 ] = 0; // black
+    // mid left
+    [ PLATFORM_SPRAT_SEG , 80 ] = 160; // enable and flip v
+    [ PLATFORM_SPRAT_SEG , 81 ] = 32; // X
+    [ PLATFORM_SPRAT_SEG , 82 ] = 62; // Y
+    [ PLATFORM_SPRAT_SEG , 83 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 84 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 85 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 86 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 87 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 88 ] = 0; // black
+    // mid right
+    [ PLATFORM_SPRAT_SEG , 96 ] = 160; // enable and flip v
+    [ PLATFORM_SPRAT_SEG , 97 ] = 160; // X
+    [ PLATFORM_SPRAT_SEG , 98 ] = 62; // Y
+    [ PLATFORM_SPRAT_SEG , 99 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 100 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 101 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 102 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 103 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 104 ] = 0; // black
+    // right
+    [ PLATFORM_SPRAT_SEG , 112 ] = 160; // enable flip v
+    [ PLATFORM_SPRAT_SEG , 113 ] = 192; // X
+    [ PLATFORM_SPRAT_SEG , 114 ] = 62; // Y
+    [ PLATFORM_SPRAT_SEG , 115 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 116 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 117 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 118 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 119 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 120 ] = 0; // black
+    // pit floor
+    [ PLATFORM_SPRAT_SEG , 128 ] = 128; // enable
+    [ PLATFORM_SPRAT_SEG , 129 ] = 96; // X
+    [ PLATFORM_SPRAT_SEG , 130 ] = 144; // Y
+    if playerRoomXDist > 3 {
+        [ PLATFORM_SPRAT_SEG , 130 ] = 176; // Y
+    }
+    [ PLATFORM_SPRAT_SEG , 131 ] = 64; // width
+    [ PLATFORM_SPRAT_SEG , 132 ] = 8; // height
+    [ PLATFORM_SPRAT_SEG , 133 ] = PLATFORM_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 134 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 135 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 136 ] = 0; // black
+    // pit walls
+    [ PLATFORM_SPRAT_SEG , 144 ] = 128; // enable
+    [ PLATFORM_SPRAT_SEG , 145 ] = 96; // X
+    [ PLATFORM_SPRAT_SEG , 146 ] = 104; // Y
+    [ PLATFORM_SPRAT_SEG , 147 ] = 8; // width
+    [ PLATFORM_SPRAT_SEG , 148 ] = 42; // height
+    if playerRoomXDist > 3 {
+        [ PLATFORM_SPRAT_SEG , 148 ] = 64; // height
+    }
+    [ PLATFORM_SPRAT_SEG , 149 ] = WALL_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 150 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 151 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 152 ] = 0; // black
+
+    [ PLATFORM_SPRAT_SEG , 160 ] = 208; // enable, transparency and flip horizontal
+    [ PLATFORM_SPRAT_SEG , 161 ] = 152; // X
+    [ PLATFORM_SPRAT_SEG , 162 ] = 104; // Y
+    [ PLATFORM_SPRAT_SEG , 163 ] = 8; // width
+    [ PLATFORM_SPRAT_SEG , 164 ] = 42; // height
+    if playerRoomXDist > 3 {
+        [ PLATFORM_SPRAT_SEG , 164 ] = 64; // height
+    }
+    [ PLATFORM_SPRAT_SEG , 165 ] = WALL_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 166 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 167 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 168 ] = 0; // black
+    // top walls
+    [ PLATFORM_SPRAT_SEG , 176 ] = 128; // enable
+    [ PLATFORM_SPRAT_SEG , 177 ] = 96; // X
+    [ PLATFORM_SPRAT_SEG , 178 ] = 0; // Y
+    [ PLATFORM_SPRAT_SEG , 179 ] = 8; // width
+    [ PLATFORM_SPRAT_SEG , 180 ] = 64; // height
+    [ PLATFORM_SPRAT_SEG , 181 ] = WALL_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 182 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 183 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 184 ] = 0; // black
+
+    [ PLATFORM_SPRAT_SEG , 192 ] = 208; // enable, transparency and flip horizontal
+    [ PLATFORM_SPRAT_SEG , 193 ] = 152; // X
+    [ PLATFORM_SPRAT_SEG , 194 ] = 0; // Y
+    [ PLATFORM_SPRAT_SEG , 195 ] = 8; // width
+    [ PLATFORM_SPRAT_SEG , 196 ] = 64; // height
+    [ PLATFORM_SPRAT_SEG , 197 ] = WALL_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 198 ] = 128; // color start
+    [ PLATFORM_SPRAT_SEG , 199 ] = 255; // white
+    [ PLATFORM_SPRAT_SEG , 200 ] = 0; // black
+    if playerRoomXDist > 3 {
+        [ PLATFORM_SPRAT_SEG , 208 ] = 128; // enable
+        [ PLATFORM_SPRAT_SEG , 209 ] = 96; // X
+        [ PLATFORM_SPRAT_SEG , 210 ] = 168; // Y
+        [ PLATFORM_SPRAT_SEG , 211 ] = 8; // width
+        [ PLATFORM_SPRAT_SEG , 212 ] = 8; // height
+        [ PLATFORM_SPRAT_SEG , 213 ] = WALL_SPRDATA_SEG;
+        [ PLATFORM_SPRAT_SEG , 214 ] = 128; // color start
+        [ PLATFORM_SPRAT_SEG , 215 ] = 255; // white
+        [ PLATFORM_SPRAT_SEG , 216 ] = 0; // black
+
+        [ PLATFORM_SPRAT_SEG , 224 ] = 208; // enable, transparency and flip horizontal
+        [ PLATFORM_SPRAT_SEG , 225 ] = 152; // X
+        [ PLATFORM_SPRAT_SEG , 226 ] = 168; // Y
+        [ PLATFORM_SPRAT_SEG , 227 ] = 8; // width
+        [ PLATFORM_SPRAT_SEG , 228 ] = 8; // height
+        [ PLATFORM_SPRAT_SEG , 229 ] = WALL_SPRDATA_SEG;
+        [ PLATFORM_SPRAT_SEG , 230 ] = 128; // color start
+        [ PLATFORM_SPRAT_SEG , 231 ] = 255; // white
+        [ PLATFORM_SPRAT_SEG , 232 ] = 0; // black
+    }
+    // single tiles
+    [ WALL_SPRAT_SEG , 0 ] = 128; // enable
+    [ WALL_SPRAT_SEG , 1 ] = 96; // X
+    [ WALL_SPRAT_SEG , 2 ] = 62; // Y
+    [ WALL_SPRAT_SEG , 3 ] = 8; // width
+    [ WALL_SPRAT_SEG , 4 ] = 8; // height
+    [ WALL_SPRAT_SEG , 5 ] = ROM_WALL_BLOCKS_SEG;
+    [ WALL_SPRAT_SEG , 6 ] = tile8;
+    [ WALL_SPRAT_SEG , 7 ] = 255; // white
+    [ WALL_SPRAT_SEG , 8 ] = 0; // black
+
+    [ WALL_SPRAT_SEG , 16 ] = 128; // enable
+    [ WALL_SPRAT_SEG , 17 ] = 96; // X
+    [ WALL_SPRAT_SEG , 18 ] = 96; // Y
+    [ WALL_SPRAT_SEG , 19 ] = 8; // width
+    [ WALL_SPRAT_SEG , 20 ] = 8; // height
+    [ WALL_SPRAT_SEG , 21 ] = ROM_WALL_BLOCKS_SEG;
+    [ WALL_SPRAT_SEG , 22 ] = tile6;
+    [ WALL_SPRAT_SEG , 23 ] = 255; // white
+    [ WALL_SPRAT_SEG , 24 ] = 0; // black
+
+    [ WALL_SPRAT_SEG , 32 ] = 128; // enable
+    [ WALL_SPRAT_SEG , 33 ] = 152; // X
+    [ WALL_SPRAT_SEG , 34 ] = 62; // Y
+    [ WALL_SPRAT_SEG , 35 ] = 8; // width
+    [ WALL_SPRAT_SEG , 36 ] = 8; // height
+    [ WALL_SPRAT_SEG , 37 ] = ROM_WALL_BLOCKS_SEG;
+    [ WALL_SPRAT_SEG , 38 ] = tile2;
+    [ WALL_SPRAT_SEG , 39 ] = 255; // white
+    [ WALL_SPRAT_SEG , 40 ] = 0; // black
+
+    [ WALL_SPRAT_SEG , 48 ] = 128; // enable
+    [ WALL_SPRAT_SEG , 49 ] = 152; // X
+    [ WALL_SPRAT_SEG , 50 ] = 96; // Y
+    [ WALL_SPRAT_SEG , 51 ] = 8; // width
+    [ WALL_SPRAT_SEG , 52 ] = 8; // height
+    [ WALL_SPRAT_SEG , 53 ] = ROM_WALL_BLOCKS_SEG;
+    [ WALL_SPRAT_SEG , 54 ] = tile0;
+    [ WALL_SPRAT_SEG , 55 ] = 255; // white
+    [ WALL_SPRAT_SEG , 56 ] = 0; // black
+
+    [ WALL_SPRAT_SEG , 64 ] = 128; // enable
+    [ WALL_SPRAT_SEG , 65 ] = 96; // X
+    [ WALL_SPRAT_SEG , 66 ] = 144; // Y
+    if playerRoomXDist > 3 {
+        [ WALL_SPRAT_SEG , 66 ] = 176; // Y
+    }
+    [ WALL_SPRAT_SEG , 67 ] = 8; // width
+    [ WALL_SPRAT_SEG , 68 ] = 8; // height
+    [ WALL_SPRAT_SEG , 69 ] = ROM_WALL_BLOCKS_SEG;
+    [ WALL_SPRAT_SEG , 70 ] = tile2;
+    [ WALL_SPRAT_SEG , 71 ] = 0; // black
+    [ WALL_SPRAT_SEG , 72 ] = 255; // white
+
+    [ WALL_SPRAT_SEG , 80 ] = 128; // enable
+    [ WALL_SPRAT_SEG , 81 ] = 152; // X
+    [ WALL_SPRAT_SEG , 82 ] = 144; // Y
+    if playerRoomXDist > 3 {
+        [ WALL_SPRAT_SEG , 82 ] = 176; // Y
+    }
+    [ WALL_SPRAT_SEG , 83 ] = 8; // width
+    [ WALL_SPRAT_SEG , 84 ] = 8; // height
+    [ WALL_SPRAT_SEG , 85 ] = ROM_WALL_BLOCKS_SEG;
+    [ WALL_SPRAT_SEG , 86 ] = tile8;
+    [ WALL_SPRAT_SEG , 87 ] = 0; // black
+    [ WALL_SPRAT_SEG , 88 ] = 255; // white
+
+    [ WALL_SPRAT_SEG , 96 ] = 0; // disable
+    [ WALL_SPRAT_SEG , 112 ] = 0; // disable
+    [ WALL_SPRAT_SEG , 128 ] = 0; // disable
+    [ WALL_SPRAT_SEG , 144 ] = 0; // disable
+    [ WALL_SPRAT_SEG , 160 ] = 0; // disable
+    [ WALL_SPRAT_SEG , 176 ] = 0; // disable
+    [ WALL_SPRAT_SEG , 192 ] = 0; // disable
+    [ WALL_SPRAT_SEG , 208 ] = 0; // disable
+
+    colSeg = COL0_BLOCKS_SEG;
+    call passageCheckColumnSpritesInit;
+    colSeg = COL1_BLOCKS_SEG;
+    call passageCheckColumnSpritesInit;
+    colSeg = COL2_BLOCKS_SEG;
+    call passageCheckColumnSpritesInit;
+}
+
+// in: colSeg
+func passageCheckColumnSpritesInit {
+    if colSeg == COL0_BLOCKS_SEG {
+        x = 104;
+        colSprAtSeg = COL0_SPRAT_SEG;
+        count = countCol0Blocks;
+    }
+    if colSeg == COL1_BLOCKS_SEG {
+        x = 120;
+        colSprAtSeg = COL1_SPRAT_SEG;
+        count = countCol1Blocks;
+    }
+    if colSeg == COL2_BLOCKS_SEG {
+        x = 136;
+        colSprAtSeg = COL2_SPRAT_SEG;
+        count = countCol2Blocks;
+    }
+    i = 0;
+    t = 0;
+    while i < MAX_COLUMN_BLOCKS {
+        [ colSprAtSeg , t ] = 0; // disable
+        if i < count {
+            [ colSprAtSeg , t ] = 128; // enable
+            [ colSprAtSeg , t + 1 ] = x;
+            i2 = 0;
+            y = 128;
+            if playerRoomXDist > 3 {
+                y = 160; // second check passage
+            }
+            while i2 < i {
+                y = y - BLOCK_DIM;
+                i2 = i2 + 1;
+            }
+            [ colSprAtSeg , t + 2 ] = y;
+            [ colSprAtSeg , t + 3 ] = BLOCK_DIM; // width
+            [ colSprAtSeg , t + 4 ] = BLOCK_DIM; // height
+            blockIndex = [ colSeg , i ];
+            i2 = 0;
+            blockSprDataSeg = ROM_BLOCK_SPRDATA_SEG;
+            blockSprDataOffset = 0;
+            while i2 < blockIndex {
+                blockSprDataOffset = blockSprDataOffset + 64;
+                if blockSprDataOffset == 0 {
+                    blockSprDataSeg = blockSprDataSeg + 1;
+                }
+                i2 = i2 + 1;
+            }
+            [ colSprAtSeg , t + 5 ] = blockSprDataSeg;
+            [ colSprAtSeg , t + 6 ] = blockSprDataOffset;
+            [ colSprAtSeg , t + 7 ] = 73;
+            [ colSprAtSeg , t + 8 ] = 36;
+            [ colSprAtSeg , t + 9 ] = 255;
+            [ colSprAtSeg , t + 10 ] = 0;
+        }
+        i = i + 1;
+        t = t + 16;
+    }
+}
+
+func waterfallRoomSpritesInit {
+    // TODO crew
+    [ 72 , 0 ] = 144; // enable and transparency
+    // bright colors
+    [ 72 , 7 ] = 240;
+    [ 72 , 8 ] = 236;
+    [ 72 , 9 ] = 255;
+    // player behind waterfall
+    [ 73 , 0 ] = 0; // disable
+    // waterfall
+    [ PLATFORM_SPRAT_SEG , 160 ] = 128; // enable
+    [ PLATFORM_SPRAT_SEG , 161 ] = 122; // X
+    [ PLATFORM_SPRAT_SEG , 162 ] = 78; // Y
+    [ PLATFORM_SPRAT_SEG , 163 ] = 12; // width
+    [ PLATFORM_SPRAT_SEG , 164 ] = 20; // height
+    [ PLATFORM_SPRAT_SEG , 165 ] = ROM_WATERFALL_SPRDATA_SEG;
+    [ PLATFORM_SPRAT_SEG , 166 ] = 0;
+    [ PLATFORM_SPRAT_SEG , 167 ] = 1; // color
+
+    i = 0;
+    t = 0;
+    while i < WATERFALL_WALL_TILES_COUNT {
+        [ WALL_SPRAT_SEG , t ] = 0; // disable
+        i = i + 1;
+        t = t + 16;
+    }
+    // top middle
+    [ WALL_SPRAT_SEG , 0 ] = 160; // enable and flip v
+    [ WALL_SPRAT_SEG , 1 ] = 96; // X
+    [ WALL_SPRAT_SEG , 2 ] = 62; // Y
+    [ WALL_SPRAT_SEG , 3 ] = 64; // width
+    [ WALL_SPRAT_SEG , 4 ] = 8; // height
+    [ WALL_SPRAT_SEG , 5 ] = PLATFORM_SPRDATA_SEG;
+    [ WALL_SPRAT_SEG , 6 ] = 128; // color starts at 64x8 pixels from start (64*8*2)/8 = 128
+    [ WALL_SPRAT_SEG , 7 ] = 255; // white
+    [ WALL_SPRAT_SEG , 8 ] = 0; // black
+    // bottom middle
+    [ WALL_SPRAT_SEG , 16 ] = 128; // enable
+    [ WALL_SPRAT_SEG , 17 ] = 96; // X
+    [ WALL_SPRAT_SEG , 18 ] = 96; // Y
+    [ WALL_SPRAT_SEG , 19 ] = 64; // width
+    [ WALL_SPRAT_SEG , 20 ] = 8; // height
+    [ WALL_SPRAT_SEG , 21 ] = PLATFORM_SPRDATA_SEG;
+    [ WALL_SPRAT_SEG , 22 ] = 128; // color start
+    [ WALL_SPRAT_SEG , 23 ] = 255; // white
+    [ WALL_SPRAT_SEG , 24 ] = 0; // black
+    // left wall
+    [ WALL_SPRAT_SEG , 32 ] = 128; // enable
+    [ WALL_SPRAT_SEG , 33 ] = 86; // X
+    [ WALL_SPRAT_SEG , 34 ] = 72; // Y
+    [ WALL_SPRAT_SEG , 35 ] = 8; // width
+    [ WALL_SPRAT_SEG , 36 ] = 24; // height
+    [ WALL_SPRAT_SEG , 37 ] = WALL_SPRDATA_SEG;
+    [ WALL_SPRAT_SEG , 38 ] = 128; // color start
+    [ WALL_SPRAT_SEG , 39 ] = 255; // white
+    [ WALL_SPRAT_SEG , 40 ] = 0; // black
+    // right wall
+    [ WALL_SPRAT_SEG , 48 ] = 208; // enable, transparency and flip h
+    [ WALL_SPRAT_SEG , 49 ] = 162; // X
+    [ WALL_SPRAT_SEG , 50 ] = 72; // Y
+    [ WALL_SPRAT_SEG , 51 ] = 8; // width
+    [ WALL_SPRAT_SEG , 52 ] = 24; // height
+    [ WALL_SPRAT_SEG , 53 ] = WALL_SPRDATA_SEG;
+    [ WALL_SPRAT_SEG , 54 ] = 128; // color start
+    [ WALL_SPRAT_SEG , 55 ] = 255; // white
+    [ WALL_SPRAT_SEG , 56 ] = 0; // black
+    // top left
+    [ WALL_SPRAT_SEG , 64 ] = 128; // enable
+    [ WALL_SPRAT_SEG , 65 ] = 88; // X
+    [ WALL_SPRAT_SEG , 66 ] = 64; // Y
+    [ WALL_SPRAT_SEG , 67 ] = 8; // width
+    [ WALL_SPRAT_SEG , 68 ] = 8; // height
+    [ WALL_SPRAT_SEG , 69 ] = ROM_WALL_BLOCKS_SEG;
+    [ WALL_SPRAT_SEG , 70 ] = tile0;
+    [ WALL_SPRAT_SEG , 71 ] = 255; // white
+    [ WALL_SPRAT_SEG , 72 ] = 0; // black
+    // top right
+    [ WALL_SPRAT_SEG , 80 ] = 128; // enable
+    [ WALL_SPRAT_SEG , 81 ] = 160; // X
+    [ WALL_SPRAT_SEG , 82 ] = 64; // Y
+    [ WALL_SPRAT_SEG , 83 ] = 8; // width
+    [ WALL_SPRAT_SEG , 84 ] = 8; // height
+    [ WALL_SPRAT_SEG , 85 ] = ROM_WALL_BLOCKS_SEG;
+    [ WALL_SPRAT_SEG , 86 ] = tile6;
+    [ WALL_SPRAT_SEG , 87 ] = 255; // white
+    [ WALL_SPRAT_SEG , 88 ] = 0; // black
+    // bottom left
+    [ WALL_SPRAT_SEG , 96 ] = 128; // enable
+    [ WALL_SPRAT_SEG , 97 ] = 88; // X
+    [ WALL_SPRAT_SEG , 98 ] = 94; // Y
+    [ WALL_SPRAT_SEG , 99 ] = 8; // width
+    [ WALL_SPRAT_SEG , 100 ] = 8; // height
+    [ WALL_SPRAT_SEG , 101 ] = ROM_WALL_BLOCKS_SEG;
+    [ WALL_SPRAT_SEG , 102 ] = tile2;
+    [ WALL_SPRAT_SEG , 103 ] = 255; // white
+    [ WALL_SPRAT_SEG , 104 ] = 0; // black
+    // bottom right
+    [ WALL_SPRAT_SEG , 112 ] = 128; // enable
+    [ WALL_SPRAT_SEG , 113 ] = 160; // X
+    [ WALL_SPRAT_SEG , 114 ] = 94; // Y
+    [ WALL_SPRAT_SEG , 115 ] = 8; // width
+    [ WALL_SPRAT_SEG , 116 ] = 8; // height
+    [ WALL_SPRAT_SEG , 117 ] = ROM_WALL_BLOCKS_SEG;
+    [ WALL_SPRAT_SEG , 118 ] = tile8;
+    [ WALL_SPRAT_SEG , 119 ] = 255; // white
+    [ WALL_SPRAT_SEG , 120 ] = 0; // black
+    // door frame
+    // top left
+    [ WALL_SPRAT_SEG , 128 ] = 128; // enable
+    [ WALL_SPRAT_SEG , 129 ] = 114; // X
+    [ WALL_SPRAT_SEG , 130 ] = 70; // Y
+    [ WALL_SPRAT_SEG , 131 ] = 8; // width
+    [ WALL_SPRAT_SEG , 132 ] = 8; // height
+    [ WALL_SPRAT_SEG , 133 ] = ROM_WALL_BLOCKS_SEG;
+    [ WALL_SPRAT_SEG , 134 ] = tile0;
+    [ WALL_SPRAT_SEG , 135 ] = 0; // black
+    [ WALL_SPRAT_SEG , 136 ] = 255; // white
+    // top right
+    [ WALL_SPRAT_SEG , 144 ] = 128; // enable
+    [ WALL_SPRAT_SEG , 145 ] = 134; // X
+    [ WALL_SPRAT_SEG , 146 ] = 70; // Y
+    [ WALL_SPRAT_SEG , 147 ] = 8; // width
+    [ WALL_SPRAT_SEG , 148 ] = 8; // height
+    [ WALL_SPRAT_SEG , 149 ] = ROM_WALL_BLOCKS_SEG;
+    [ WALL_SPRAT_SEG , 150 ] = tile6;
+    [ WALL_SPRAT_SEG , 151 ] = 0; // black
+    [ WALL_SPRAT_SEG , 152 ] = 255; // white
+    // top middle left
+    [ WALL_SPRAT_SEG , 160 ] = 128; // enable
+    [ WALL_SPRAT_SEG , 161 ] = 122; // X
+    [ WALL_SPRAT_SEG , 162 ] = 70; // Y
+    [ WALL_SPRAT_SEG , 163 ] = 8; // width
+    [ WALL_SPRAT_SEG , 164 ] = 8; // height
+    [ WALL_SPRAT_SEG , 165 ] = ROM_WALL_BLOCKS_SEG;
+    [ WALL_SPRAT_SEG , 166 ] = tile3;
+    [ WALL_SPRAT_SEG , 167 ] = 0; // black
+    [ WALL_SPRAT_SEG , 168 ] = 255; // white
+    // top middle right
+    [ WALL_SPRAT_SEG , 176 ] = 128; // enable
+    [ WALL_SPRAT_SEG , 177 ] = 126; // X
+    [ WALL_SPRAT_SEG , 178 ] = 70; // Y
+    [ WALL_SPRAT_SEG , 179 ] = 8; // width
+    [ WALL_SPRAT_SEG , 180 ] = 8; // height
+    [ WALL_SPRAT_SEG , 181 ] = ROM_WALL_BLOCKS_SEG;
+    [ WALL_SPRAT_SEG , 182 ] = tile3;
+    [ WALL_SPRAT_SEG , 183 ] = 0; // black
+    [ WALL_SPRAT_SEG , 184 ] = 255; // white
+    // left wall
+    [ WALL_SPRAT_SEG , 192 ] = 128; // enable
+    [ WALL_SPRAT_SEG , 193 ] = 114; // X
+    [ WALL_SPRAT_SEG , 194 ] = 76; // Y
+    [ WALL_SPRAT_SEG , 195 ] = 8; // width
+    [ WALL_SPRAT_SEG , 196 ] = 20; // height
+    [ WALL_SPRAT_SEG , 197 ] = WALL_SPRDATA_SEG;
+    [ WALL_SPRAT_SEG , 198 ] = 128; // color start
+    [ WALL_SPRAT_SEG , 199 ] = 255; // white
+    [ WALL_SPRAT_SEG , 200 ] = 0; // black
+    // right wall
+    [ WALL_SPRAT_SEG , 208 ] = 208; // enable, transparency, and flip h
+    [ WALL_SPRAT_SEG , 209 ] = 134; // X
+    [ WALL_SPRAT_SEG , 210 ] = 76; // Y
+    [ WALL_SPRAT_SEG , 211 ] = 8; // width
+    [ WALL_SPRAT_SEG , 212 ] = 20; // height
+    [ WALL_SPRAT_SEG , 213 ] = WALL_SPRDATA_SEG;
+    [ WALL_SPRAT_SEG , 214 ] = 128; // color start
+    [ WALL_SPRAT_SEG , 215 ] = 255; // white
+    [ WALL_SPRAT_SEG , 216 ] = 0; // black
+}
+
+func disableAllSprites {
+    i = 65;
+    t = 0;
+    while i < 81 {
+        [ i , t ] = 0; // disable
+        t = t + 16;
+        if t == 0 {
+            i = i + 1;
+        }
+    }
+}
+
+func titleSpritesInit {
+    call disableAllSprites;
+    currentLetterIterHor = 0;
+    currentLetterIterVer = 0;
+    call clearTitleLettersHor;
+    call clearTitleLettersVer;
+    call clearTitleLetterN;
+
+    [ TITLE_STARS_X_SEG , TITLE_STARS_X_OFFSET + 10 ] = 136;
+    [ TITLE_STARS_Y_SEG , TITLE_STARS_Y_OFFSET + 10 ] = 40;
+    i = 0;
+    t = 0;
+    while i < TITLE_STARS_COUNT {
+        [ TITLE_STARS_TOP_SPRAT_SEG , t ] = 144; // enable and transparency
+        x = [ TITLE_STARS_X_SEG , TITLE_STARS_X_OFFSET + i ];
+        y = [ TITLE_STARS_Y_SEG , TITLE_STARS_Y_OFFSET + i ];
+        [ TITLE_STARS_TOP_SPRAT_SEG , t + 1 ] = x;
+        [ TITLE_STARS_TOP_SPRAT_SEG , t + 2 ] = y;
+        [ TITLE_STARS_TOP_SPRAT_SEG , t + 3 ] = 4; // width
+        [ TITLE_STARS_TOP_SPRAT_SEG , t + 4 ] = 4; // height
+        [ TITLE_STARS_TOP_SPRAT_SEG , t + 5 ] = TITLE_STARS_SPRDATA_SEG;
+        [ TITLE_STARS_TOP_SPRAT_SEG , t + 6 ] = TITLE_STARS_SPRDATA_OFFSET;
+        [ TITLE_STARS_TOP_SPRAT_SEG , t + 7 ] = 0;
+        [ TITLE_STARS_TOP_SPRAT_SEG , t + 8 ] = 255; // white
+        i = i + 1;
+        t = t + 16;
+    }
+    [ TITLE_STARS_X_SEG , TITLE_STARS_X_OFFSET + 10 ] = 116;
+    [ TITLE_STARS_Y_SEG , TITLE_STARS_Y_OFFSET + 10 ] = 75;
+    i = 0;
+    t = 0;
+    while i < TITLE_STARS_COUNT {
+        [ TITLE_STARS_BOT_SPRAT_SEG , t ] = 144; // enable and transparency
+        x = [ TITLE_STARS_X_SEG , TITLE_STARS_X_OFFSET + i ];
+        y = [ TITLE_STARS_Y_SEG , TITLE_STARS_Y_OFFSET + i ];
+        [ TITLE_STARS_BOT_SPRAT_SEG , t + 1 ] = x;
+        [ TITLE_STARS_BOT_SPRAT_SEG , t + 2 ] = y + 96;
+        [ TITLE_STARS_BOT_SPRAT_SEG , t + 3 ] = 4; // width
+        [ TITLE_STARS_BOT_SPRAT_SEG , t + 4 ] = 4; // height
+        [ TITLE_STARS_BOT_SPRAT_SEG , t + 5 ] = TITLE_STARS_SPRDATA_SEG;
+        [ TITLE_STARS_BOT_SPRAT_SEG , t + 6 ] = TITLE_STARS_SPRDATA_OFFSET;
+        [ TITLE_STARS_BOT_SPRAT_SEG , t + 7 ] = 0;
+        [ TITLE_STARS_BOT_SPRAT_SEG , t + 8 ] = 255; // white
+        i = i + 1;
+        t = t + 16;
+    }
+    [ 66 , 0 ] = 144; // enable and transparency
+    [ 66 , 1 ] = 97; // X
+    [ 66 , 2 ] = 71; // Y
+    [ 66 , 3 ] = 64; // width
+    [ 66 , 4 ] = 48; // height
+    [ 66 , 5 ] = ROM_PLANET_SEG;
+    [ 66 , 6 ] = 0;
+    [ 66 , 7 ] = 73;
+    [ 66 , 8 ] = 36;
+    [ 66 , 9 ] = 0;
+    i = 0;
+    t = 0;
+    while i < TITLE_LETTERS_HOR_COUNT {
+        [ TITLE_LETTERS_HOR_SPRAT_SEG , t ] = 144; // enable and transparency
+        x = [ TITLE_LETTERS_HOR_X_SEG , TITLE_LETTERS_HOR_X_OFFSET + i ];
+        y = [ TITLE_LETTERS_HOR_Y_SEG , TITLE_LETTERS_HOR_Y_OFFSET + i ];
+        [ TITLE_LETTERS_HOR_SPRAT_SEG , t + 1 ] = x;
+        [ TITLE_LETTERS_HOR_SPRAT_SEG , t + 2 ] = y;
+        [ TITLE_LETTERS_HOR_SPRAT_SEG , t + 3 ] = 20; // width
+        [ TITLE_LETTERS_HOR_SPRAT_SEG , t + 4 ] = 4; // height
+        [ TITLE_LETTERS_HOR_SPRAT_SEG , t + 5 ] = TITLE_LETTERS_HOR_SPRDATA_SEG;
+        [ TITLE_LETTERS_HOR_SPRAT_SEG , t + 6 ] = TITLE_LETTERS_HOR_SPRDATA_OFFSET;
+        [ TITLE_LETTERS_HOR_SPRAT_SEG , t + 7 ] = 182; // gray
+        i = i + 1;
+        t = t + 16;
+    }
+    i = 0;
+    t = 0;
+    while i < TITLE_LETTERS_VER_COUNT {
+        [ TITLE_LETTERS_VER_SPRAT_SEG , t ] = 144; // enable and transparency
+        x = [ TITLE_LETTERS_VER_X_SEG , TITLE_LETTERS_VER_X_OFFSET + i ];
+        y = [ TITLE_LETTERS_VER_Y_SEG , TITLE_LETTERS_VER_Y_OFFSET + i ];
+        [ TITLE_LETTERS_VER_SPRAT_SEG , t + 1 ] = x;
+        [ TITLE_LETTERS_VER_SPRAT_SEG , t + 2 ] = y;
+        [ TITLE_LETTERS_VER_SPRAT_SEG , t + 3 ] = 4; // width
+        [ TITLE_LETTERS_VER_SPRAT_SEG , t + 4 ] = 16; // height
+        cnd0 = i == 2;
+        cnd1 = i == 3;
+        if cnd0 | cnd1 {
+            [ TITLE_LETTERS_VER_SPRAT_SEG , t + 4 ] = 8; // height
+        }
+        [ TITLE_LETTERS_VER_SPRAT_SEG , t + 5 ] = TITLE_LETTERS_VER_SPRDATA_SEG;
+        [ TITLE_LETTERS_VER_SPRAT_SEG , t + 6 ] = TITLE_LETTERS_VER_SPRDATA_OFFSET;
+        [ TITLE_LETTERS_VER_SPRAT_SEG , t + 7 ] = 182; // gray
+        i = i + 1;
+        t = t + 16;
+    }
+    // N-slash
+    [ TITLE_LETTERS_VER_SPRAT_SEG , t ] = 144; // enable and transparency
+    [ TITLE_LETTERS_VER_SPRAT_SEG , t + 1 ] = 167; // x
+    [ TITLE_LETTERS_VER_SPRAT_SEG , t + 2 ] = 89; // y
+    [ TITLE_LETTERS_VER_SPRAT_SEG , t + 3 ] = 16; // width
+    [ TITLE_LETTERS_VER_SPRAT_SEG , t + 4 ] = 16; // height
+    [ TITLE_LETTERS_VER_SPRAT_SEG , t + 5 ] = TITLE_LETTERS_N_SPRDATA_SEG;
+    [ TITLE_LETTERS_VER_SPRAT_SEG , t + 6 ] = TITLE_LETTERS_N_SPRDATA_OFFSET;
+    [ TITLE_LETTERS_VER_SPRAT_SEG , t + 7 ] = 182; // gray
+    // dirs
+    // up
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET ] = 0; // disable
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 1 ] = 120; // X
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 2 ] = 129; // Y
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 3 ] = ARROW_DIM; // width
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 4 ] = ARROW_DIM; // height
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 5 ] = ROM_ARROWS_SEG;
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 6 ] = 0;
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 7 ] = 73; // dark gray
+    // right
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 16 ] = 0; // disable
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 17 ] = 137; // X
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 18 ] = 146; // Y
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 19 ] = ARROW_DIM; // width
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 20 ] = ARROW_DIM; // height
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 21 ] = ROM_ARROWS_SEG;
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 22 ] = RIGHT_ARROW_OFFSET;
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 23 ] = 73; // dark gray
+    // left
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 32 ] = 0; // disable
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 33 ] = 103; // X
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 34 ] = 146; // Y
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 35 ] = ARROW_DIM; // width
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 36 ] = ARROW_DIM; // height
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 37 ] = ROM_ARROWS_SEG;
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 38 ] = RIGHT_ARROW_OFFSET;
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 39 ] = 73; // dark gray
+    // down
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 48 ] = 0; // disable
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 49 ] = 120; // X
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 50 ] = 163; // Y
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 51 ] = ARROW_DIM; // width
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 52 ] = ARROW_DIM; // height
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 53 ] = ROM_ARROWS_SEG;
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 54 ] = 0;
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 55 ] = 73; // dark gray
+}
+
+func titleSpritesDisable {
+    i = 0;
+    t = 0;
+    while i < TITLE_STARS_COUNT {
+        [ TITLE_STARS_TOP_SPRAT_SEG , t ] = 0; // disable
+        i = i + 1;
+        t = t + 16;
+    }
+    i = 0;
+    t = 0;
+    while i < TITLE_STARS_COUNT {
+        [ TITLE_STARS_BOT_SPRAT_SEG , t ] = 0; // disable
+        i = i + 1;
+        t = t + 16;
+    }
+    [ 66 , 0 ] = 0; // disable
+    i = 0;
+    t = 0;
+    while i < TITLE_LETTERS_HOR_COUNT {
+        [ TITLE_LETTERS_HOR_SPRAT_SEG , t ] = 0; // disable
+        i = i + 1;
+        t = t + 16;
+    }
+    i = 0;
+    t = 0;
+    while i < TITLE_LETTERS_VER_COUNT {
+        [ TITLE_LETTERS_VER_SPRAT_SEG , t ] = 0; // disable
+        i = i + 1;
+        t = t + 16;
+    }
+    // N-slash
+    [ TITLE_LETTERS_VER_SPRAT_SEG , t ] = 0; // disable
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET ] = 0; // disable
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 16 ] = 0; // disable
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 32 ] = 0; // disable
+    [ TITLE_DIRS_SPRAT_SEG , TITLE_DIRS_SPRAT_OFFSET + 48 ] = 0; // disable
+}
+
+func createTestMap {
+    // 0: none
+    t = SIDE_CLOSED << SIDE_L_OFFSET;
+    [ MAP_SEG , 1 ] = t;
+    t = SIDE_OPEN | SIDE_OPEN << SIDE_L_OFFSET;
+    t = t | ROOM_EMPTY << ROOM_R_OFFSET;
+    t = t | ROOM_EMPTY << ROOM_L_OFFSET;
+    [ MAP_SEG , 2 ] = t;
+    t = SIDE_BLOCKED | SIDE_BLOCKED << SIDE_L_OFFSET;
+    t = t | ROOM_BLOCK << ROOM_R_OFFSET;
+    t = t | ROOM_BLOCK << ROOM_L_OFFSET;
+    [ MAP_SEG , 5 ] = t;
+
+    // x + 1
+    t = SIDE_BLOCKED << SIDE_L_OFFSET;
+    t = t | ROOM_BLOCK << ROOM_L_OFFSET;
+    [ MAP_SEG + 1 , 3 ] = t;
+    t = SIDE_BLOCKED << SIDE_L_OFFSET;
+    t = t | ROOM_BLOCK << ROOM_L_OFFSET;
+    [ MAP_SEG + 1 , 5 ] = t;
+
+    // x + 2
+    t = SIDE_OPEN << SIDE_L_OFFSET;
+    t = t | ROOM_CHECK << ROOM_L_OFFSET;
+    [ MAP_SEG + 2 , 3 ] = t;
+
+    // x - 1
+    t = SIDE_OPEN | ROOM_BLOCK << ROOM_R_OFFSET;
+    [ MAP_SEG - 1 , 2 ] = t;
+    t = SIDE_OPEN | ROOM_BLOCK << ROOM_R_OFFSET;
+    [ MAP_SEG - 1 , 4 ] = t;
+}
+
+func createStandardMap {
+    // 0: none
+    t = SIDE_CLOSED << SIDE_L_OFFSET;
+    [ MAP_SEG , 1 ] = t;
+    i = 2;
+    while i < 6 {
+        t = SIDE_OPEN;
+        t = t | ROOM_BLOCK << ROOM_R_OFFSET;
+        t = t | SIDE_OPEN << SIDE_L_OFFSET;
+        t = t | ROOM_BLOCK << ROOM_L_OFFSET;
+        [ MAP_SEG , i ] = t;
+        i = i + 1;
+    }
+    i = 8;
+    while i < 240 {
+        t = SIDE_BLOCKED << SIDE_L_OFFSET;
+        t = t | ROOM_BLOCK << ROOM_L_OFFSET;
+        t = t | SIDE_BLOCKED;
+        t = t | ROOM_BLOCK << ROOM_R_OFFSET;
+        [ MAP_SEG , i ] = t;
+        i = i + 4;
+    }
+
+    // x +
+    t = SIDE_OPEN << SIDE_L_OFFSET;
+    t = t | ROOM_BLOCK << ROOM_L_OFFSET;
+    [ MAP_SEG + 1 , 2 ] = t;
+    t = SIDE_OPEN << SIDE_L_OFFSET;
+    t = t | ROOM_BLOCK << ROOM_L_OFFSET;
+    t = t | SIDE_OPEN;
+    t = t | ROOM_CHECK << ROOM_R_OFFSET;
+    [ MAP_SEG + 1 , 3 ] = t;
+    t = SIDE_OPEN << SIDE_L_OFFSET;
+    t = t | ROOM_BLOCK << ROOM_L_OFFSET;
+    [ MAP_SEG + 1 , 4 ] = t;
+    t = SIDE_OPEN << SIDE_L_OFFSET;
+    t = t | ROOM_BLOCK << ROOM_L_OFFSET;
+    [ MAP_SEG + 1 , 5 ] = t;
+    t = SIDE_OPEN << SIDE_L_OFFSET;
+    t = t | ROOM_CHECK << ROOM_L_OFFSET;
+    [ MAP_SEG + 2 , 3 ] = t;
+    t = SIDE_OPEN | ROOM_BLOCK << ROOM_R_OFFSET;
+    [ MAP_SEG + 2 , 4 ] = t;
+    t = SIDE_OPEN << SIDE_L_OFFSET;
+    t = t | ROOM_BLOCK << ROOM_L_OFFSET;
+    [ MAP_SEG + 3 , 4 ] = t;
+    t = SIDE_OPEN | ROOM_CHECK << ROOM_R_OFFSET;
+    [ MAP_SEG + 3 , 5 ] = t;
+    i = 8;
+    while i < 240 {
+        t = SIDE_BLOCKED << SIDE_L_OFFSET;
+        t = t | ROOM_BLOCK << ROOM_L_OFFSET;
+        [ MAP_SEG + 1 , i ] = t;
+        t = SIDE_OPEN | ROOM_CHECK << ROOM_R_OFFSET;
+        [ MAP_SEG + 1 , i + 1 ] = t;
+        t = SIDE_OPEN << SIDE_L_OFFSET;
+        t = t | ROOM_CHECK << ROOM_L_OFFSET;
+        [ MAP_SEG + 2 , i + 1 ] = t;
+        t = SIDE_BLOCKED | ROOM_BLOCK << ROOM_R_OFFSET;
+        [ MAP_SEG + 2 , i ] = t;
+        t = SIDE_BLOCKED << SIDE_L_OFFSET;
+        t = t | ROOM_BLOCK << ROOM_L_OFFSET;
+        [ MAP_SEG + 3 , i ] = t;
+        t = SIDE_OPEN | ROOM_CHECK << ROOM_R_OFFSET;
+        [ MAP_SEG + 3 , i + 1 ] = t;
+        t = SIDE_OPEN << SIDE_L_OFFSET; // ROOM_EMPTY, note: no entrance on other end created yet
+        [ MAP_SEG + 3 , i + 2 ] = t;
+        i = i + 4;
+    }
+
+    // x -
+    t = SIDE_OPEN | ROOM_BLOCK << ROOM_R_OFFSET;
+    t = t | SIDE_OPEN << SIDE_L_OFFSET;
+    t = t | ROOM_CHECK << ROOM_L_OFFSET;
+    [ MAP_SEG - 1 , 2 ] = t;
+    t = SIDE_OPEN;
+    t = t | ROOM_BLOCK << ROOM_R_OFFSET;
+    [ MAP_SEG - 1 , 3 ] = t;
+    t = SIDE_OPEN;
+    t = t | ROOM_BLOCK << ROOM_R_OFFSET;
+    [ MAP_SEG - 1 , 4 ] = t;
+    t = SIDE_OPEN;
+    t = t | ROOM_BLOCK << ROOM_R_OFFSET;
+    [ MAP_SEG - 1 , 5 ] = t;
+    t = SIDE_OPEN | ROOM_CHECK << ROOM_R_OFFSET;
+    t = t | SIDE_OPEN << SIDE_L_OFFSET;
+    t = t | ROOM_BLOCK << ROOM_L_OFFSET;
+    [ MAP_SEG - 2 , 2 ] = t;
+    t = SIDE_OPEN | ROOM_BLOCK << ROOM_R_OFFSET;
+    t = t | SIDE_OPEN << SIDE_L_OFFSET;
+    t = t | ROOM_CHECK << ROOM_L_OFFSET;
+    [ MAP_SEG - 3 , 2 ] = t;
+    i = 8;
+    while i < 240 {
+        t = SIDE_BLOCKED | ROOM_BLOCK << ROOM_R_OFFSET;
+        t = t | SIDE_OPEN << SIDE_L_OFFSET;
+        t = t | ROOM_CHECK << ROOM_L_OFFSET;
+        [ MAP_SEG - 1 , i ] = t;
+        [ MAP_SEG - 3 , i ] = t;
+        t = SIDE_OPEN;
+        t = t | ROOM_CHECK << ROOM_R_OFFSET;
+        t = t | SIDE_BLOCKED << SIDE_L_OFFSET;
+        t = t | ROOM_BLOCK << ROOM_L_OFFSET;
+        [ MAP_SEG - 2 , i ] = t;
+        t = SIDE_OPEN; // ROOM_EMPTY, note: no entrance on other end created yet
+        [ MAP_SEG - 3 , i + 2 ] = t;
+        i = i + 4;
+    }
+}
+
+func clearTitleLettersHor {
+    i = 0;
+    while i < 5 {
+        [ TITLE_LETTERS_HOR_SPRDATA_SEG , TITLE_LETTERS_HOR_SPRDATA_OFFSET + i ] = 255;
+        [ TITLE_LETTERS_HOR_SPRDATA_SEG , TITLE_LETTERS_HOR_SPRDATA_OFFSET + i + 5 ] = 255;
+        [ TITLE_LETTERS_HOR_SPRDATA_SEG , TITLE_LETTERS_HOR_SPRDATA_OFFSET + i + 10 ] = 255;
+        [ TITLE_LETTERS_HOR_SPRDATA_SEG , TITLE_LETTERS_HOR_SPRDATA_OFFSET + i + 15 ] = 255;
+        i = i + 1;
+    }
+}
+
+func writeTitleLettersHor {
+    pixels = 15; // 0000 1111
+    // >> 1 divide by two ish
+    t = currentLetterIterHor >> 1;
+    // odd check
+    if currentLetterIterHor & 1 == 1 {
+        pixels = 0;
+    }
+    [ TITLE_LETTERS_HOR_SPRDATA_SEG , TITLE_LETTERS_HOR_SPRDATA_OFFSET + t ] = pixels;
+    [ TITLE_LETTERS_HOR_SPRDATA_SEG , TITLE_LETTERS_HOR_SPRDATA_OFFSET + t + 5 ] = pixels;
+    [ TITLE_LETTERS_HOR_SPRDATA_SEG , TITLE_LETTERS_HOR_SPRDATA_OFFSET + t + 10 ] = pixels;
+}
+
+func clearTitleLettersVer {
+    i = 0;
+    while i < 16 {
+        [ TITLE_LETTERS_VER_SPRDATA_SEG , TITLE_LETTERS_VER_SPRDATA_OFFSET + i ] = 255;
+        i = i + 1;
+    }
+}
+
+func writeTitleLettersVer {
+    [ TITLE_LETTERS_VER_SPRDATA_SEG , TITLE_LETTERS_VER_SPRDATA_OFFSET + currentLetterIterVer ] = 3; // 0000 0011
+}
+
+func clearTitleLetterN {
+    i = 0;
+    while i < 4 {
+        t = 0;
+        while t < 64 {
+            [ TITLE_LETTERS_N_SPRDATA_SEG , TITLE_LETTERS_N_SPRDATA_OFFSET + i + t ] = 255;
+            t = t + 4;
+        }
+        i = i + 1;
+    }
+}
+
+func writeTitleLetterN {
+    i = 0;
+    t = 0;
+    while i < currentLetterIterVer {
+        i = i + 1;
+        t = t + 4;
+    }
+    cnd0 = currentLetterIterVer == 0;
+    cnd1 = currentLetterIterVer == 1;
+    cnd = cnd0 | cnd1;
+    cnd0 = currentLetterIterVer == 13;
+    cnd = cnd | cnd0;
+    cnd0 = currentLetterIterVer == 14;
+    cnd = cnd | cnd0;
+    if cnd == 0 {
+        cnd0 = currentLetterIterVer == 2;
+        cnd1 = currentLetterIterVer == 6;
+        cnd0 = cnd0 | cnd1;
+        cnd1 = currentLetterIterVer == 10;
+        cnd0 = cnd0 | cnd1;
+        i = 2;
+        while i < currentLetterIterVer {
+            i = i + 4;
+            t = t + 1;
+        }
+        if cnd0 {
+            [ TITLE_LETTERS_N_SPRDATA_SEG , TITLE_LETTERS_N_SPRDATA_OFFSET + t ] = 0; // 0000 0000
+        }
+        if cnd0 == 0 {
+            if currentLetterIterVer < 6 {
+                i = currentLetterIterVer - 2;
+                i = i + i;
+            }
+            if currentLetterIterVer > 6 {
+                i = currentLetterIterVer - 6;
+                i = i + i;
+            }
+            if currentLetterIterVer > 10 {
+                i = currentLetterIterVer - 10;
+                i = i + i;
+            }
+            [ TITLE_LETTERS_N_SPRDATA_SEG , TITLE_LETTERS_N_SPRDATA_OFFSET + t - 1 ] = 255 << 8 - i;
+            [ TITLE_LETTERS_N_SPRDATA_SEG , TITLE_LETTERS_N_SPRDATA_OFFSET + t ] = 255 >> i;
+        }
+    }
+    if cnd {
+        if currentLetterIterVer == 0 {
+            [ TITLE_LETTERS_N_SPRDATA_SEG , TITLE_LETTERS_N_SPRDATA_OFFSET + t ] = 15; // 0000 1111
+        }
+        if currentLetterIterVer == 1 {
+            [ TITLE_LETTERS_N_SPRDATA_SEG , TITLE_LETTERS_N_SPRDATA_OFFSET + t ] = 3; // 0000 0011
+        }
+        if currentLetterIterVer == 13 {
+            [ TITLE_LETTERS_N_SPRDATA_SEG , TITLE_LETTERS_N_SPRDATA_OFFSET + t + 2 ] = 252; // 1111 1100
+            [ TITLE_LETTERS_N_SPRDATA_SEG , TITLE_LETTERS_N_SPRDATA_OFFSET + t + 3 ] = 15; // 0000 1111
+        }
+        if currentLetterIterVer == 14 {
+            [ TITLE_LETTERS_N_SPRDATA_SEG , TITLE_LETTERS_N_SPRDATA_OFFSET + t + 3 ] = 15; // 0000 1111
+        }
+    }
+}
+
+// in: copyFromIndex
+// in: copyDestSegment
+// in: copyDestOffset
+// in: copySkip
+func copy8x8Block {
+    copyFromStart = 0;
+    copyI = 0;
+    while copyI < copyFromIndex {
+        copyFromStart = copyFromStart + 16;
+        copyI = copyI + 1;
+    }
+    copyI = 0;
+    while copyI < 8 {
+        pixels = [ ROM_WALL_BLOCKS_SEG , copyFromStart ];
+        [ copyDestSegment , copyDestOffset ] = pixels;
+        pixels = [ ROM_WALL_BLOCKS_SEG , copyFromStart + 1 ];
+        [ copyDestSegment , copyDestOffset + 1 ] = pixels;
+        copyT = copyDestOffset;
+        copyDestOffset = copyDestOffset + copySkip + 2;
+        if copyDestOffset < copyT { // passed 255
+            copyDestSegment = copyDestSegment + 1;
+        }
+        copyI = copyI + 1;
+        copyFromStart = copyFromStart + 2;
+    }
+}
+
+func copyPlatformBlocks {
+    copyFromIndex = 3; // horizontal block
+    copyDestSegment = PLATFORM_SPRDATA_SEG;
+    copyDestSegmentT = PLATFORM_SPRDATA_SEG;
+    copyDestOffset = 128;
+    copyDestOffsetT = 128;
+    copySkip = 14;
+    i = 0;
+    while i < 8 { // 8 tiles per platform
+        call copy8x8Block;
+        t = copyDestOffsetT;
+        copyDestOffsetT = copyDestOffsetT + 2;
+        if copyDestOffsetT < t {
+            copyDestSegmentT = PLATFORM_SPRDATA_SEG + 1;
+        }
+        copyDestSegment = copyDestSegmentT;
+        copyDestOffset = copyDestOffsetT;
+        i = i + 1;
+    }
+}
+
+func copyWallBlocks {
+    copyFromIndex = 7; // vertical block
+    copyDestSegment = WALL_SPRDATA_SEG;
+    copyDestSegmentT = WALL_SPRDATA_SEG;
+    copyDestOffset = 128;
+    copyDestOffsetT = 128;
+    copySkip = 0;
+    i = 0;
+    while i < 8 { // 8 tiles per wall
+        call copy8x8Block;
+        t = copyDestOffsetT;
+        copyDestOffsetT = copyDestOffsetT + 16;
+        if copyDestOffsetT < t {
+            copyDestSegmentT = WALL_SPRDATA_SEG + 1;
+        }
+        copyDestSegment = copyDestSegmentT;
+        copyDestOffset = copyDestOffsetT;
+        i = i + 1;
+    }
+}
+
+func copyHalfWallBlocks {
+    copyFromIndex = 7; // horizontal block
+    copyDestSegment = HALFWALL_SPRDATA_SEG;
+    copyDestSegmentT = HALFWALL_SPRDATA_SEG;
+    copyDestOffset = 128;
+    copyDestOffsetT = 128;
+    copySkip = 0;
+    i = 0;
+    while i < 4 { // 4 tiles per half wall
+        call copy8x8Block;
+        t = copyDestOffsetT;
+        copyDestOffsetT = copyDestOffsetT + 16;
+        if copyDestOffsetT < t {
+            copyDestSegmentT = HALFWALL_SPRDATA_SEG + 1;
+        }
+        copyDestSegment = copyDestSegmentT;
+        copyDestOffset = copyDestOffsetT;
+        i = i + 1;
+    }
+}
+
+// in: copyDestSegment
+// in: copyLine
+// in: nextBlockIndex
+func copyBlockedLine {
+    copyDestOffset = 128;
+    i = 0;
+    t = copyDestOffset;
+    while i < copyLine {
+        copyDestOffset = copyDestOffset + 64;
+        i = i + 1;
+    }
+    if copyDestOffset < t {
+        copyDestSegment = copyDestSegment + 1;
+    }
+    call copyBlockedBlocks;
+}
+
+// in: copyDestSegment
+// in copyDestOffset
+// in: nextBlockIndex
+// copy a line of 4 blocks
+func copyBlockedBlocks {
+    copyDestSegmentT = copyDestSegment;
+    copyDestOffsetT = copyDestOffset;
+    copySkip = 6;
+    i = 0;
+    // TODO better
+    random = copyDestOffset ^ playerSlice;
+    while i < 4 {
+        //random = random ^ frameCount;
+        t = [ BLOCK_INDEX_SEG , random ];
+        random = random + 1;
+        if t == nextBlockIndex {
+            // hint: the current obstacle is missing the next block 
+            t = t + 1;
+            if t > 8 {
+                t = 0;
+            }
+        }
+        copyFromIndex = t;
+        call copy8x8Block;
+        t = copyDestOffsetT;
+        i = i + 1;
+        cnd0 = i == 4;
+        cnd1 = i == 8;
+        cnd = cnd0 | cnd1;
+        cnd0 = i == 12;
+        cnd = cnd | cnd0;
+        if cnd {
+            copyDestOffsetT = copyDestOffsetT + 58;
+            random = random >> 3;
+        }
+        if cnd == 0 {
+            copyDestOffsetT = copyDestOffsetT + 2;
+        }
+        if copyDestOffsetT < t {
+            copyDestSegmentT = copyDestSegmentT + 1;
+        }
+        copyDestSegment = copyDestSegmentT;
+        copyDestOffset = copyDestOffsetT;
+    }
+}
+
+// do not call after star positions set
+func writeTransparencyPlatformsWallsHalfWallsBlocked {
+    copyDestSegment = PLATFORM_SPRDATA_SEG;
+    call writeTransparency2Segments;
+    copyDestSegment = WALL_SPRDATA_SEG;
+    call writeTransparency2Segments;
+    copyDestSegment = HALFWALL_SPRDATA_SEG;
+    call writeTransparency2Segments;
+    copyDestSegment = BLOCKED_L_SPRDATA_SEG;
+    call writeTransparency2Segments;
+    copyDestSegment = BLOCKED_R_SPRDATA_SEG;
+    call writeTransparency2Segments;
+}
+
+// in: copyDestSegment
+func writeTransparency2Segments {
+    i = 0;
+    while i < 2 {
+        t = 0;
+        while t < 255 {
+            [ copyDestSegment + i , t ] = 255;
+            t = t + 1;
+        }
+        [ copyDestSegment + i , 255 ] = 255;
+        i = i + 1;
+    }
+}
+
+func writeWaterfallPlayerTransparency {
+    i = 0;
+    while i < 24 {
+        [ WATERFALL_PLAYER_SPRDATA_SEG , i ] = 255;
+        i = i + 1;
+    }
+}
+
+func writeTransparencyDeath {
+    i = 0;
+    while i < 64 {
+        [ DEATH_SPRDATA_SEG , DEATH_SPRDATA_OFFSET + i ] = 255;
+        i = i + 1;
+    }
+}
+
+func waitScreen {
+    while GPUState == previousGPUState {
+        GPUState = [ 127 , 17 ];
+        GPUState = GPUState & 2;
+    }
+    previousGPUState = GPUState;
+}
+

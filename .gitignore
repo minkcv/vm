@@ -41,3 +41,8 @@ VaporSpec.opensdf
 .suo
 **.VC.db
 **.user
+**/descent.vaporbin
+**/descent.asm
+**/descent.rom
+games/descent/*.spr
+
