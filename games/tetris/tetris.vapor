@@ -1387,7 +1387,7 @@ func initSprites {
     [ 64 , 3 ] = x; // Width
     [ 64 , 4 ] = y; // Height
     // Use data at end of ROM as color info
-    [ 64 , 5 ] = 255;
+    [ 64 , 5 ] = 240;
     [ 64 , 7 ] = 0; // Black
 
     // Tiles start at [ 64 , 16 ]
