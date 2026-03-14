@@ -43,7 +43,6 @@ These programs are much simpler and some do not use any rom.
 ![mars](./etc/mars.png)
 ![pong](./etc/pong.png)
 ![tetris](./etc/tetris.png)
-![paint](./etc/paint.png)
 ![breakout](./etc/breakout.png)
 
 Two programs demonstrate the ability to create sprites at runtime.
