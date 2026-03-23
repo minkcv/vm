@@ -45,4 +45,6 @@ VaporSpec.opensdf
 **/descent.asm
 **/descent.rom
 games/descent/*.spr
+**/buttontest.vaporbin
+**/buttontest.asm
 

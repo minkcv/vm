@@ -1,0 +1,255 @@
+// buttontest
+// minkcv 2026
+
+var previousGPUState;
+var GPUState;
+var buttons;
+var b;
+call initSprites;
+call enableGPU;
+
+// Main loop
+while 1 {
+    buttons = [ 127 , 0 ];
+    b = buttons & 1; // Up button
+    [ 64 , 7 ] = 73; // gray
+    if b == 1 {
+        [ 64 , 7 ] = 255; // White
+    }
+    [ 64 , 16 + 7 ] = 73; // gray
+    b = buttons & 2; // down
+    if b == 2 {
+        [ 64 , 16 + 7 ] = 255; // White
+    }
+    [ 64 , 32 + 7 ] = 73; // gray
+    b = buttons & 4; // left
+    if b == 4 {
+        [ 64 , 32 + 7 ] = 255; // White
+    }
+    [ 64 , 48 + 7 ] = 73; // gray
+    b = buttons & 8; // right
+    if b == 8 {
+        [ 64 , 48 + 7 ] = 255; // White
+    }
+    // abxy
+    b = buttons & 16;
+    [ 64 , 64 + 7 ] = 73; // gray
+    if b == 16 {
+        [ 64 , 64 + 7 ] = 255; // White
+    }
+    [ 64 , 80 + 7 ] = 73; // gray
+    b = buttons & 32;
+    if b == 32 {
+        [ 64 , 80 + 7 ] = 255; // White
+    }
+    [ 64 , 96 + 7 ] = 73; // gray
+    b = buttons & 64;
+    if b == 64 {
+        [ 64 , 96 + 7 ] = 255; // White
+    }
+    [ 64 , 112 + 7 ] = 73; // gray
+    b = buttons & 128;
+    if b == 128 {
+        [ 64 , 112 + 7 ] = 255; // White
+    }
+    // p2
+    buttons = [ 127 , 1 ];
+    b = buttons & 1; // Up button
+    [ 65 , 7 ] = 73; // gray
+    if b == 1 {
+        [ 65 , 7 ] = 255; // White
+    }
+    [ 65 , 16 + 7 ] = 73; // gray
+    b = buttons & 2; // down
+    if b == 2 {
+        [ 65 , 16 + 7 ] = 255; // White
+    }
+    [ 65 , 32 + 7 ] = 73; // gray
+    b = buttons & 4; // left
+    if b == 4 {
+        [ 65 , 32 + 7 ] = 255; // White
+    }
+    [ 65 , 48 + 7 ] = 73; // gray
+    b = buttons & 8; // right
+    if b == 8 {
+        [ 65 , 48 + 7 ] = 255; // White
+    }
+    // abxy
+    b = buttons & 16;
+    [ 65 , 64 + 7 ] = 73; // gray
+    if b == 16 {
+        [ 65 , 64 + 7 ] = 255; // White
+    }
+    [ 65 , 80 + 7 ] = 73; // gray
+    b = buttons & 32;
+    if b == 32 {
+        [ 65 , 80 + 7 ] = 255; // White
+    }
+    [ 65 , 96 + 7 ] = 73; // gray
+    b = buttons & 64;
+    if b == 64 {
+        [ 65 , 96 + 7 ] = 255; // White
+    }
+    [ 65 , 112 + 7 ] = 73; // gray
+    b = buttons & 128;
+    if b == 128 {
+        [ 65 , 112 + 7 ] = 255; // White
+    }
+    call waitScreen;
+}
+
+var i;
+func initSprites {
+    // up
+    [ 64 , i ] = 128; // Enable
+    [ 64 , i + 1 ] = 20; // x position
+    [ 64 , i + 2 ] = 0; // y position
+    [ 64 , i + 3 ] = 8; // Width
+    [ 64 , i + 4 ] = 8; // Height
+    [ 64 , i + 5 ] = 128; // Sprite data segment
+    [ 64 , i + 7 ] = 73; // gray
+    i = i + 16;
+    // down
+    [ 64 , i ] = 128; // Enable
+    [ 64 , i + 1 ] = 20; // x position
+    [ 64 , i + 2 ] = 16; // y position
+    [ 64 , i + 3 ] = 8; // Width
+    [ 64 , i + 4 ] = 8; // Height
+    [ 64 , i + 5 ] = 128; // Sprite data segment
+    [ 64 , i + 7 ] = 73; // gray
+    i = i + 16;
+    // left
+    [ 64 , i ] = 128; // Enable
+    [ 64 , i + 1 ] = 12; // x position
+    [ 64 , i + 2 ] = 8; // y position
+    [ 64 , i + 3 ] = 8; // Width
+    [ 64 , i + 4 ] = 8; // Height
+    [ 64 , i + 5 ] = 128; // Sprite data segment
+    [ 64 , i + 7 ] = 73; // gray
+    i = i + 16;
+    // right
+    [ 64 , i ] = 128; // Enable
+    [ 64 , i + 1 ] = 28; // x position
+    [ 64 , i + 2 ] = 8; // y position
+    [ 64 , i + 3 ] = 8; // Width
+    [ 64 , i + 4 ] = 8; // Height
+    [ 64 , i + 5 ] = 128; // Sprite data segment
+    [ 64 , i + 7 ] = 73; // gray
+    i = i + 16;
+    // abxy
+    [ 64 , i ] = 128; // Enable
+    [ 64 , i + 1 ] = 68; // x position
+    [ 64 , i + 2 ] = 8; // y position
+    [ 64 , i + 3 ] = 8; // Width
+    [ 64 , i + 4 ] = 8; // Height
+    [ 64 , i + 5 ] = 128; // Sprite data segment
+    [ 64 , i + 7 ] = 73; // gray
+    i = i + 16;
+    [ 64 , i ] = 128; // Enable
+    [ 64 , i + 1 ] = 60; // x position
+    [ 64 , i + 2 ] = 16; // y position
+    [ 64 , i + 3 ] = 8; // Width
+    [ 64 , i + 4 ] = 8; // Height
+    [ 64 , i + 5 ] = 128; // Sprite data segment
+    [ 64 , i + 7 ] = 73; // gray
+    i = i + 16;
+    [ 64 , i ] = 128; // Enable
+    [ 64 , i + 1 ] = 60; // x position
+    [ 64 , i + 2 ] = 0; // y position
+    [ 64 , i + 3 ] = 8; // Width
+    [ 64 , i + 4 ] = 8; // Height
+    [ 64 , i + 5 ] = 128; // Sprite data segment
+    [ 64 , i + 7 ] = 73; // gray
+    i = i + 16;
+    [ 64 , i ] = 128; // Enable
+    [ 64 , i + 1 ] = 52; // x position
+    [ 64 , i + 2 ] = 8; // y position
+    [ 64 , i + 3 ] = 8; // Width
+    [ 64 , i + 4 ] = 8; // Height
+    [ 64 , i + 5 ] = 128; // Sprite data segment
+    [ 64 , i + 7 ] = 73; // gray
+
+    // p2
+    i = 0;
+    // up
+    [ 65 , i ] = 128; // Enable
+    [ 65 , i + 1 ] = 20; // x position
+    [ 65 , i + 2 ] = 100; // y position
+    [ 65 , i + 3 ] = 8; // Width
+    [ 65 , i + 4 ] = 8; // Height
+    [ 65 , i + 5 ] = 128; // Sprite data segment
+    [ 65 , i + 7 ] = 73; // gray
+    i = i + 16;
+    // down
+    [ 65 , i ] = 128; // Enable
+    [ 65 , i + 1 ] = 20; // x position
+    [ 65 , i + 2 ] = 16 + 100; // y position
+    [ 65 , i + 3 ] = 8; // Width
+    [ 65 , i + 4 ] = 8; // Height
+    [ 65 , i + 5 ] = 128; // Sprite data segment
+    [ 65 , i + 7 ] = 73; // gray
+    i = i + 16;
+    // left
+    [ 65 , i ] = 128; // Enable
+    [ 65 , i + 1 ] = 12; // x position
+    [ 65 , i + 2 ] = 8 + 100; // y position
+    [ 65 , i + 3 ] = 8; // Width
+    [ 65 , i + 4 ] = 8; // Height
+    [ 65 , i + 5 ] = 128; // Sprite data segment
+    [ 65 , i + 7 ] = 73; // gray
+    i = i + 16;
+    // right
+    [ 65 , i ] = 128; // Enable
+    [ 65 , i + 1 ] = 28; // x position
+    [ 65 , i + 2 ] = 8 + 100; // y position
+    [ 65 , i + 3 ] = 8; // Width
+    [ 65 , i + 4 ] = 8; // Height
+    [ 65 , i + 5 ] = 128; // Sprite data segment
+    [ 65 , i + 7 ] = 73; // gray
+    i = i + 16;
+    // abxy
+    [ 65 , i ] = 128; // Enable
+    [ 65 , i + 1 ] = 68; // x position
+    [ 65 , i + 2 ] = 8 + 100; // y position
+    [ 65 , i + 3 ] = 8; // Width
+    [ 65 , i + 4 ] = 8; // Height
+    [ 65 , i + 5 ] = 128; // Sprite data segment
+    [ 65 , i + 7 ] = 73; // gray
+    i = i + 16;
+    [ 65 , i ] = 128; // Enable
+    [ 65 , i + 1 ] = 60; // x position
+    [ 65 , i + 2 ] = 16 + 100; // y position
+    [ 65 , i + 3 ] = 8; // Width
+    [ 65 , i + 4 ] = 8; // Height
+    [ 65 , i + 5 ] = 128; // Sprite data segment
+    [ 65 , i + 7 ] = 73; // gray
+    i = i + 16;
+    [ 65 , i ] = 128; // Enable
+    [ 65 , i + 1 ] = 60; // x position
+    [ 65 , i + 2 ] = 100; // y position
+    [ 65 , i + 3 ] = 8; // Width
+    [ 65 , i + 4 ] = 8; // Height
+    [ 65 , i + 5 ] = 128; // Sprite data segment
+    [ 65 , i + 7 ] = 73; // gray
+    i = i + 16;
+    [ 65 , i ] = 128; // Enable
+    [ 65 , i + 1 ] = 52; // x position
+    [ 65 , i + 2 ] = 8 + 100; // y position
+    [ 65 , i + 3 ] = 8; // Width
+    [ 65 , i + 4 ] = 8; // Height
+    [ 65 , i + 5 ] = 128; // Sprite data segment
+    [ 65 , i + 7 ] = 73; // gray
+}
+
+func waitScreen {
+    while GPUState == previousGPUState {
+        GPUState = [ 127 , 17 ];
+        GPUState = GPUState & 2;
+    }
+    previousGPUState = GPUState;
+}
+
+func enableGPU {
+    [ 127 , 17 ] = 1;
+}
+
