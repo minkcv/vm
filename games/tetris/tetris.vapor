@@ -153,11 +153,6 @@ while 1 {
             waitCounter = 0;
             seedDone = 1;
         }
-        if buttons & 1 {
-            if prevButtons & 1 == 0 {
-                call rotatePiece;
-            }
-        }
         if buttons & 16 {
             if prevButtons & 16 == 0 {
                 call rotatePiece;

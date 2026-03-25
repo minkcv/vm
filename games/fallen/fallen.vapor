@@ -134,7 +134,6 @@ var y2;
 var tile_type;
 var tile_sprite;
 var buttons;
-var buttons2;
 
 // Locals for sprite rendering
 var sprite_index;
@@ -158,8 +157,7 @@ var title_screen;
 title_screen = 1;
 while title_screen {
     buttons = [ 127 , 0 ];
-    buttons2 = [ 127 , 1 ];
-    if buttons | buttons2 { // Any button to start
+    if buttons { // Any button to start
         title_screen = 0;
     }
 }
@@ -180,7 +178,7 @@ while 1 {
 }
 
 func playerMovement {
-    buttons = [ 127 , 1 ];
+    buttons = [ 127 , 0 ];
     if buttons & BUTTON_LEFT == BUTTON_LEFT {
         call playerMoveLeft;
     }
