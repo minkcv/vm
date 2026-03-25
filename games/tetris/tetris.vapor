@@ -1,5 +1,6 @@
 // Tetris in Vaporlang
 // 2017 Will Smith (minkcv)
+// 2026 changes: add T piece, better randomness, fix rotation not working bugs, another rotate button
 
 var previousGPUState;
 var GPUState;
@@ -19,6 +20,8 @@ var y2;
 
 // Randomness for next piece
 var random;
+var seedDone;
+var frameCount;
 
 var updateRender; // True when render is needed
 var clearRender; // True to reset tile sprites to disabled
@@ -38,6 +41,7 @@ const pieceS 2;
 const pieceReverseS 3;
 const pieceLine 4;
 const pieceSquare 5;
+const pieceT 6;
 
 var nextPieceType;
 var currentPieceType;
@@ -109,6 +113,8 @@ const green 28;
 const cyan 31;
 const magenta 227;
 const yellow 252;
+const gray 73;
+const white 255;
 
 var waitCounter;
 
@@ -116,16 +122,17 @@ var gameOver; // True when the game has been lost
 var paused; // True when paused
 
 // Set background to grayish
-[ 127 , 16 ] = 73;
+[ 127 , 16 ] = gray;
 
 call reset;
 [ 127 , 17 ] = 1; // Enable GPU
 
 // Main loop
 while 1 {
+    prevButtons = buttons;
     buttons = [ 127 , 0 ];
     if paused == 0 {
-        if buttons & 4 == 4 { // Left
+        if buttons & 4 { // Left
             if prevButtons & 4 == 0 {
                 call checkMoveLeft;
                 if canMoveLeft {
@@ -133,7 +140,7 @@ while 1 {
                 }
             }
         }
-        if buttons & 8 == 8 { // Right
+        if buttons & 8 { // Right
             if prevButtons & 8 == 0 {
                 call checkMoveRight;
                 if canMoveRight {
@@ -141,19 +148,39 @@ while 1 {
                 }
             }
         }
-        if buttons & 2 == 2 {
+        if buttons & 2 {
             // Drop piece
             waitCounter = 0;
+            seedDone = 1;
         }
-        if buttons & 1 == 1 {
+        if buttons & 1 {
             if prevButtons & 1 == 0 {
+                call rotatePiece;
+            }
+        }
+        if buttons & 16 {
+            if prevButtons & 16 == 0 {
                 call rotatePiece;
             }
         }
         if waitCounter == 0 {
             call checkHitBelow;
             if hitBelow {
+                if seedDone == 0 {
+                    frameCount = tile3X;
+                    random = tile3X;
+                }
                 call addPieceToTiles;
+                if seedDone {
+                    random = frameCount;
+                }
+                if frameCount == 255 {
+                    random = random ^ tile2X;
+                }
+                nextPieceType = random & 7;
+                while nextPieceType > 6 {
+                    nextPieceType = nextPieceType - 7;
+                }
                 call newPiece;
             }
             if hitBelow == 0 {
@@ -175,7 +202,7 @@ while 1 {
         }
         waitCounter = waitCounter - 1;
     }
-    if buttons & 128 == 128 {
+    if buttons & 128 {
         if prevButtons & 128 == 0 {
             paused = ~ paused;
             if gameOver {
@@ -184,12 +211,9 @@ while 1 {
         }
     }
 
-    random = random ^ nTiles;
-    random = random ^ tile1X;
-    random = random ^ tile4Y;
-    random = random ^ currentRotation;
-    random = random ^ prevButtons;
-    prevButtons = buttons;
+    if seedDone {
+        frameCount = frameCount + 1;
+    }
     call render;
     call waitScreen;
 }
@@ -539,8 +563,12 @@ func rotatePiece {
         call rotateLine;
         return;
     }
+    if currentPieceType == pieceT {
+        call rotateT;
+    }
 }
 
+// tiles must be in order 1234 top to bottom
 func rotateReverseL {
     if currentRotation == 0 {
         // 123
@@ -558,11 +586,6 @@ func rotateReverseL {
         while i < nTiles {
             x = [ 0 , i ];
             y = [ 0 , i + 1 ];
-            if dest1Y == y {
-                if dest1X == x {
-                    return;
-                }
-            }
             if dest2Y == y {
                 if dest2X == x {
                     return;
@@ -611,11 +634,6 @@ func rotateReverseL {
                     return;
                 }
             }
-            if dest2Y == y {
-                if dest2X == x {
-                    return;
-                }
-            }
             if dest3Y == y {
                 if dest3X == x {
                     return;
@@ -650,18 +668,8 @@ func rotateReverseL {
         while i < nTiles {
             x = [ 0 , i ];
             y = [ 0 , i + 1 ];
-            if dest1Y == y {
-                if dest1X == x {
-                    return;
-                }
-            }
             if dest2Y == y {
                 if dest2X == x {
-                    return;
-                }
-            }
-            if dest3Y == y {
-                if dest3X == x {
                     return;
                 }
             }
@@ -693,16 +701,6 @@ func rotateReverseL {
     while i < nTiles {
         x = [ 0 , i ];
         y = [ 0 , i + 1 ];
-        if dest1Y == y {
-            if dest1X == x {
-                return;
-            }
-        }
-        if dest2Y == y {
-            if dest2X == x {
-                return;
-            }
-        }
         if dest3Y == y {
             if dest3X == x {
                 return;
@@ -736,16 +734,6 @@ func rotateL {
         while i < nTiles {
             x = [ 0 , i ];
             y = [ 0 , i + 1 ];
-            if dest1Y == y {
-                if dest1X == x {
-                    return;
-                }
-            }
-            if dest2Y == y {
-                if dest2X == x {
-                    return;
-                }
-            }
             if dest3Y == y {
                 if dest3X == x {
                     return;
@@ -873,11 +861,6 @@ func rotateL {
     while i < nTiles {
         x = [ 0 , i ];
         y = [ 0 , i + 1 ];
-        if dest1Y == y {
-            if dest1X == x {
-                return;
-            }
-        }
         if dest2Y == y {
             if dest2X == x {
                 return;
@@ -929,11 +912,6 @@ func rotateS {
                     return;
                 }
             }
-            if dest3Y == y {
-                if dest3X == x {
-                    return;
-                }
-            }
             if dest4Y == y {
                 if dest4X == x {
                     return;
@@ -975,11 +953,6 @@ func rotateS {
                 return;
             }
         }
-        if dest3Y == y {
-            if dest3X == x {
-                return;
-            }
-        }
         if dest4Y == y {
             if dest4X == x {
                 return;
@@ -1010,18 +983,8 @@ func rotateReverseS {
         while i < nTiles {
             x = [ 0 , i ];
             y = [ 0 , i + 1 ];
-            if dest1Y == y {
-                if dest1X == x {
-                    return;
-                }
-            }
             if dest2Y == y {
                 if dest2X == x {
-                    return;
-                }
-            }
-            if dest3Y == y {
-                if dest3X == x {
                     return;
                 }
             }
@@ -1061,16 +1024,6 @@ func rotateReverseS {
                 return;
             }
         }
-        if dest2Y == y {
-            if dest2X == x {
-                return;
-            }
-        }
-        if dest3Y == y {
-            if dest3X == x {
-                return;
-            }
-        }
         if dest4Y == y {
             if dest4X == x {
                 return;
@@ -1104,11 +1057,6 @@ func rotateLine {
             y = [ 0 , i + 1 ];
             if dest1Y == y {
                 if dest1X == x {
-                    return;
-                }
-            }
-            if dest2Y == y {
-                if dest2X == x {
                     return;
                 }
             }
@@ -1159,11 +1107,6 @@ func rotateLine {
                 return;
             }
         }
-        if dest2Y == y {
-            if dest2X == x {
-                return;
-            }
-        }
         if dest3Y == y {
             if dest3X == x {
                 return;
@@ -1184,14 +1127,117 @@ func rotateLine {
     tile4Y = dest4Y;
     currentRotation = 0;
 }
+func rotateT {
+    if currentRotation == 0 {
+        // gap
+        // 123
+        //  4
+        dest1X = tile2X;
+        dest1Y = tile2Y - 1;
+        dest2X = tile1X;
+        dest2Y = tile1Y;
+        dest3X = tile2X;
+        dest3Y = tile2Y;
+        i = 0;
+        while i < nTiles {
+            x = [ 0 , i ];
+            y = [ 0 , i + 1 ];
+            if dest1Y == y {
+                if dest1X == x {
+                    return;
+                }
+            }
+            i = i + 2;
+        }
+        tile1X = dest1X;
+        tile1Y = dest1Y;
+        tile2X = dest2X;
+        tile2Y = dest2Y;
+        tile3X = dest3X;
+        tile3Y = dest3Y;
+        currentRotation = 1;
+        return;
+    }
+    if currentRotation == 1 {
+        //   1
+        //  23
+        //   4
+        dest4X = tile4X + 1;
+        dest4Y = tile4Y - 1;
+        if dest4X > nCols - 1 {
+            return;
+        }
+        i = 0;
+        while i < nTiles {
+            x = [ 0 , i ];
+            y = [ 0 , i + 1 ];
+            if dest4Y == y {
+                if dest4X == x {
+                    return;
+                }
+            }
+            i = i + 2;
+        }
+        tile4X = dest4X;
+        tile4Y = dest4Y;
+        currentRotation = 2;
+        return;
+    }
+    if currentRotation == 2 {
+        //   1
+        //  234
+        dest2X = tile3X;
+        dest3X = tile4X;
+        dest4X = tile3X;
+        dest4Y = tile4Y + 1;
+        if dest4Y > nRows - 1 {
+            return;
+        }
+        i = 0;
+        while i < nTiles {
+            x = [ 0 , i ];
+            y = [ 0 , i + 1 ];
+            if dest4Y == y {
+                if dest4X == x {
+                    return;
+                }
+            }
+            i = i + 2;
+        }
+        tile2X = dest2X;
+        tile3X = dest3X;
+        tile4X = dest4X;
+        tile4Y = dest4Y;
+        currentRotation = 3;
+        return;
+    }
+    // else currentRotation == 3
+    //   1
+    //   23
+    //   4
+    dest1X = tile1X - 1;
+    dest1Y = tile2Y;
+    if tile4X == 0 {
+        return;
+    }
+    i = 0;
+    while i < nTiles {
+        x = [ 0 , i ];
+        y = [ 0 , i + 1 ];
+        if dest1Y == y {
+            if dest1X == x {
+                return;
+            }
+        }
+        i = i + 2;
+    }
+    tile1X = dest1X;
+    tile1Y = dest1Y;
+    currentRotation = 0;
+}
 
 func newPiece {
     currentPieceType = nextPieceType;
-    nextPieceType = random;
-    nextPieceType = nextPieceType & 7;
-    if nextPieceType > 5 {
-        nextPieceType = nextPieceType >> 1;
-    }
     currentRotation = 0;
     if currentPieceType == pieceReverseL {
         tile1X = 3;
@@ -1205,6 +1251,8 @@ func newPiece {
         return;
     }
     if currentPieceType == pieceL {
+        //  123
+        //  4
         tile1X = 3;
         tile1Y = 0;
         tile2X = 4;
@@ -1258,6 +1306,18 @@ func newPiece {
         tile4X = 4;
         tile4Y = 1;
         return;
+    }
+    if currentPieceType == pieceT {
+        // 123
+        //  4
+        tile1X = 3;
+        tile1Y = 0;
+        tile2X = 4;
+        tile2Y = 0;
+        tile3X = 5;
+        tile3Y = 0;
+        tile4X = 4;
+        tile4Y = 1;
     }
 }
 
@@ -1354,12 +1414,16 @@ func renderTile {
     if renderTileColor == 5 {
         color = yellow;
     }
+    if renderTileColor == 6 {
+        color = white;
+    }
     [ renderSegment , renderAddress + 1 ] = x2;
     [ renderSegment , renderAddress + 2 ] = y2;
     [ renderSegment , renderAddress + 7 ] = color;
 }
 
 func reset {
+    seedDone = 0;
     nTiles = 0;
     call initSprites;
     call newPiece;
